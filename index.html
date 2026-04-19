@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrderFlow</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{--nd:#10154a;--nm:#1a1f4a;--nc:#1e2455;--ni:#222860;--nb:#2a3070;--nh:#2a3080;--pk:#e8a0c0;--pb:#c8507a;--pd:#2a1020;--t1:#e8eaf6;--t2:#a0a8d8;--tm:#6870a8;--td:#4a5280;--gn:#30b878;--gd:#0e2230;--am:#d4a020;--ad:#2a2810;--rd:#e86080;--rdd:#2a1020}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -535,7 +535,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <script>
 const SURL='https://gaxdvpmabrqsxtvsysoz.supabase.co';
 const SKEY='sb_publishable_gyYvpY477T0pv8FqhlrLSg_KNERhv0l';
-const db=supabase.createClient(SURL,SKEY);
+const db=window.supabase.createClient(SURL,SKEY);
 
 let cU=null,cP=null;
 let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[];
