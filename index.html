@@ -554,6 +554,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <div class="fg full"><label>Φιλική ονομασία</label><input type="text" id="sfr"></div>
             <div class="fg full"><label>IBAN</label><input type="text" id="siban" placeholder="GR..."></div>
             <div class="fg"><label>Τράπεζα</label><input type="text" id="sbank" placeholder="π.χ. Εθνική, Alpha"></div>
+            <div class="fg"><label>Δικαιούχος</label><input type="text" id="sbenef" placeholder="Επωνυμία δικαιούχου"></div>
             <div class="fg"><label>Τηλέφωνο</label><input type="text" id="sphone"></div>
             <div class="fg"><label>Email</label><input type="email" id="semail"></div>
             <div class="fg full"><label>Σημειώσεις</label><input type="text" id="snotes"></div>
@@ -563,7 +564,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <button class="btn p" id="sup-save-btn" onclick="saveSup()">Αποθήκευση</button>
           </div>
         </div>
-        <table class="sptbl"><thead><tr><th>Επωνυμία</th><th>Φιλική</th><th>Τράπεζα</th><th>IBAN</th><th></th></tr></thead><tbody id="stbl"></tbody></table>
+        <table class="sptbl"><thead><tr><th>Επωνυμία</th><th>Φιλική</th><th>Δικαιούχος</th><th>Τράπεζα</th><th>IBAN</th><th></th></tr></thead><tbody id="stbl"></tbody></table>
       </div>
 
       <!-- ΕΙΔΗ -->
@@ -1190,7 +1191,7 @@ function prevXL(){
 }
 function exportXL(){
   const data=getXD();if(!data.length){toast('Δεν βρέθηκαν εγγραφές','err');return;}
-  const rows=data.map(o=>{const s=sups.find(x=>x.id===o.supplier_id);return{'Προμηθευτής':s?.name||'—','IBAN':s?.iban||'—','Τράπεζα':s?.bank||i2b(s?.iban),'Περιγραφή':'Παραγγελία '+fd(o.order_date),'Σύνολο (€)':Number(o.total_amount),'Προκαταβολή (€)':Number(o.prepayment),'Υπόλοιπο (€)':Number(o.balance),'Εκτ. Παράδοση':fd(o.estimated_delivery),'Τοποθεσία':lN(o.location_id),'Κατάσταση':o.status==='pending'?'Εκκρεμής':'Παραδόθηκε'};});
+  const rows=data.map(o=>{const s=sups.find(x=>x.id===o.supplier_id);return{'Προμηθευτής':s?.name||'—','Δικαιούχος':s?.beneficiary||'—','IBAN':s?.iban||'—','Τράπεζα':s?.bank||i2b(s?.iban),'Περιγραφή':'Παραγγελία '+fd(o.order_date),'Σύνολο (€)':Number(o.total_amount),'Προκαταβολή (€)':Number(o.prepayment),'Υπόλοιπο (€)':Number(o.balance),'Εκτ. Παράδοση':fd(o.estimated_delivery),'Τοποθεσία':lN(o.location_id),'Κατάσταση':o.status==='pending'?'Εκκρεμής':'Παραδόθηκε'};});
   const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Εκκρεμότητες');XLSX.writeFile(wb,'orderflow-'+td()+'.xlsx');toast('Excel εξήχθη!');
 }
 
@@ -1212,12 +1213,13 @@ function rMgmt(){
   set('stbl',sups.length?sups.map(s=>`<tr>
     <td style="font-weight:500">${s.name}</td>
     <td style="color:var(--pk)">${s.friendly_name||'—'}</td>
+    <td style="color:var(--t2);font-size:11px">${s.beneficiary||'—'}</td>
     <td>${s.bank||'—'}</td>
     <td style="font-family:monospace;font-size:10px">${s.iban||'—'}</td>
     <td style="display:flex;gap:4px">
       <button class="ib" onclick="editSup('${s.id}')" title="Επεξεργασία">✎</button>
       <button class="ib" onclick="delSup('${s.id}')" style="color:var(--rd)">✕</button>
-    </td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν προμηθευτές</td></tr>');
+    </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν προμηθευτές</td></tr>');
 
   set('ptbl',prods.length?prods.map(p=>`<tr>
     <td style="font-weight:500">${p.friendly_name||p.name}</td>
@@ -1264,6 +1266,7 @@ function editSup(id){
   document.getElementById('sedit-id').value=id;
   document.getElementById('sname').value=s.name||'';document.getElementById('sfr').value=s.friendly_name||'';
   document.getElementById('siban').value=s.iban||'';document.getElementById('sbank').value=s.bank||'';
+  document.getElementById('sbenef').value=s.beneficiary||'';
   document.getElementById('sphone').value=s.phone||'';document.getElementById('semail').value=s.email||'';document.getElementById('snotes').value=s.notes||'';
   set('sup-form-title','✎ Επεξεργασία προμηθευτή');
   document.getElementById('sup-cancel-edit').style.display='inline-flex';
@@ -1271,16 +1274,16 @@ function editSup(id){
   document.getElementById('sname').scrollIntoView({behavior:'smooth'});
 }
 function cancelSupEdit(){
-  document.getElementById('sedit-id').value='';['sname','sfr','siban','sbank','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('sedit-id').value='';['sname','sfr','siban','sbank','sbenef','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');
   set('sup-form-title','+ Νέος προμηθευτής');document.getElementById('sup-cancel-edit').style.display='none';document.getElementById('sup-save-btn').textContent='Αποθήκευση';
 }
 async function saveSup(){
   const editId=document.getElementById('sedit-id').value;
-  const d={name:document.getElementById('sname').value.trim(),friendly_name:document.getElementById('sfr').value.trim(),iban:document.getElementById('siban').value.trim(),bank:document.getElementById('sbank').value.trim(),phone:document.getElementById('sphone').value.trim(),email:document.getElementById('semail').value.trim(),notes:document.getElementById('snotes').value.trim()};
+  const d={name:document.getElementById('sname').value.trim(),friendly_name:document.getElementById('sfr').value.trim(),iban:document.getElementById('siban').value.trim(),bank:document.getElementById('sbank').value.trim(),beneficiary:document.getElementById('sbenef').value.trim(),phone:document.getElementById('sphone').value.trim(),email:document.getElementById('semail').value.trim(),notes:document.getElementById('snotes').value.trim()};
   if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
   try{
     if(editId){await getDb().from('suppliers').update(d).eq('id',editId);const idx=sups.findIndex(x=>x.id===editId);if(idx>=0)sups[idx]={...sups[idx],...d};cancelSupEdit();toast('Ενημερώθηκε!');}
-    else{const{data:r}=await getDb().from('suppliers').insert(d).select();sups.push(r[0]);sups.sort((a,b)=>a.name.localeCompare(b.name,'el'));['sname','sfr','siban','sbank','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');toast('Αποθηκεύτηκε!');}
+    else{const{data:r}=await getDb().from('suppliers').insert(d).select();sups.push(r[0]);sups.sort((a,b)=>a.name.localeCompare(b.name,'el'));['sname','sfr','siban','sbank','sbenef','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');toast('Αποθηκεύτηκε!');}
     rMgmt();popSel();
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
