@@ -408,7 +408,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="icc">
       <div class="icct">Ποσότητα — συμπλήρωσε όποιο βολεύει</div>
       <div class="iccr">
-        <div class="f" style="margin:0"><label>Κουτιά/Συσκ.</label><input type="number" id="iboxes" step="0.01" placeholder="0" oninput="calcI('b')"></div>
+        <div class="f" style="margin:0"><label id="iboxlbl">Κουτιά/Συσκ.</label><input type="number" id="iboxes" step="0.01" placeholder="0" oninput="calcI('b')"></div>
         <div class="iccop">×</div>
         <div class="f" style="margin:0"><label id="iul">Τεμ./Συσκ.</label><input type="number" id="iper" step="0.001" value="1" oninput="calcI('b')"></div>
         <div class="iccop">=</div>
@@ -952,7 +952,23 @@ function rStock(){
   }).join('')).join('');
   set('slist',h||'<div class="empty" style="grid-column:1/-1"><div class="ic">&#128230;</div><p>Δεν υπάρχουν εγγραφές αποθέματος</p></div>');
 }
-function updIU(){const p=prods.find(x=>x.id===document.getElementById('iprod').value);set('ibl',`Σύνολο (${p?.base_unit||'τμχ'})`);}
+function updIU(){
+  const pid=document.getElementById('iprod').value;
+  const p=prods.find(x=>x.id===pid);
+  set('ibl',`Σύνολο (${p?.base_unit||'τμχ'})`);
+  // Βρες τυπική συσκευασία από κατάλογο προμηθευτών
+  const sp=sps.find(x=>x.product_id===pid);
+  if(sp&&sp.package_qty>1){
+    document.getElementById('iper').value=sp.package_qty;
+    set('iboxlbl',sp.package_unit||'Κουτιά/Συσκ.');
+    set('iul',`${p?.base_unit||'τμχ'} ανά ${sp.package_unit||'συσκ.'}`);
+    calcI('b');
+  }else{
+    document.getElementById('iper').value=1;
+    set('iboxlbl','Κουτιά/Συσκ.');
+    set('iul','Τεμ./Συσκ.');
+  }
+}
 function calcI(s){if(s==='b'){const b=parseFloat(document.getElementById('iboxes').value)||0;const pb=parseFloat(document.getElementById('iper').value)||1;document.getElementById('iqty').value=(b*pb).toFixed(2);}else{document.getElementById('iboxes').value='';}}
 async function saveInv(){
   const qty=parseFloat(document.getElementById('iqty').value)||0;
@@ -1008,7 +1024,33 @@ function rPay(){
   if(!fl.length){set('plist',`<div class="empty"><div class="ic">&#128197;</div><p>${iF?'Δεν υπάρχουν προγραμματισμένες':'Δεν υπάρχουν εκκρεμείς'} πληρωμές</p></div>`);return;}
   set('plist',fl.map(i=>{const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';const cb=i.fc?'':`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="Πληρώθηκε">&#10003;</button>`;return`<div class="pi"><div class="pd2 ${cl}">${lb}</div><div class="pinf"><div class="pnm">${i.name}</div><div class="psb">${i.sub} · Λήξη: ${fd(i.due)}</div></div><div class="pam">${fmt(i.amount)} €</div><div class="pact">${cb}</div></div>`;}).join(''));
 }
-async function confPI(t,id){if(t==='rec')await confRec(id);else if(t==='other')await confOth(id);else if(t==='order')await confDlv(id);}
+async function confPI(t,id){
+  if(t==='rec') await confRec(id);
+  else if(t==='other') await confOth(id);
+  else if(t==='order') await confOrderPayment(id);
+}
+
+async function confOrderPayment(id){
+  if(!confirm('Επιβεβαίωση πληρωμής υπολοίπου;'))return;
+  const o=ords.find(x=>x.id===id);
+  if(!o)return;
+  // Μηδένισε το υπόλοιπο — prepayment = total_amount
+  const{error}=await getDb().from('orders').update({prepayment:o.total_amount}).eq('id',id);
+  if(error){toast('Σφάλμα: '+error.message,'err');return;}
+  // Καταχώρηση στο payments
+  await getDb().from('payments').insert({
+    order_id:id,
+    amount:Number(o.balance),
+    payment_date:td(),
+    confirmed:true,
+    confirmed_at:new Date().toISOString()
+  });
+  // Ενημέρωση τοπικά — φέρε την ενημερωμένη εγγραφή
+  const{data:updated}=await getDb().from('orders').select('*').eq('id',id).single();
+  if(updated){const idx=ords.findIndex(x=>x.id===id);if(idx>=0)ords[idx]=updated;}
+  rOrders();rPay();
+  toast('Πληρωμή επιβεβαιώθηκε! ✓');
+}
 
 function fCash(f,el){document.querySelectorAll('#clf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aCF=f;rCash();}
 function rCash(){
