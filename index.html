@@ -7,143 +7,195 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
-:root{--nd:#10154a;--nm:#1a1f4a;--nc:#1e2455;--ni:#222860;--nb:#2a3070;--nh:#2a3080;--pk:#e8a0c0;--pb:#c8507a;--pd:#2a1020;--t1:#e8eaf6;--t2:#a0a8d8;--tm:#6870a8;--td:#4a5280;--gn:#30b878;--gd:#0e2230;--am:#d4a020;--ad:#2a2810;--rd:#e86080;--rdd:#2a1020}
+:root{
+  --nd:#0d0d12;--nm:#111118;--nc:#161b32;--ni:#1a2040;--nb:#252d58;--nh:#2d3668;
+  --pk:#e8a0c0;--pb:#c8507a;--pd:#2a1020;
+  --t1:#e8eaf6;--t2:#9aa4d0;--tm:#5a6898;--td:#3a4268;
+  --gn:#30b878;--gd:#0a1f18;--am:#d4a020;--ad:#241e08;--rd:#e86080;--rdd:#2a1020
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
-#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.lb{background:var(--nc);border:0.5px solid var(--nb);border-radius:16px;padding:40px;width:100%;max-width:400px}
-.ll{font-size:24px;font-weight:700;color:var(--pk);text-align:center;letter-spacing:2px;margin-bottom:6px}
-.ls2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:28px}
-.lf{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+
+/* LOGIN */
+#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#1a1f3a 0%,var(--nm) 70%)}
+.lb{background:var(--nc);border:0.5px solid var(--nb);border-radius:20px;padding:44px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.ll{font-size:26px;font-weight:700;color:var(--pk);text-align:center;letter-spacing:2px;margin-bottom:6px}
+.ls2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:32px}
+.lf{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
 .lf label{font-size:12px;color:var(--td)}
-.lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:10px 12px;font-size:14px;outline:none;font-family:inherit;width:100%}
+.lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;color:var(--t1);padding:11px 14px;font-size:14px;outline:none;font-family:inherit;width:100%;transition:border-color .15s}
 .lf input:focus{border-color:var(--pk)}
-.lbtn{width:100%;padding:11px;background:var(--pb);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px}
-.lbtn:hover{background:#d4607a}
-.lerr{font-size:12px;color:var(--rd);text-align:center;margin-top:8px;min-height:18px}
+.lbtn{width:100%;padding:12px;background:var(--pb);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:background .15s}
+.lbtn:hover{background:#b8406a}
+.lerr{font-size:12px;color:var(--rd);text-align:center;margin-top:10px;min-height:18px}
+
+/* APP */
 #app{display:none}
-.topbar{background:var(--nd);border-bottom:1px solid var(--nb);display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;overflow-x:auto}
-.logo{font-size:15px;font-weight:700;color:var(--pk);padding:14px 0;margin-right:18px;white-space:nowrap;letter-spacing:1px;flex-shrink:0}
+.topbar{background:var(--nd);border-bottom:1px solid var(--nb);display:flex;align-items:center;padding:0 18px;position:sticky;top:0;z-index:100;overflow-x:auto}
+.logo{font-size:15px;font-weight:700;color:var(--pk);padding:14px 0;margin-right:20px;white-space:nowrap;letter-spacing:1px;flex-shrink:0}
 .tab{padding:14px 12px;font-size:13px;color:var(--tm);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s;flex-shrink:0}
 .tab:hover{color:var(--t2)}.tab.active{color:var(--pk);border-bottom-color:var(--pk)}
 .ts{flex:1}
 .tbr{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px}
 .ub{font-size:12px;color:var(--tm);white-space:nowrap}
-.mbtn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--pk);background:var(--pd);color:var(--pk);cursor:pointer;white-space:nowrap;font-weight:500}
+.mbtn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--pk);background:var(--pd);color:var(--pk);cursor:pointer;white-space:nowrap;font-weight:500;transition:background .15s}
 .mbtn:hover{background:#3a1530}
-.lout{padding:7px 12px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer}
+.lout{padding:7px 12px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
 .lout:hover{color:var(--rd);border-color:var(--rd)}
+
+/* PAGES */
 .page{display:none;padding:20px;max-width:1200px;margin:0 auto}.page.active{display:block}
+
+/* METRICS */
 .mets{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
-.met{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:12px 14px}
-.met label{font-size:11px;color:var(--td);display:block;margin-bottom:4px}
-.mv{font-size:20px;font-weight:600}
+.met{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:14px 16px}
+.met label{font-size:11px;color:var(--td);display:block;margin-bottom:5px}
+.mv{font-size:22px;font-weight:600}
 .mv.pk{color:var(--pk)}.mv.gn{color:var(--gn)}.mv.am{color:var(--am)}.mv.rd{color:var(--rd)}
+
+/* TOOLBAR */
 .tlb{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
 .tlt{font-size:15px;font-weight:500}
 .tbr2{display:flex;gap:8px;flex-wrap:wrap}
+
+/* BUTTONS */
 .btn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--t2);cursor:pointer;transition:background .15s;white-space:nowrap}
 .btn:hover{background:var(--nh)}
-.btn.p{background:var(--pb);border-color:var(--pb);color:#ffe8f0;font-weight:500}.btn.p:hover{background:#d4607a}
-.btn.s{background:#0e3a20;border-color:var(--gn);color:var(--gn)}
+.btn.p{background:var(--pb);border-color:var(--pb);color:#ffe8f0;font-weight:500}.btn.p:hover{background:#b8406a}
+.btn.s{background:var(--gd);border-color:var(--gn);color:var(--gn)}
+
+/* FILTERS */
 .fils{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .pill{padding:5px 12px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
 .pill:hover{color:var(--t2)}.pill.active{background:var(--pd);border-color:var(--pk);color:var(--pk)}
+
+/* CARDS */
 .cards{display:flex;flex-direction:column;gap:10px}
-.card{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:14px 16px}
+.card{background:var(--nc);border:0.5px solid var(--nb);border-radius:14px;padding:16px 18px;transition:border-color .15s}
 .card:hover{border-color:var(--nh)}
 .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap}
-.csup{font-size:14px;font-weight:500}
+.csup{font-size:14px;font-weight:600}
 .cmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cdate{font-size:12px;color:var(--td)}
 .cbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
 .fi label{font-size:11px;color:var(--td);display:block;margin-bottom:2px}
 .fi span{font-size:13px;color:var(--t2)}
 .cfoot{display:flex;align-items:center;justify-content:space-between;border-top:0.5px solid var(--nb);padding-top:10px;flex-wrap:wrap;gap:8px}
-.amts{display:flex;gap:14px;flex-wrap:wrap}
+.amts{display:flex;gap:16px;flex-wrap:wrap}
 .amt label{font-size:11px;color:var(--td);display:block}
 .amt span{font-size:13px;font-weight:500}
 .acts{display:flex;gap:6px}
 .ib{width:30px;height:30px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s}
 .ib:hover{border-color:var(--pk);color:var(--pk)}
 .ib.cf{border-color:var(--pk);color:var(--pk);background:var(--pd)}
+
+/* BADGES */
 .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
 .bp{background:var(--ad);color:var(--am)}.bd{background:var(--gd);color:var(--gn)}.bc{background:var(--rdd);color:var(--rd)}
-.br{background:#1a1560;color:#8080e8}.bo{background:#1a2a1a;color:#60a860}
-.loc{padding:3px 8px;border-radius:6px;font-size:11px;white-space:nowrap}
-.lm{background:#1a2a4a;color:#6090d0;border:0.5px solid #2a4060}
-.lg{background:#1a2a20;color:#50a870;border:0.5px solid #2a4030}
-.lp{background:#2a1a3a;color:#b070d8;border:0.5px solid #3a2a4a}
-.lma{background:#2a1a1a;color:#e87060;border:0.5px solid #4a2a2a}
-.mbg{display:none;position:fixed;inset:0;background:rgba(10,12,30,.85);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.br{background:#101840;color:#7080e0}.bo{background:#101a10;color:#50a860}
+
+/* LOCATION BADGES */
+.loc{padding:3px 9px;border-radius:6px;font-size:11px;white-space:nowrap}
+.lm{background:#0d1a30;color:#5080c0;border:0.5px solid #1a3050}
+.lg{background:#0d1a10;color:#40a060;border:0.5px solid #1a3020}
+.lp{background:#1a0d30;color:#9060c8;border:0.5px solid #2a1a40}
+.lma{background:#2a0d0d;color:#e06050;border:0.5px solid #401a1a}
+
+/* ITEMS IN ORDER CARD */
+.order-items-preview{background:var(--ni);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:12px}
+.order-item-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--t2);border-bottom:0.5px solid var(--nb)}
+.order-item-row:last-child{border-bottom:none}
+
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;background:rgba(5,5,15,.88);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .mbg.open{display:flex}
-.modal{background:var(--nc);border:0.5px solid var(--nb);border-radius:16px;padding:24px;width:100%;max-width:640px;margin:auto}
-.modal h2{font-size:16px;font-weight:500;color:var(--pk);margin-bottom:20px}
+.modal{background:var(--nc);border:0.5px solid var(--nb);border-radius:18px;padding:26px;width:100%;max-width:680px;margin:auto}
+.modal h2{font-size:16px;font-weight:600;color:var(--pk);margin-bottom:20px}
 .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg2 .f{display:flex;flex-direction:column;gap:5px}
 .fg2 .f.s2{grid-column:span 2}
 .fg2 .f label{font-size:12px;color:var(--td)}
-.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:inherit}
+.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
 .fg2 .f input:focus,.fg2 .f select:focus{border-color:var(--pk)}
 .fg2 .f select option{background:var(--nd)}
-.fg2 .f textarea{resize:vertical;min-height:60px}
 .mf{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:0.5px solid var(--nb)}
+
+/* ITEMS TABLE */
 .itb{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
-.itb th{text-align:left;color:var(--td);padding:6px 4px;border-bottom:0.5px solid var(--nb)}
-.itb td{padding:4px 3px;border-bottom:0.5px solid #1a2060}
-.itb td input,.itb td select{background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:4px 5px;font-size:12px;width:100%}
+.itb th{text-align:left;color:var(--td);padding:6px 4px;border-bottom:0.5px solid var(--nb);white-space:nowrap}
+.itb td{padding:4px 3px;border-bottom:0.5px solid var(--ni)}
+.itb td input,.itb td select{background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:4px 5px;font-size:12px;width:100%;font-family:inherit}
+.itb td input:focus,.itb td select:focus{border-color:var(--pk);outline:none}
+
+/* STOCK */
 .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.sc{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:16px}
-.sbar{height:6px;background:var(--ni);border-radius:3px;margin:10px 0 6px}
-.sbarv{height:6px;border-radius:3px;transition:width .4s}
+.sc{background:var(--nc);border:0.5px solid var(--nb);border-radius:14px;padding:18px}
+.sbar{height:5px;background:var(--ni);border-radius:3px;margin:10px 0 6px}
+.sbarv{height:5px;border-radius:3px;transition:width .4s}
+
+/* DATA TABLE */
 .dt{width:100%;border-collapse:collapse;font-size:13px}
 .dt th{text-align:left;color:var(--td);padding:10px 12px;border-bottom:0.5px solid var(--nb);font-size:12px;font-weight:500}
-.dt td{padding:10px 12px;border-bottom:0.5px solid #1a2060;color:var(--t2)}
-.dt tr:hover td{background:#1e2860}
-.bprice{color:var(--gn);font-weight:500}
+.dt td{padding:10px 12px;border-bottom:0.5px solid var(--ni);color:var(--t2)}
+.dt tr:hover td{background:var(--ni)}
+.bprice{color:var(--gn);font-weight:600}
+
+/* PRICES TABLE - multi price rows */
+.price-group td{padding:4px 12px;border-bottom:none}
+.price-group-first td{padding-top:10px}
+.price-group-last td{padding-bottom:10px;border-bottom:0.5px solid var(--ni)}
+.price-latest{color:var(--gn)}
+
+/* PAYMENTS */
 .pl{display:flex;flex-direction:column;gap:8px}
-.pi{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.pd2{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;text-align:center;line-height:1.2}
-.dov{background:#3a1020;color:var(--rd)}.dsn{background:var(--ad);color:var(--am)}.dok{background:#0e2a1a;color:var(--gn)}
+.pi{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pd2{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;text-align:center;line-height:1.2}
+.dov{background:#2a0a10;color:var(--rd)}.dsn{background:var(--ad);color:var(--am)}.dok{background:var(--gd);color:var(--gn)}
 .pinf{flex:1;min-width:0}
-.pnm{font-size:14px;font-weight:500}
+.pnm{font-size:14px;font-weight:600}
 .psb{font-size:12px;color:var(--tm);margin-top:2px}
-.pam{font-size:16px;font-weight:600;color:var(--am);white-space:nowrap}
+.pam{font-size:16px;font-weight:700;color:var(--am);white-space:nowrap}
 .pact{display:flex;gap:6px;align-items:center}
+
+/* CASH */
 .cs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px}
-.cc{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:16px;text-align:center}
+.cc{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:18px;text-align:center}
 .cc.av{border-color:var(--gn)}
-.cl2{font-size:12px;color:var(--tm);margin-bottom:6px}
-.ca{font-size:24px;font-weight:600}
+.cl2{font-size:12px;color:var(--tm);margin-bottom:8px}
+.ca{font-size:26px;font-weight:700}
 .clist{display:flex;flex-direction:column;gap:8px}
 .crow{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .cri{flex:1}.crd{font-size:11px;color:var(--td)}.crds{font-size:13px;color:var(--t2);margin-top:2px}
 .cra{font-size:15px;font-weight:600;white-space:nowrap}
-.spbg{display:none;position:fixed;inset:0;background:rgba(10,12,30,.7);z-index:300}
+
+/* SIDE PANEL */
+.spbg{display:none;position:fixed;inset:0;background:rgba(5,5,15,.7);z-index:300}
 .spbg.open{display:block}
-.sp{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--nc);border-left:0.5px solid var(--nb);z-index:301;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+.sp{position:fixed;top:0;right:0;bottom:0;width:min(600px,100vw);background:var(--nc);border-left:0.5px solid var(--nb);z-index:301;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
 .spbg.open .sp{transform:translateX(0)}
 .sph{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:0.5px solid var(--nb);flex-shrink:0}
-.sph h2{font-size:15px;font-weight:500;color:var(--pk)}
+.sph h2{font-size:15px;font-weight:600;color:var(--pk)}
 .spc{width:30px;height:30px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
-.sptabs{display:flex;border-bottom:0.5px solid var(--nb);flex-shrink:0}
-.sptab{padding:10px 14px;font-size:13px;color:var(--tm);cursor:pointer;border-bottom:2px solid transparent}
+.sptabs{display:flex;border-bottom:0.5px solid var(--nb);flex-shrink:0;overflow-x:auto}
+.sptab{padding:10px 14px;font-size:12px;color:var(--tm);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s}
 .sptab.active{color:var(--pk);border-bottom-color:var(--pk)}
 .spbd{flex:1;overflow-y:auto;padding:16px 20px}
-.spf{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;padding:14px;margin-bottom:16px}
-.spf h4{font-size:12px;color:var(--pk);margin-bottom:10px}
+.spf{background:var(--ni);border:0.5px solid var(--nb);border-radius:12px;padding:16px;margin-bottom:16px}
+.spf h4{font-size:12px;color:var(--pk);margin-bottom:12px;font-weight:600}
 .spg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fg{display:flex;flex-direction:column;gap:4px}
 .fg.full{grid-column:span 2}
 .fg label{font-size:11px;color:var(--td)}
-.fg input,.fg select{background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px;width:100%;outline:none;font-family:inherit}
+.fg input,.fg select{background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
 .fg input:focus,.fg select:focus{border-color:var(--pk)}
-.spff{display:flex;justify-content:flex-end;margin-top:10px}
+.spff{display:flex;justify-content:flex-end;margin-top:12px;gap:8px}
 .sptbl{width:100%;border-collapse:collapse;font-size:12px}
-.sptbl th{text-align:left;color:var(--td);padding:7px 8px;border-bottom:0.5px solid var(--nb);font-weight:400}
-.sptbl td{padding:7px 8px;border-bottom:0.5px solid #1a2060;color:var(--t2);vertical-align:middle}
-.sptbl tr:hover td{background:#1e2860}
-.sec{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;overflow:hidden}
+.sptbl th{text-align:left;color:var(--td);padding:8px;border-bottom:0.5px solid var(--nb);font-weight:500;font-size:11px}
+.sptbl td{padding:8px;border-bottom:0.5px solid var(--ni);color:var(--t2);vertical-align:middle}
+.sptbl tr:hover td{background:var(--ni)}
+
+/* MISC */
+.sec{background:var(--nc);border:0.5px solid var(--nb);border-radius:14px;overflow:hidden}
 .tgl{display:flex;align-items:center;gap:8px;cursor:pointer}
 .tgl input{display:none}
 .tgltr{width:34px;height:18px;background:var(--ni);border-radius:9px;border:0.5px solid var(--nb);position:relative;transition:background .2s;flex-shrink:0}
@@ -151,26 +203,32 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .tglth{position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s}
 .tgl input:checked+.tgltr .tglth{transform:translateX(16px)}
 .empty{text-align:center;padding:60px 20px;color:var(--td)}
-.empty .ic{font-size:36px;margin-bottom:12px}
+.empty .ic{font-size:40px;margin-bottom:14px}
 .ld{text-align:center;padding:40px;color:var(--tm);font-size:13px}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--t1);z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;max-width:320px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:12px 18px;font-size:13px;color:var(--t1);z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;max-width:320px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{border-color:var(--gn);color:var(--gn)}.toast.err{border-color:var(--rd);color:var(--rd)}
 .vt{display:flex;gap:6px;margin-bottom:16px}
-.vb{padding:6px 16px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer}
+.vb{padding:6px 16px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
 .vb.active{background:var(--pd);border-color:var(--pk);color:var(--pk)}
 .icc{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;padding:14px;margin-top:12px}
-.icct{font-size:12px;color:var(--pk);margin-bottom:10px}
+.icct{font-size:12px;color:var(--pk);margin-bottom:10px;font-weight:500}
 .iccr{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:end}
 .iccop{font-size:18px;color:var(--td);text-align:center;padding-bottom:8px}
-@media(max-width:600px){.fg2{grid-template-columns:1fr}.fg2 .f.s2{grid-column:span 1}.spg{grid-template-columns:1fr}.fg.full{grid-column:span 1}.page{padding:12px}.iccr{grid-template-columns:1fr auto 1fr}}
+
+@media(max-width:600px){
+  .fg2{grid-template-columns:1fr}.fg2 .f.s2{grid-column:span 1}
+  .spg{grid-template-columns:1fr}.fg.full{grid-column:span 1}
+  .page{padding:12px}.iccr{grid-template-columns:1fr auto 1fr}
+}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="ls">
   <div class="lb">
-    <div class="ll">&#10022; OrderFlow</div>
+    <div class="ll">✦ OrderFlow</div>
     <div class="ls2">Σύνδεση στο σύστημα διαχείρισης</div>
     <div class="lf"><label>Email</label><input type="email" id="lemail" placeholder="email@example.com" autocomplete="email"></div>
     <div class="lf"><label>Κωδικός</label><input type="password" id="lpass" placeholder="••••••••" autocomplete="current-password"></div>
@@ -179,9 +237,10 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
 <div class="topbar">
-  <div class="logo">&#10022; OrderFlow</div>
+  <div class="logo">✦ OrderFlow</div>
   <div class="tab active" id="tab-orders" onclick="sw('orders',this)">Παραγγελίες</div>
   <div class="tab" id="tab-stock" onclick="sw('stock',this)">Αποθήκη</div>
   <div class="tab" id="tab-prices" onclick="sw('prices',this)">Τιμές</div>
@@ -191,16 +250,17 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="ts"></div>
   <div class="tbr">
     <span class="ub" id="ubadge"></span>
-    <button class="mbtn ao" onclick="openMgmt()">&#9881; Διαχείριση</button>
-    <button class="lout" onclick="doLogout()">&#8594; Έξοδος</button>
+    <button class="mbtn ao" onclick="openMgmt()">⚙ Διαχείριση</button>
+    <button class="lout" onclick="doLogout()">→ Έξοδος</button>
   </div>
 </div>
 
+<!-- ΠΑΡΑΓΓΕΛΙΕΣ -->
 <div id="page-orders" class="page active ao">
   <div class="mets">
     <div class="met"><label>Σύνολο</label><div class="mv pk" id="m-tot">—</div></div>
     <div class="met"><label>Εκκρεμείς</label><div class="mv am" id="m-pnd">—</div></div>
-    <div class="met"><label>Υπόλοιπο</label><div class="mv rd" id="m-bal">—</div></div>
+    <div class="met"><label>Υπόλοιπο προς πληρωμή</label><div class="mv rd" id="m-bal">—</div></div>
     <div class="met"><label>Παραδόθηκαν</label><div class="mv gn" id="m-dlv">—</div></div>
   </div>
   <div class="tlb">
@@ -225,6 +285,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="cards" id="olist"><div class="ld">Φόρτωση...</div></div>
 </div>
 
+<!-- ΑΠΟΘΗΚΗ -->
 <div id="page-stock" class="page ao">
   <div class="tlb">
     <span class="tlt">Επάρκεια αποθήκης</span>
@@ -240,31 +301,34 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="sg" id="slist"><div class="ld">Φόρτωση...</div></div>
 </div>
 
+<!-- ΤΙΜΕΣ -->
 <div id="page-prices" class="page ao">
   <div class="tlb">
     <span class="tlt">Παρατηρητήριο τιμών</span>
     <div class="tbr2">
       <select id="pfp" onchange="rPrices()" style="background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t2);padding:6px 10px;font-size:12px"><option value="">Όλα τα είδη</option></select>
+      <select id="pfps" onchange="rPrices()" style="background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t2);padding:6px 10px;font-size:12px"><option value="">Όλοι οι προμηθευτές</option></select>
       <button class="btn p" onclick="om('mpr')">+ Καταχώρηση τιμής</button>
     </div>
   </div>
   <div class="sec">
-    <table class="dt"><thead><tr><th>Φιλική ονομ.</th><th>Προμηθευτής</th><th>Κωδικός</th><th>Περιγρ. προμ.</th><th>Συσκευασία</th><th>Τιμή/συσκ</th><th>Τιμή/μον.</th><th>Ημερομηνία</th></tr></thead>
+    <table class="dt"><thead><tr><th>Είδος</th><th>Προμηθευτής</th><th>Κωδικός</th><th>Ονομ. Προμ.</th><th>Συσκευασία</th><th>Τιμή/Συσκ</th><th>Τιμή/τμχ</th><th>Ημερομηνία</th></tr></thead>
     <tbody id="pbody"><tr><td colspan="8" class="ld">Φόρτωση...</td></tr></tbody></table>
   </div>
 </div>
 
+<!-- ΠΛΗΡΩΜΕΣ -->
 <div id="page-payments" class="page ao">
   <div class="mets">
     <div class="met"><label>Εκκρεμείς</label><div class="mv rd" id="pc">—</div></div>
-    <div class="met"><label>Σύνολο</label><div class="mv am" id="pt">—</div></div>
+    <div class="met"><label>Σύνολο εκκρεμών</label><div class="mv am" id="pt">—</div></div>
     <div class="met"><label>Ληγμένες</label><div class="mv rd" id="pov">—</div></div>
     <div class="met"><label>Εντός 7 ημ.</label><div class="mv am" id="psn">—</div></div>
   </div>
   <div class="tlb" style="flex-wrap:wrap;gap:12px">
     <div class="vt">
-      <button class="vb active" onclick="swPV('pending',this)">&#9679; Εκκρεμείς</button>
-      <button class="vb" onclick="swPV('forecast',this)">&#9654; Forecast</button>
+      <button class="vb active" onclick="swPV('pending',this)">● Εκκρεμείς</button>
+      <button class="vb" onclick="swPV('forecast',this)">▶ Forecast</button>
     </div>
     <div class="fils" id="pf" style="margin:0">
       <div class="pill active" onclick="fPay('all',this)">Όλα</div>
@@ -277,11 +341,12 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="pl" id="plist"><div class="ld">Φόρτωση...</div></div>
 </div>
 
+<!-- ΤΑΜΕΙΟ -->
 <div id="page-cash" class="page">
   <div class="cs">
     <div class="cc"><div class="cl2">Εισπράξεις</div><div class="ca" id="cin" style="color:var(--gn)">—</div></div>
     <div class="cc"><div class="cl2">Πληρωμές</div><div class="ca" id="cout" style="color:var(--rd)">—</div></div>
-    <div class="cc av"><div class="cl2">&#128181; Διαθέσιμα μετρητά</div><div class="ca" id="cavail" style="color:var(--gn)">—</div></div>
+    <div class="cc av"><div class="cl2">💵 Διαθέσιμα μετρητά</div><div class="ca" id="cavail" style="color:var(--gn)">—</div></div>
   </div>
   <div class="tlb">
     <div class="fils" id="clf" style="margin:0"><div class="pill active" onclick="fCash('all',this)">Όλα</div></div>
@@ -291,11 +356,12 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     </div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-    <div><div style="font-size:13px;font-weight:500;color:var(--gn);margin-bottom:10px">Εισπράξεις</div><div class="clist" id="celist"><div class="ld">Φόρτωση...</div></div></div>
-    <div><div style="font-size:13px;font-weight:500;color:var(--rd);margin-bottom:10px">Πληρωμές από ταμείο</div><div class="clist" id="cplist"><div class="ld">Φόρτωση...</div></div></div>
+    <div><div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις</div><div class="clist" id="celist"><div class="ld">Φόρτωση...</div></div></div>
+    <div><div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές από ταμείο</div><div class="clist" id="cplist"><div class="ld">Φόρτωση...</div></div></div>
   </div>
 </div>
 
+<!-- EXCEL -->
 <div id="page-excel" class="page ao">
   <div class="tlb"><span class="tlt">Εξαγωγή για λογιστήριο</span></div>
   <div class="card" style="margin-bottom:16px">
@@ -306,8 +372,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <div class="f"><label>Κατάσταση</label><select id="xst"><option value="">Όλες</option><option value="pending">Εκκρεμείς</option><option value="delivered">Παραδόθηκαν</option></select></div>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px">
-      <button class="btn s" onclick="exportXL()">&#8659; Εξαγωγή Excel</button>
-      <button class="btn" onclick="prevXL()">&#128065; Προεπισκόπηση</button>
+      <button class="btn s" onclick="exportXL()">↙ Εξαγωγή Excel</button>
+      <button class="btn" onclick="prevXL()">👁 Προεπισκόπηση</button>
     </div>
   </div>
   <div id="xprev" class="sec" style="display:none">
@@ -317,17 +383,21 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 </div>
 </div><!-- /app -->
 
-<!-- MODALS -->
+<!-- ══ MODALS ══ -->
+
+<!-- Νέα παραγγελία -->
 <div class="mbg" id="mord">
-  <div class="modal"><h2>Νέα παραγγελία</h2>
+  <div class="modal" style="max-width:760px"><h2 id="mord-title">Νέα παραγγελία</h2>
     <div class="fg2">
-      <div class="f"><label>Προμηθευτής *</label><select id="osup" onchange="loadSP()"></select></div>
+      <div class="f"><label>Προμηθευτής *</label>
+        <select id="osup" onchange="loadSP()"></select>
+      </div>
       <div class="f"><label>Τοποθεσία *</label><select id="oloc"></select></div>
       <div class="f"><label>Ημερομηνία</label><input type="date" id="odt"></div>
       <div class="f"><label>Εκτ. παράδοση</label><input type="date" id="odlv"></div>
       <div class="f"><label>Κατηγορία</label><select id="ocat"></select></div>
-      <div class="f"><label>Σύνολο γραμμών (€)</label><input type="number" id="otot" step="0.01" placeholder="0.00" readonly style="opacity:.7;background:var(--nd)"></div>
       <div class="f"><label>Προκαταβολή (€)</label><input type="number" id="opp" step="0.01" placeholder="0.00" oninput="calcB()"></div>
+      <div class="f"><label>Σύνολο γραμμών (€)</label><input type="number" id="otot" step="0.01" readonly style="opacity:.7;background:var(--nd)"></div>
       <div class="f"><label>Υπόλοιπο (€)</label><input type="number" id="obal" readonly style="opacity:.6"></div>
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="onotes"></div>
     </div>
@@ -337,14 +407,27 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
         <button class="btn" onclick="addRow()">+ Είδος</button>
       </div>
       <div style="overflow-x:auto">
-        <table class="itb"><thead><tr><th>Προϊόν</th><th>Κωδ.Προμ.</th><th style="min-width:140px">Περιγρ.Προμ.</th><th>Συσκ.</th><th title="Τεμάχια ανά συσκευασία">Τεμ/Συσκ</th><th title="Αριθμός συσκευασιών που παραγγέλνεις">Ποσ.Συσκ</th><th>Τιμή/Συσκ(€)</th><th>Σύνολο(€)</th><th></th></tr></thead>
-        <tbody id="ibody"></tbody></table>
+        <table class="itb">
+          <thead><tr>
+            <th style="min-width:130px">Προϊόν</th>
+            <th style="min-width:80px">Κωδ.Προμ.</th>
+            <th style="min-width:150px">Ονομ.Προμ.</th>
+            <th style="min-width:70px">Συσκ.</th>
+            <th style="min-width:60px" title="Τεμάχια ανά συσκευασία">Τεμ/Συσκ</th>
+            <th style="min-width:60px" title="Αριθμός συσκευασιών">Ποσ.Συσκ</th>
+            <th style="min-width:80px">Τιμή/Συσκ(€)</th>
+            <th style="min-width:80px">Σύνολο(€)</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="ibody"></tbody>
+        </table>
       </div>
     </div>
     <div class="mf"><button class="btn" onclick="cm('mord')">Ακύρωση</button><button class="btn p" onclick="saveOrder()">Αποθήκευση</button></div>
   </div>
 </div>
 
+<!-- Πάγια υποχρέωση -->
 <div class="mbg" id="mr">
   <div class="modal"><h2>Πάγια υποχρέωση</h2>
     <div class="fg2">
@@ -364,11 +447,12 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Άλλη υποχρέωση -->
 <div class="mbg" id="mo">
   <div class="modal"><h2>Άλλη υποχρέωση</h2>
     <p style="font-size:12px;color:var(--tm);margin-bottom:14px">Έκτακτο έξοδο, αμοιβή, επισκευή κλπ.</p>
     <div class="fg2">
-      <div class="f s2"><label>Περιγραφή *</label><input type="text" id="oname" placeholder="π.χ. Επισκευή ψυγείου"></div>
+      <div class="f s2"><label>Περιγραφή *</label><input type="text" id="oname"></div>
       <div class="f"><label>Κατηγορία</label><select id="ocat2"></select></div>
       <div class="f"><label>Τοποθεσία *</label><select id="oloc2"></select></div>
       <div class="f"><label>Προμηθευτής</label><select id="osup2"></select></div>
@@ -380,16 +464,17 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Καταχώρηση τιμής -->
 <div class="mbg" id="mpr">
   <div class="modal"><h2>Καταχώρηση τιμής</h2>
     <div class="fg2">
       <div class="f"><label>Προμηθευτής *</label><select id="psup" onchange="loadSPP()"></select></div>
-      <div class="f"><label>Προϊόν *</label><select id="pprod"></select></div>
-      <div class="f"><label>Κωδικός προμηθευτή</label><input type="text" id="pcode" placeholder="π.χ. ECO-144"></div>
-      <div class="f"><label>Περιγραφή προμηθευτή</label><input type="text" id="pdesc"></div>
+      <div class="f"><label>Είδος *</label><select id="pprod"></select></div>
+      <div class="f"><label>Κωδικός προμηθευτή</label><input type="text" id="pcode"></div>
+      <div class="f"><label>Ονομασία προμηθευτή</label><input type="text" id="pdesc"></div>
       <div class="f"><label>Συσκευασία</label><input type="text" id="ppkg" placeholder="π.χ. Κιβώτιο"></div>
       <div class="f"><label>Τεμ./Συσκ.</label><input type="number" id="ppqty" value="1" step="0.001"></div>
-      <div class="f"><label>Τιμή/συσκ (€)</label><input type="number" id="ppprice" step="0.01" placeholder="0.00"></div>
+      <div class="f"><label>Τιμή/Συσκ (€)</label><input type="number" id="ppprice" step="0.01" placeholder="0.00"></div>
       <div class="f"><label>Ημερομηνία</label><input type="date" id="pdt"></div>
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="pnotes"></div>
     </div>
@@ -397,6 +482,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Απογραφή -->
 <div class="mbg" id="minv">
   <div class="modal"><h2>Καταχώρηση απογραφής</h2>
     <div class="fg2">
@@ -419,42 +505,47 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Ταμείο - Καταχώρηση -->
 <div class="mbg" id="mce">
   <div class="modal"><h2>Καταχώρηση ημέρας ταμείου</h2>
     <div class="fg2">
       <div class="f"><label>Τοποθεσία *</label><select id="celoc"></select></div>
       <div class="f"><label>Ημερομηνία *</label><input type="date" id="cedt"></div>
-      <div class="f s2"><label>Ποσό μετρητών (€) *</label><input type="number" id="ceamt" step="0.01" placeholder="0.00" style="font-size:18px;font-weight:600"></div>
+      <div class="f s2"><label>Ποσό μετρητών (€) *</label><input type="number" id="ceamt" step="0.01" placeholder="0.00" style="font-size:20px;font-weight:700"></div>
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="cenotes"></div>
     </div>
     <div class="mf"><button class="btn" onclick="cm('mce')">Ακύρωση</button><button class="btn p" onclick="saveCE()">Αποθήκευση</button></div>
   </div>
 </div>
 
+<!-- Ταμείο - Πληρωμή -->
 <div class="mbg" id="mcp">
   <div class="modal"><h2>Πληρωμή από ταμείο</h2>
     <div class="fg2">
       <div class="f"><label>Τοποθεσία *</label><select id="cploc"></select></div>
       <div class="f"><label>Ημερομηνία *</label><input type="date" id="cpdt"></div>
       <div class="f s2"><label>Περιγραφή *</label><input type="text" id="cpdesc" placeholder="π.χ. Πληρωμή προμηθευτή"></div>
-      <div class="f s2"><label>Ποσό (€) *</label><input type="number" id="cpamt" step="0.01" placeholder="0.00" style="font-size:18px;font-weight:600"></div>
+      <div class="f s2"><label>Ποσό (€) *</label><input type="number" id="cpamt" step="0.01" placeholder="0.00" style="font-size:20px;font-weight:700"></div>
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="cpnotes"></div>
     </div>
     <div class="mf"><button class="btn" onclick="cm('mcp')">Ακύρωση</button><button class="btn p" onclick="saveCP()">Αποθήκευση</button></div>
   </div>
 </div>
 
-<!-- SIDE PANEL -->
+<!-- ══ SIDE PANEL ΔΙΑΧΕΙΡΙΣΗ ══ -->
 <div class="spbg" id="spbg">
   <div class="sp">
-    <div class="sph"><h2>&#9881; Διαχείριση</h2><div class="spc" onclick="closeMgmt()">&#215;</div></div>
+    <div class="sph"><h2>⚙ Διαχείριση</h2><div class="spc" onclick="closeMgmt()">✕</div></div>
     <div class="sptabs">
       <div class="sptab active" onclick="swMT('suppliers',this)">Προμηθευτές</div>
       <div class="sptab" onclick="swMT('products',this)">Είδη</div>
+      <div class="sptab" onclick="swMT('catalog',this)">Κατάλογος</div>
       <div class="sptab" onclick="swMT('users',this)">Χρήστες</div>
       <div class="sptab" onclick="swMT('categories',this)">Κατηγορίες</div>
     </div>
     <div class="spbd">
+
+      <!-- ΠΡΟΜΗΘΕΥΤΕΣ -->
       <div id="msp-suppliers">
         <div class="spf"><h4 id="sup-form-title">+ Νέος προμηθευτής</h4>
           <input type="hidden" id="sedit-id">
@@ -467,31 +558,53 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <div class="fg"><label>Email</label><input type="email" id="semail"></div>
             <div class="fg full"><label>Σημειώσεις</label><input type="text" id="snotes"></div>
           </div>
-          <div class="spff" style="gap:8px">
+          <div class="spff">
             <button class="btn" id="sup-cancel-edit" style="display:none" onclick="cancelSupEdit()">Ακύρωση</button>
             <button class="btn p" id="sup-save-btn" onclick="saveSup()">Αποθήκευση</button>
           </div>
         </div>
-        <table class="sptbl"><thead><tr><th>Επωνυμία</th><th>Φιλική</th><th>IBAN</th><th>Τράπεζα</th><th>Κατάλογος</th><th></th></tr></thead><tbody id="stbl"></tbody></table>
+        <table class="sptbl"><thead><tr><th>Επωνυμία</th><th>Φιλική</th><th>Τράπεζα</th><th>IBAN</th><th></th></tr></thead><tbody id="stbl"></tbody></table>
       </div>
+
+      <!-- ΕΙΔΗ -->
       <div id="msp-products" style="display:none">
         <div class="spf"><h4 id="prod-form-title">+ Νέο είδος</h4>
           <input type="hidden" id="predit-id">
           <div class="spg">
-            <div class="fg full"><label>Ονομασία *</label><input type="text" id="prname" placeholder="π.χ. Χαρτοπετσέτα 1/8"></div>
-            <div class="fg full"><label>Φιλική ονομασία</label><input type="text" id="prfr" placeholder="π.χ. Χαρτοπετσέτα (για γρήγορη αναζήτηση)"></div>
+            <div class="fg full"><label>Φιλική ονομασία *</label><input type="text" id="prname" placeholder="π.χ. Χαρτοπετσέτα μικρή"></div>
             <div class="fg"><label>Κατηγορία</label><select id="prcat"><option value="">— Επιλογή —</option></select></div>
             <div class="fg"><label>Βασική μονάδα</label><select id="prunit"><option value="τμχ">Τεμάχιο (τμχ)</option><option value="kg">Κιλό (kg)</option><option value="lt">Λίτρο (lt)</option><option value="m">Μέτρο (m)</option></select></div>
-            <div class="fg"><label>Κατανάλωση/ημέρα</label><input type="number" id="prcons" step="0.01" placeholder="0"></div>
-            <div class="fg"><label>Σημειώσεις</label><input type="text" id="prnotes"></div>
+            <div class="fg full"><label>Κατανάλωση/ημέρα</label><input type="number" id="prcons" step="0.01" placeholder="0"></div>
           </div>
           <div class="spff" style="gap:8px">
             <button class="btn" id="prod-cancel-edit" style="display:none" onclick="cancelProdEdit()">Ακύρωση</button>
             <button class="btn p" onclick="saveProd()">Αποθήκευση</button>
           </div>
         </div>
-        <table class="sptbl"><thead><tr><th>Ονομασία</th><th>Φιλική</th><th>Κατηγορία</th><th>Μον.</th><th>Κατ/ημ</th><th></th></tr></thead><tbody id="ptbl"></tbody></table>
+        <table class="sptbl"><thead><tr><th>Φιλική ονομασία</th><th>Κατηγορία</th><th>Μον.</th><th>Κατ/ημ</th><th></th></tr></thead><tbody id="ptbl"></tbody></table>
       </div>
+
+      <!-- ΚΑΤΑΛΟΓΟΣ -->
+      <div id="msp-catalog" style="display:none">
+        <div class="spf"><h4>+ Νέα εγγραφή καταλόγου</h4>
+          <div class="spg">
+            <div class="fg"><label>Προμηθευτής *</label><select id="cat2-sup"></select></div>
+            <div class="fg"><label>Είδος *</label><select id="cat2-prod"></select></div>
+            <div class="fg full"><label>Ονομασία προμηθευτή</label><input type="text" id="cat2-desc" placeholder="π.χ. Χαρτοπετσέτα 1/8 38x38 POZ"></div>
+            <div class="fg"><label>Κωδικός προμηθευτή</label><input type="text" id="cat2-code" placeholder="π.χ. POZ-001"></div>
+            <div class="fg"><label>Συσκευασία</label><input type="text" id="cat2-pkg" placeholder="π.χ. Κιβώτιο"></div>
+            <div class="fg"><label>Τεμ./Συσκ.</label><input type="number" id="cat2-qty" value="1" step="0.001"></div>
+          </div>
+          <div class="spff"><button class="btn p" onclick="saveCat2()">Αποθήκευση</button></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <select id="cat2-filter-sup" onchange="rCat2()" style="background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t2);padding:5px 8px;font-size:12px;flex:1"><option value="">Όλοι οι προμηθευτές</option></select>
+          <select id="cat2-filter-prod" onchange="rCat2()" style="background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t2);padding:5px 8px;font-size:12px;flex:1"><option value="">Όλα τα είδη</option></select>
+        </div>
+        <table class="sptbl"><thead><tr><th>Προμηθευτής</th><th>Είδος</th><th>Ονομ. Προμ.</th><th>Κωδ.</th><th>Συσκ.</th><th>Τεμ/Σ</th><th></th></tr></thead><tbody id="cat2tbl"></tbody></table>
+      </div>
+
+      <!-- ΧΡΗΣΤΕΣ -->
       <div id="msp-users" style="display:none">
         <div class="spf"><h4>+ Νέος χρήστης</h4>
           <div class="spg">
@@ -503,8 +616,11 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
           </div>
           <div class="spff"><button class="btn p" onclick="saveUser()">Δημιουργία</button></div>
         </div>
+        <p style="font-size:11px;color:var(--td);margin-bottom:10px">⚠ Η δημιουργία χρηστών γίνεται από τον διαχειριστή του συστήματος.</p>
         <table class="sptbl"><thead><tr><th>Όνομα</th><th>Email</th><th>Ρόλος</th><th>Τοποθεσία</th><th>Ενεργός</th><th></th></tr></thead><tbody id="utbl"></tbody></table>
       </div>
+
+      <!-- ΚΑΤΗΓΟΡΙΕΣ -->
       <div id="msp-categories" style="display:none">
         <div class="spf"><h4>+ Νέα κατηγορία</h4>
           <div class="spg">
@@ -515,43 +631,32 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
         </div>
         <div id="catlist" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- Κατάλογος ειδών -->
-<div class="mbg" id="mcat">
-  <div class="modal" style="max-width:700px">
-    <h2 id="cattitle">Κατάλογος ειδών</h2>
-    <div class="spf" style="margin-bottom:16px"><h4>+ Προσθήκη είδους</h4>
-      <div class="fg2">
-        <div class="f"><label>Προϊόν</label><select id="catprod"></select></div>
-        <div class="f"><label>Κωδικός προμηθευτή</label><input type="text" id="catcode" placeholder="π.χ. ECO-144"></div>
-        <div class="f s2"><label>Περιγραφή προμηθευτή</label><input type="text" id="catdesc"></div>
-        <div class="f"><label>Συσκευασία</label><input type="text" id="catpkg"></div>
-        <div class="f"><label>Τεμ./Συσκ.</label><input type="number" id="catqty" value="1" step="0.001"></div>
-      </div>
-      <div class="mf" style="padding-top:12px;margin-top:12px"><button class="btn p" onclick="saveSP()">Προσθήκη</button></div>
     </div>
-    <table class="dt"><thead><tr><th>Φιλική ονομ.</th><th>Κωδ. προμ.</th><th>Περιγρ. προμ.</th><th>Συσκευασία</th><th></th></tr></thead>
-    <tbody id="catbody"></tbody></table>
-    <div class="mf"><button class="btn" onclick="cm('mcat')">Κλείσιμο</button></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ══════════════════════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════════════════════
 const SURL='https://gaxdvpmabrqsxtvsysoz.supabase.co';
 const SKEY='sb_publishable_gyYvpY477T0pv8FqhlrLSg_KNERhv0l';
-let db=null;
-function getDb(){if(!db)db=window.supabase.createClient(SURL,SKEY);return db;}
+let _db=null;
+function getDb(){if(!_db)_db=window.supabase.createClient(SURL,SKEY);return _db;}
 
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
 let cU=null,cP=null;
 let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[],oitems=[];
-let oeditId=null;
-let aOF='all',aSF='all',aPF='all',aCF='all',aPV='pending',aCatSup=null;
+let aOF='all',aSF='all',aPF='all',aCF='all',aPV='pending',oeditId=null;
 
+// ══════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════
 const td=()=>new Date().toISOString().split('T')[0];
 const fmt=n=>Number(n||0).toLocaleString('el-GR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fd=d=>d?new Date(d).toLocaleDateString('el-GR'):'—';
@@ -561,11 +666,14 @@ const pN=id=>{const p=prods.find(x=>x.id===id);return p?(p.friendly_name||p.name
 const lC=lid=>{const n=locs.find(x=>x.id===lid)?.name||'';if(n.includes('Κεντρική'))return'lm';if(n.includes('Γέρακα'))return'lg';if(n.includes('Παγκράτι'))return'lp';if(n.includes('Μαρούσι'))return'lma';return'lm';};
 const i2b=i=>{if(!i)return'—';const c=i.replace(/\s/g,'').substring(4,7);const b={'011':'Εθνική','014':'Alpha','026':'Πειραιώς','019':'Eurobank','037':'Attica','060':'Παγκρήτια','072':'Optima'};return b[c]||('GR'+c);};
 const toast=(m,t='ok')=>{const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+t;setTimeout(()=>e.className='toast',3000);};
+const set=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h;};
 const calcB=()=>{const t=parseFloat(document.getElementById('otot').value)||0;const p=parseFloat(document.getElementById('opp').value)||0;document.getElementById('obal').value=(t-p).toFixed(2);};
 function calcRowTot(inp){const row=inp.closest('tr');const pos=parseFloat(row.querySelector('.iq')?.value)||0;const pr=parseFloat(row.querySelector('.ipr')?.value)||0;const tot=row.querySelector('.itot');if(tot)tot.value=(pos*pr).toFixed(2);calcTotFromRows();}
-function calcTotFromRows(){let sum=0;document.querySelectorAll('#ibody tr').forEach(row=>{const pos=parseFloat(row.querySelector('.iq')?.value)||0;const pr=parseFloat(row.querySelector('.ipr')?.value)||0;sum+=pos*pr;});const el=document.getElementById('otot');if(el){el.value=sum.toFixed(2);calcB();}}
-const set=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h;};
+function calcTotFromRows(){let sum=0;document.querySelectorAll('#ibody tr').forEach(row=>{sum+=(parseFloat(row.querySelector('.iq')?.value)||0)*(parseFloat(row.querySelector('.ipr')?.value)||0);});const el=document.getElementById('otot');if(el){el.value=sum.toFixed(2);calcB();}}
 
+// ══════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════
 async function doLogin(){
   const em=document.getElementById('lemail').value.trim();
   const pw=document.getElementById('lpass').value;
@@ -583,29 +691,28 @@ async function init(user){
   document.getElementById('ls').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('ubadge').textContent=p?.full_name||user.email;
-  if(p?.role==='store'){
-    document.querySelectorAll('.ao').forEach(e=>e.style.display='none');
-    sw('cash',document.getElementById('tab-cash'));
-  }
+  if(p?.role==='store'){document.querySelectorAll('.ao').forEach(e=>e.style.display='none');sw('cash',document.getElementById('tab-cash'));}
   await load();
 }
 getDb().auth.getSession().then(({data:{session}})=>{if(session)init(session.user);});
 document.getElementById('lpass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
+// ══════════════════════════════════════════════════════
+// LOAD ALL
+// ══════════════════════════════════════════════════════
 async function load(){
   try{
-    const isA=cP?.role==='admin';
-    const uid=cP?.location_id;
+    const isA=cP?.role==='admin', uid=cP?.location_id;
     const[r0,r1,r2,r3,r4]=await Promise.all([
       getDb().from('suppliers').select('*').order('name'),
       getDb().from('locations').select('*').order('name'),
-      getDb().from('products').select('*').order('name'),
+      getDb().from('products').select('*').order('friendly_name'),
       getDb().from('categories').select('*').order('name'),
       getDb().from('supplier_products').select('*')
     ]);
     sups=r0.data||[];locs=r1.data||[];prods=r2.data||[];cats=r3.data||[];sps=r4.data||[];
     if(isA){
-      const[a,b,c,d,e,f,g,h]=await Promise.all([
+      const[a,b,c,d,e,f,g,h,oi]=await Promise.all([
         getDb().from('orders').select('*').order('order_date',{ascending:false}),
         getDb().from('recurring_obligations').select('*').order('next_due_date'),
         getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
@@ -613,14 +720,12 @@ async function load(){
         getDb().from('other_obligations').select('*').order('created_at',{ascending:false}),
         getDb().from('user_profiles').select('*').order('created_at'),
         getDb().from('cash_entries').select('*').order('entry_date',{ascending:false}),
-        getDb().from('cash_payments').select('*').order('payment_date',{ascending:false})
+        getDb().from('cash_payments').select('*').order('payment_date',{ascending:false}),
+        getDb().from('order_items').select('*')
       ]);
-      ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];
-      // Load order items
-      const{data:oi}=await getDb().from('order_items').select('*');
-      oitems=oi||[];
+      ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];
     }else{
-      ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];
+      ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];
       const[g,h]=await Promise.all([
         getDb().from('cash_entries').select('*').eq('location_id',uid).order('entry_date',{ascending:false}),
         getDb().from('cash_payments').select('*').eq('location_id',uid).order('payment_date',{ascending:false})
@@ -634,31 +739,41 @@ async function load(){
     else if(ap?.id==='page-prices')rPrices();
     else if(ap?.id==='page-payments')rPay();
     else if(ap?.id==='page-cash')rCash();
-  }catch(e){toast('Σφάλμα φόρτωσης','err');}
+  }catch(e){toast('Σφάλμα φόρτωσης: '+e.message,'err');}
 }
 
+// ══════════════════════════════════════════════════════
+// POPULATE SELECTS
+// ══════════════════════════════════════════════════════
 function popSel(){
   const su=sups.map(s=>`<option value="${s.id}">${s.friendly_name||s.name}</option>`).join('');
   const sum='<option value="">— Χωρίς —</option>'+su;
   const lo=locs.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
   const pr=prods.map(p=>`<option value="${p.id}">${p.friendly_name||p.name}</option>`).join('');
   const ca='<option value="">— Επιλογή —</option>'+cats.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
-  set('osup',su);set('oloc',lo);set('ocat',ca);
-  set('rsup',sum);set('rloc',lo);
-  set('psup',su);set('pprod',pr);
-  set('iprod',pr);set('iloc',lo);
-  set('osup2',sum);set('oloc2',lo);set('ocat2',ca);
-  set('catprod',pr);
-  set('uloc','<option value="">— Χωρίς —</option>'+lo);
-  set('prcat',ca);
-  set('xloc','<option value="">Όλες</option>'+lo);
-  set('celoc',lo);set('cploc',lo);
-  const pf=document.getElementById('pfp');
-  if(pf)pf.innerHTML='<option value="">Όλα τα είδη</option>'+pr;
+  const s=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h;};
+  s('osup',su);s('oloc',lo);s('ocat',ca);
+  s('rsup',sum);s('rloc',lo);
+  s('psup',su);s('pprod',pr);
+  s('iprod',pr);s('iloc',lo);
+  s('osup2',sum);s('oloc2',lo);s('ocat2',ca);
+  s('uloc','<option value="">— Χωρίς —</option>'+lo);
+  s('prcat',ca);
+  s('xloc','<option value="">Όλες</option>'+lo);
+  s('celoc',lo);s('cploc',lo);
+  s('cat2-sup','<option value="">— Επιλογή —</option>'+su);
+  s('cat2-prod','<option value="">— Επιλογή —</option>'+pr);
+  s('cat2-filter-sup','<option value="">Όλοι οι προμηθευτές</option>'+su);
+  s('cat2-filter-prod','<option value="">Όλα τα είδη</option>'+pr);
+  const pf=document.getElementById('pfp');if(pf)pf.innerHTML='<option value="">Όλα τα είδη</option>'+pr;
+  const pfs=document.getElementById('pfps');if(pfs)pfs.innerHTML='<option value="">Όλοι οι προμηθευτές</option>'+su;
   const clf=document.getElementById('clf');
   if(clf)clf.innerHTML='<div class="pill active" onclick="fCash(\'all\',this)">Όλα</div>'+locs.map(l=>`<div class="pill" onclick="fCash('${l.id}',this)">${l.name}</div>`).join('');
 }
 
+// ══════════════════════════════════════════════════════
+// TABS & MODALS
+// ══════════════════════════════════════════════════════
 function sw(n,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -666,11 +781,10 @@ function sw(n,el){
   if(el)el.classList.add('active');
   if(n==='orders')rOrders();if(n==='stock')rStock();if(n==='prices')rPrices();if(n==='payments')rPay();if(n==='cash')rCash();
 }
-
 function om(id){
-  if(id==='mord'){oeditId=null;document.querySelector('#mord h2').textContent='Νέα παραγγελία';document.getElementById('odt').value=td();document.getElementById('ibody').innerHTML='';document.getElementById('otot').value='';document.getElementById('opp').value='';document.getElementById('obal').value='';['osup','oloc','ocat','onotes'].forEach(i=>document.getElementById(i).value='');addRow();}
+  if(id==='mord'){oeditId=null;set('mord-title','Νέα παραγγελία');document.getElementById('odt').value=td();['otot','opp','obal'].forEach(i=>document.getElementById(i).value='');['osup','oloc','ocat','onotes','odlv'].forEach(i=>document.getElementById(i).value='');document.getElementById('ibody').innerHTML='';addRow();}
   if(id==='mpr')document.getElementById('pdt').value=td();
-  if(id==='minv'){document.getElementById('idt').value=td();document.getElementById('iboxes').value='';document.getElementById('iqty').value='';}
+  if(id==='minv'){document.getElementById('idt').value=td();['iboxes','iqty'].forEach(i=>document.getElementById(i).value='');document.getElementById('iper').value=1;}
   if(id==='mr')document.getElementById('rdue').value=td();
   if(id==='mo')document.getElementById('odue').value=td();
   if(id==='mce'){document.getElementById('cedt').value=td();document.getElementById('ceamt').value='';if(cP?.role==='store'&&cP.location_id){const s=document.getElementById('celoc');if(s)s.value=cP.location_id;}}
@@ -680,14 +794,18 @@ function om(id){
 function cm(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.mbg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
+// ══════════════════════════════════════════════════════
+// ORDERS
+// ══════════════════════════════════════════════════════
 function fOrd(f,el){document.querySelectorAll('#of .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aOF=f;rOrders();}
+
 function rOrders(){
   set('m-tot',ords.length);
   set('m-pnd',ords.filter(o=>o.status==='pending').length);
   set('m-bal',fmt(ords.reduce((s,o)=>s+Number(o.balance||0),0))+' €');
   set('m-dlv',ords.filter(o=>o.status==='delivered').length);
-  const f=aOF;let h='';
-  const kwm={lm:'Κεντρική',lg:'Γέρακα',lp:'Παγκράτι',lma:'Μαρούσι'};
+  const f=aOF,kwm={lm:'Κεντρική',lg:'Γέρακα',lp:'Παγκράτι',lma:'Μαρούσι'};
+  let h='';
   if(f!=='recurring'&&f!=='other'){
     let fl=[...ords];
     if(f==='pending')fl=fl.filter(o=>o.status==='pending');
@@ -698,12 +816,7 @@ function rOrders(){
     h+=fl.map(o=>{
       const bal=Number(o.balance||0);
       const items=oitems.filter(i=>i.order_id===o.id);
-      const itemsHtml=items.length?`<div style="margin:8px 0;padding:8px;background:var(--ni);border-radius:8px;font-size:12px">
-        ${items.map(i=>`<div style="display:flex;justify-content:space-between;padding:2px 0;color:var(--t2)">
-          <span>${pN(i.product_id)}${i.supplier_code?' <span style="color:var(--td)">['+i.supplier_code+']</span>':''}</span>
-          <span style="color:var(--am)">${i.quantity} συσκ. × ${fmt(i.package_price)} € = <b>${fmt(i.quantity*i.package_price)} €</b></span>
-        </div>`).join('')}
-      </div>`:'';
+      const itemsHtml=items.length?`<div class="order-items-preview">${items.map(i=>`<div class="order-item-row"><span>${pN(i.product_id)}${i.supplier_code?` <span style="color:var(--td)">[${i.supplier_code}]</span>`:''}</span><span style="color:var(--am)">${i.quantity} συσκ × ${fmt(i.package_price)}€ = <b style="color:var(--t1)">${fmt(i.quantity*i.package_price)}€</b></span></div>`).join('')}</div>`:'';
       return`<div class="card">
         <div class="ch">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -727,9 +840,9 @@ function rOrders(){
             <div class="amt"><label>Υπόλοιπο</label><span style="color:${bal>0?'var(--am)':'var(--gn)'}">${fmt(bal)} €</span></div>
           </div>
           <div class="acts">
-            <button class="ib" onclick="editOrd('${o.id}')" title="Επεξεργασία">&#9998;</button>
-            ${o.status==='pending'?`<button class="ib cf" onclick="confDlv('${o.id}')" title="Επιβεβαίωση παράδοσης">&#10003;</button>`:''}
-            <button class="ib" onclick="delOrd('${o.id}')" style="color:var(--rd)" title="Διαγραφή">&#215;</button>
+            <button class="ib" onclick="editOrd('${o.id}')" title="Επεξεργασία">✎</button>
+            ${o.status==='pending'?`<button class="ib cf" onclick="confDlv('${o.id}')" title="Επιβεβαίωση παράδοσης">✓</button>`:''}
+            <button class="ib" onclick="delOrd('${o.id}')" style="color:var(--rd)" title="Διαγραφή">✕</button>
           </div>
         </div>
       </div>`;
@@ -737,44 +850,44 @@ function rOrders(){
   }
   if(f==='all'||f==='recurring'){
     const fm={monthly:'Μηνιαία',biannual:'Εξαμηνιαία',annual:'Ετήσια',once:'Εφάπαξ'};
-    h+=recs.map(r=>{const dl=Math.ceil((new Date(r.next_due_date)-new Date())/86400000);return`<div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="csup">${r.name}</span><span class="loc ${lC(r.location_id)}">${lN(r.location_id)}</span></div><div class="cmeta"><span class="badge br">Πάγια · ${fm[r.frequency]||r.frequency}</span><span class="cdate">${r.auto_repeat?'↻ Αυτόματη':'Χειροκίνητη'}</span></div></div><div class="cbody"><div class="fi"><label>Κατηγορία</label><span>${r.category||'—'}</span></div><div class="fi"><label>Επόμενη λήξη</label><span style="color:${dl<=7?'var(--rd)':dl<=30?'var(--am)':'var(--gn)'}">${fd(r.next_due_date)} (${dl>0?dl+' ημ.':'ΛΗΞΗ'})</span></div></div><div class="cfoot"><div class="amts"><div class="amt"><label>Ποσό</label><span style="color:var(--am)">${fmt(r.amount)} €</span></div></div><div class="acts"><button class="ib cf" onclick="confRec('${r.id}')" title="Πληρώθηκε">&#10003;</button><button class="ib" onclick="delRec('${r.id}')" style="color:var(--rd)">&#215;</button></div></div></div>`;}).join('');
+    h+=recs.map(r=>{const dl=Math.ceil((new Date(r.next_due_date)-new Date())/86400000);return`<div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="csup">${r.name}</span><span class="loc ${lC(r.location_id)}">${lN(r.location_id)}</span></div><div class="cmeta"><span class="badge br">Πάγια · ${fm[r.frequency]||r.frequency}</span></div></div><div class="cbody"><div class="fi"><label>Κατηγορία</label><span>${r.category||'—'}</span></div><div class="fi"><label>Επόμενη λήξη</label><span style="color:${dl<=7?'var(--rd)':dl<=30?'var(--am)':'var(--gn)'}">${fd(r.next_due_date)} (${dl>0?dl+' ημ.':'ΛΗΞΗ'})</span></div></div><div class="cfoot"><div class="amts"><div class="amt"><label>Ποσό</label><span style="color:var(--am)">${fmt(r.amount)} €</span></div></div><div class="acts"><button class="ib cf" onclick="confRec('${r.id}')" title="Πληρώθηκε">✓</button><button class="ib" onclick="delRec('${r.id}')" style="color:var(--rd)">✕</button></div></div></div>`;}).join('');
   }
   if(f==='all'||f==='other'){
-    h+=oths.filter(o=>!o.paid).map(o=>`<div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="csup">${o.name}</span><span class="loc ${lC(o.location_id)}">${lN(o.location_id)}</span></div><div class="cmeta"><span class="badge bo">Άλλη υποχρέωση</span><span class="cdate">${fd(o.due_date)}</span></div></div><div class="cbody"><div class="fi"><label>Κατηγορία</label><span>${o.category||'—'}</span></div><div class="fi"><label>Προμηθευτής</label><span>${sN(o.supplier_id)||'—'}</span></div></div><div class="cfoot"><div class="amts"><div class="amt"><label>Ποσό</label><span style="color:var(--am)">${fmt(o.amount)} €</span></div></div><div class="acts"><button class="ib cf" onclick="confOth('${o.id}')" title="Πληρώθηκε">&#10003;</button><button class="ib" onclick="delOth('${o.id}')" style="color:var(--rd)">&#215;</button></div></div></div>`).join('');
+    h+=oths.filter(o=>!o.paid).map(o=>`<div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="csup">${o.name}</span><span class="loc ${lC(o.location_id)}">${lN(o.location_id)}</span></div><div class="cmeta"><span class="badge bo">Άλλη υποχρέωση</span><span class="cdate">${fd(o.due_date)}</span></div></div><div class="cbody"><div class="fi"><label>Κατηγορία</label><span>${o.category||'—'}</span></div><div class="fi"><label>Ποσό</label><span style="color:var(--am)">${fmt(o.amount)} €</span></div></div><div class="cfoot"><div class="amts"></div><div class="acts"><button class="ib cf" onclick="confOth('${o.id}')" title="Πληρώθηκε">✓</button><button class="ib" onclick="delOth('${o.id}')" style="color:var(--rd)">✕</button></div></div></div>`).join('');
   }
-  set('olist',h||'<div class="empty"><div class="ic">&#128230;</div><p>Δεν βρέθηκαν εγγραφές</p></div>');
+  set('olist',h||'<div class="empty"><div class="ic">📦</div><p>Δεν βρέθηκαν εγγραφές</p></div>');
 }
 
-function loadSP(){
-  const sid=document.getElementById('osup').value;
-  document.getElementById('ibody').innerHTML='';
-  addRow();
-}
-function getSupOpts(sid, selProdId){
+// ORDER ITEMS - Dropdown με κατάλογο ή ελεύθερη γραφή
+function loadSP(){document.getElementById('ibody').innerHTML='';addRow();}
+
+function getSupOpts(sid,selProdId){
   const sp=sps.filter(x=>x.supplier_id===sid);
   if(sp.length){
     return sp.map(x=>`<option value="${x.product_id}" data-sp="${x.id}" data-c="${x.supplier_code||''}" data-d="${x.supplier_description||''}" data-p="${x.package_unit||''}" data-q="${x.package_qty||1}" ${x.product_id===selProdId?'selected':''}>${pN(x.product_id)}</option>`).join('');
   }
-  // Αν δεν υπάρχει κατάλογος, δείξε όλα τα προϊόντα
   return prods.map(p=>`<option value="${p.id}" ${p.id===selProdId?'selected':''}>${p.friendly_name||p.name}</option>`).join('');
 }
+
 function addRow(selProdId){
   const sid=document.getElementById('osup')?.value;
   const opts=getSupOpts(sid,selProdId);
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td><select class="ip" onchange="fillR(this)" style="width:110px">${opts}</select></td>
-    <td><input type="text" class="isc" style="width:70px" placeholder="κωδ."></td>
-    <td><input type="text" class="isd" style="min-width:140px;width:140px" placeholder="περιγραφή"></td>
-    <td><input type="text" class="ipkg" style="width:65px" placeholder="Κιβ."></td>
-    <td><input type="number" class="iqp" value="1" step="0.001" style="width:55px" title="Τεμάχια ανά συσκευασία" oninput="calcRowTot(this)"></td>
+  tr.innerHTML=`
+    <td><select class="ip" onchange="fillR(this)" style="width:120px">${opts}</select></td>
+    <td><input type="text" class="isc" style="width:75px" placeholder="κωδ."></td>
+    <td><input type="text" class="isd" style="min-width:150px;width:150px" placeholder="ονομασία προμ."></td>
+    <td><input type="text" class="ipkg" style="width:70px" placeholder="Κιβ."></td>
+    <td><input type="number" class="iqp" value="1" step="0.001" style="width:55px" title="Τεμάχια/συσκευασία" oninput="calcRowTot(this)"></td>
     <td><input type="number" class="iq" value="1" step="1" style="width:55px" title="Αριθμός συσκευασιών" oninput="calcRowTot(this)"></td>
-    <td><input type="number" class="ipr" step="0.01" placeholder="0.00" style="width:75px" title="Τιμή ανά συσκευασία" oninput="calcRowTot(this)"></td>
-    <td><input type="number" class="itot" readonly step="0.01" placeholder="0.00" style="width:75px;opacity:.7;background:var(--nd)" title="Ποσ.Συσκ × Τιμή/Συσκ"></td>
-    <td><button class="ib" onclick="this.closest('tr').remove();calcTotFromRows()">&#215;</button></td>`;
+    <td><input type="number" class="ipr" step="0.01" placeholder="0.00" style="width:80px" title="Τιμή ανά συσκευασία" oninput="calcRowTot(this)"></td>
+    <td><input type="number" class="itot" readonly step="0.01" placeholder="0.00" style="width:80px;opacity:.7;background:var(--nd)"></td>
+    <td><button class="ib" onclick="this.closest('tr').remove();calcTotFromRows()" style="flex-shrink:0">✕</button></td>`;
   document.getElementById('ibody').appendChild(tr);
-  if(!selProdId) fillR(tr.querySelector('.ip'));
+  if(!selProdId)fillR(tr.querySelector('.ip'));
   return tr;
 }
+
 function fillR(sel){
   const o=sel.options[sel.selectedIndex];const row=sel.closest('tr');
   if(o.dataset.c)row.querySelector('.isc').value=o.dataset.c;
@@ -783,31 +896,20 @@ function fillR(sel){
   if(o.dataset.q)row.querySelector('.iqp').value=o.dataset.q;
   const spId=o.dataset.sp;
   if(spId){const lp=prs.filter(p=>p.supplier_product_id===spId).sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];if(lp)row.querySelector('.ipr').value=lp.package_price;}
+  calcRowTot(row.querySelector('.ipr'));
 }
+
 async function saveOrder(){
   const sid=document.getElementById('osup').value,lid=document.getElementById('oloc').value,od=document.getElementById('odt').value;
   const ta=parseFloat(document.getElementById('otot').value)||0,pp=parseFloat(document.getElementById('opp').value)||0;
   if(!sid||!lid||!od){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-
   // Συλλογή items ΠΡΙΝ κλείσει το modal
   const itemRows=[];
   document.querySelectorAll('#ibody tr').forEach(row=>{
-    const pid=row.querySelector('.ip')?.value;
-    if(!pid)return;
-    itemRows.push({
-      product_id:pid,
-      supplier_code:row.querySelector('.isc')?.value||'',
-      supplier_description:row.querySelector('.isd')?.value||'',
-      package_unit:row.querySelector('.ipkg')?.value||'',
-      package_qty:parseFloat(row.querySelector('.iqp')?.value)||1,
-      quantity:parseFloat(row.querySelector('.iq')?.value)||1,
-      package_price:parseFloat(row.querySelector('.ipr')?.value)||0
-    });
+    const pid=row.querySelector('.ip')?.value;if(!pid)return;
+    itemRows.push({product_id:pid,supplier_code:row.querySelector('.isc')?.value||'',supplier_description:row.querySelector('.isd')?.value||'',package_unit:row.querySelector('.ipkg')?.value||'',package_qty:parseFloat(row.querySelector('.iqp')?.value)||1,quantity:parseFloat(row.querySelector('.iq')?.value)||1,package_price:parseFloat(row.querySelector('.ipr')?.value)||0});
   });
-
-  // Κλείσε το modal ΠΡΩΤΑ για καλύτερη εμπειρία
   cm('mord');
-
   try{
     let ordId=oeditId;
     if(oeditId){
@@ -823,81 +925,49 @@ async function saveOrder(){
       if(!r||!r[0])throw new Error('Δεν επιστράφηκε εγγραφή');
       ords.unshift(r[0]);ordId=r[0].id;
     }
-
-    // Save items
     if(itemRows.length>0){
-      const itemsToInsert=itemRows.map(i=>({
-        order_id:ordId,
-        product_id:i.product_id,
-        supplier_code:i.supplier_code,
-        supplier_description:i.supplier_description,
-        package_unit:i.package_unit,
-        package_qty:i.package_qty,
-        quantity:i.quantity,
-        unit_price:i.package_qty>0?i.package_price/i.package_qty:0,
-        package_price:i.package_price
-      }));
-      const{data:ni,error:ie}=await getDb().from('order_items').insert(itemsToInsert).select();
-      if(ie)toast('Προειδοποίηση είδών: '+ie.message,'err');
+      const ins=itemRows.map(i=>({order_id:ordId,product_id:i.product_id,supplier_code:i.supplier_code,supplier_description:i.supplier_description,package_unit:i.package_unit,package_qty:i.package_qty,quantity:i.quantity,unit_price:i.package_qty>0?i.package_price/i.package_qty:0,package_price:i.package_price}));
+      const{data:ni,error:ie}=await getDb().from('order_items').insert(ins).select();
+      if(ie)toast('Σφάλμα ειδών: '+ie.message,'err');
       else if(ni)ni.forEach(x=>oitems.push(x));
     }
-
-    rOrders();
-    toast(oeditId?'Παραγγελία ενημερώθηκε!':'Παραγγελία αποθηκεύτηκε!');
-    oeditId=null;
+    rOrders();toast(oeditId?'Παραγγελία ενημερώθηκε!':'Παραγγελία αποθηκεύτηκε!');oeditId=null;
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
+
 async function confDlv(id){
   if(!confirm('Επιβεβαίωση παράδοσης;'))return;
   const{error}=await getDb().from('orders').update({status:'delivered'}).eq('id',id);
   if(error){toast('Σφάλμα: '+error.message,'err');return;}
   const o=ords.find(x=>x.id===id);if(o)o.status='delivered';
-  // Φόρτωσε τα items από τη βάση για να ενημερώσεις το stock
   const{data:items}=await getDb().from('order_items').select('*').eq('order_id',id);
-  if(items&&items.length){
-    items.forEach(i=>{if(!oitems.find(x=>x.id===i.id))oitems.push(i);});
-    // Φόρτωσε νέα stock entries
-    const{data:newStk}=await getDb().from('stock_entries').select('*').eq('order_id',id);
-    if(newStk)newStk.forEach(s=>{if(!stk.find(x=>x.id===s.id))stk.unshift(s);});
-  }
-  rOrders();rStock();toast('Παράδοση επιβεβαιώθηκε! Το απόθεμα ενημερώθηκε.');
+  if(items&&items.length){items.forEach(i=>{if(!oitems.find(x=>x.id===i.id))oitems.push(i);});
+    const{data:ns}=await getDb().from('stock_entries').select('*').eq('order_id',id);
+    if(ns)ns.forEach(s=>{if(!stk.find(x=>x.id===s.id))stk.unshift(s);});}
+  rOrders();rStock();toast('Παράδοση επιβεβαιώθηκε! Απόθεμα ενημερώθηκε.');
 }
+
 async function delOrd(id){if(!confirm('Διαγραφή;'))return;await getDb().from('orders').delete().eq('id',id);ords=ords.filter(o=>o.id!==id);oitems=oitems.filter(i=>i.order_id!==id);rOrders();toast('Διαγράφηκε.');}
 
 async function editOrd(id){
   const o=ords.find(x=>x.id===id);if(!o)return;
   oeditId=id;
-  document.querySelector('#mord h2').textContent='✏ Επεξεργασία παραγγελίας';
+  set('mord-title','✎ Επεξεργασία παραγγελίας');
   document.getElementById('osup').value=o.supplier_id||'';
   document.getElementById('oloc').value=o.location_id||'';
   document.getElementById('odt').value=o.order_date||'';
   document.getElementById('odlv').value=o.estimated_delivery||'';
-  document.getElementById('ocat').value='';
   document.getElementById('opp').value=o.prepayment||'';
   document.getElementById('onotes').value=o.notes||'';
   document.getElementById('ibody').innerHTML='';
-
-  // Φόρτωσε items από τη βάση αν δεν τα έχουμε
   let items=oitems.filter(i=>i.order_id===id);
-  if(!items.length){
-    const{data:dbItems}=await getDb().from('order_items').select('*').eq('order_id',id);
-    if(dbItems&&dbItems.length){
-      dbItems.forEach(i=>{if(!oitems.find(x=>x.id===i.id))oitems.push(i);});
-      items=dbItems;
-    }
-  }
-
+  if(!items.length){const{data:db}=await getDb().from('order_items').select('*').eq('order_id',id);if(db&&db.length){db.forEach(i=>{if(!oitems.find(x=>x.id===i.id))oitems.push(i);});items=db;}}
   if(items.length){
     items.forEach(i=>{
-      // Δημιούργησε row με το σωστό product pre-selected
       const tr=addRow(i.product_id);
       if(tr){
-        // Αν το product δεν βρίσκεται στο dropdown (κατάλογος άδειος), πρόσθεσέ το
         const sel=tr.querySelector('.ip');
-        if(sel&&!Array.from(sel.options).find(o=>o.value===i.product_id)){
-          const p=prods.find(x=>x.id===i.product_id);
-          if(p){const opt=new Option(p.friendly_name||p.name,p.id,true,true);sel.add(opt);}
-        }
+        if(sel&&!Array.from(sel.options).find(op=>op.value===i.product_id)){const p=prods.find(x=>x.id===i.product_id);if(p){const opt=new Option(p.friendly_name||p.name,p.id,true,true);sel.add(opt);}}
         if(sel)sel.value=i.product_id;
         tr.querySelector('.isc').value=i.supplier_code||'';
         tr.querySelector('.isd').value=i.supplier_description||'';
@@ -905,18 +975,14 @@ async function editOrd(id){
         tr.querySelector('.iqp').value=i.package_qty||1;
         tr.querySelector('.iq').value=i.quantity||1;
         tr.querySelector('.ipr').value=i.package_price||0;
-        const tot=tr.querySelector('.itot');
-        if(tot)tot.value=((i.quantity||1)*(i.package_price||0)).toFixed(2);
+        const tot=tr.querySelector('.itot');if(tot)tot.value=((i.quantity||1)*(i.package_price||0)).toFixed(2);
       }
     });
     calcTotFromRows();
-  }else{
-    document.getElementById('otot').value=o.total_amount||0;
-    calcB();
-    addRow();
-  }
+  }else{document.getElementById('otot').value=o.total_amount||0;calcB();addRow();}
   document.getElementById('mord').classList.add('open');
 }
+
 async function saveRec(){
   const d={name:document.getElementById('rname').value,supplier_id:document.getElementById('rsup').value||null,location_id:document.getElementById('rloc').value,category:document.getElementById('rcat').value,frequency:document.getElementById('rfreq').value,amount:parseFloat(document.getElementById('ramt').value)||0,next_due_date:document.getElementById('rdue').value,auto_repeat:document.getElementById('rauto').checked,notes:document.getElementById('rnotes').value};
   if(!d.name||!d.location_id||!d.next_due_date){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
@@ -938,6 +1004,9 @@ async function saveOther(){
 async function confOth(id){if(!confirm('Επιβεβαίωση πληρωμής;'))return;await getDb().from('other_obligations').update({paid:true,paid_at:new Date().toISOString()}).eq('id',id);const o=oths.find(x=>x.id===id);if(o)o.paid=true;rOrders();rPay();toast('Πληρωμή επιβεβαιώθηκε!');}
 async function delOth(id){if(!confirm('Διαγραφή;'))return;await getDb().from('other_obligations').delete().eq('id',id);oths=oths.filter(o=>o.id!==id);rOrders();toast('Διαγράφηκε.');}
 
+// ══════════════════════════════════════════════════════
+// STOCK
+// ══════════════════════════════════════════════════════
 function fStk(f,el){document.querySelectorAll('#sf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aSF=f;rStock();}
 function rStock(){
   const lm={};stk.forEach(e=>{const k=e.product_id+'_'+e.location_id;if(!lm[k]||new Date(e.entry_date)>new Date(lm[k].entry_date))lm[k]=e;});
@@ -946,28 +1015,23 @@ function rStock(){
     const e=lm[p.id+'_'+l.id];if(!e)return'';
     const qty=Number(e.quantity),cons=Number(p.daily_consumption)||0;
     const days=cons>0?Math.floor(qty/cons):null;
-    const bc=days===null?'#4a5280':days<7?'var(--rd)':days<30?'var(--am)':'var(--gn)';
+    const bc=days===null?'#3a4268':days<7?'var(--rd)':days<30?'var(--am)':'var(--gn)';
     const pct=days!==null?Math.min(100,(days/60)*100):50;
-    return`<div class="sc"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:14px;font-weight:500">${p.name}</div>${p.friendly_name?`<div style="font-size:12px;color:var(--pk)">${p.friendly_name}</div>`:''}</div><span class="loc ${lC(l.id)}" style="font-size:10px">${l.name}</span></div><div class="sbar"><div class="sbarv" style="width:${pct}%;background:${bc}"></div></div><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--t2)">${qty.toLocaleString('el-GR')} ${p.base_unit}</span><span style="color:${bc}">${days!==null?days+' ημέρες':'—'}</span></div>${cons>0?`<div style="font-size:11px;color:var(--td);margin-top:4px">Κατ/ημ: ${cons} ${p.base_unit}</div>`:''}</div>`;
+    return`<div class="sc"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-size:14px;font-weight:600">${p.friendly_name||p.name}</div></div><span class="loc ${lC(l.id)}" style="font-size:10px">${l.name}</span></div><div class="sbar"><div class="sbarv" style="width:${pct}%;background:${bc}"></div></div><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--t2)">${qty.toLocaleString('el-GR')} ${p.base_unit}</span><span style="color:${bc}">${days!==null?days+' ημέρες':'—'}</span></div>${cons>0?`<div style="font-size:11px;color:var(--td);margin-top:4px">Κατ/ημ: ${cons} ${p.base_unit}</div>`:''}</div>`;
   }).join('')).join('');
-  set('slist',h||'<div class="empty" style="grid-column:1/-1"><div class="ic">&#128230;</div><p>Δεν υπάρχουν εγγραφές αποθέματος</p></div>');
+  set('slist',h||'<div class="empty" style="grid-column:1/-1"><div class="ic">📦</div><p>Δεν υπάρχουν εγγραφές αποθέματος</p></div>');
 }
 function updIU(){
   const pid=document.getElementById('iprod').value;
   const p=prods.find(x=>x.id===pid);
   set('ibl',`Σύνολο (${p?.base_unit||'τμχ'})`);
-  // Βρες τυπική συσκευασία από κατάλογο προμηθευτών
   const sp=sps.find(x=>x.product_id===pid);
   if(sp&&sp.package_qty>1){
     document.getElementById('iper').value=sp.package_qty;
     set('iboxlbl',sp.package_unit||'Κουτιά/Συσκ.');
     set('iul',`${p?.base_unit||'τμχ'} ανά ${sp.package_unit||'συσκ.'}`);
     calcI('b');
-  }else{
-    document.getElementById('iper').value=1;
-    set('iboxlbl','Κουτιά/Συσκ.');
-    set('iul','Τεμ./Συσκ.');
-  }
+  }else{document.getElementById('iper').value=1;set('iboxlbl','Κουτιά/Συσκ.');set('iul','Τεμ./Συσκ.');}
 }
 function calcI(s){if(s==='b'){const b=parseFloat(document.getElementById('iboxes').value)||0;const pb=parseFloat(document.getElementById('iper').value)||1;document.getElementById('iqty').value=(b*pb).toFixed(2);}else{document.getElementById('iboxes').value='';}}
 async function saveInv(){
@@ -977,6 +1041,9 @@ async function saveInv(){
   try{const{data:r}=await getDb().from('stock_entries').insert(d).select();stk.unshift(r[0]);cm('minv');rStock();toast('Απογραφή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 
+// ══════════════════════════════════════════════════════
+// PRICES — τελευταίες 3 τιμές ανά είδος/προμηθευτή
+// ══════════════════════════════════════════════════════
 function loadSPP(){
   const sid=document.getElementById('psup').value;
   const sp=sps.filter(x=>x.supplier_id===sid);
@@ -988,10 +1055,51 @@ function loadSPP(){
 }
 function rPrices(){
   const fp=document.getElementById('pfp')?.value;
-  let data=[...prs];if(fp)data=data.filter(p=>p.product_id===fp);
-  const bm={};data.forEach(p=>{if(!bm[p.product_id]||Number(p.unit_price)<Number(bm[p.product_id]))bm[p.product_id]=Number(p.unit_price);});
-  if(!data.length){set('pbody','<tr><td colspan="8" class="ld">Δεν υπάρχουν τιμές</td></tr>');return;}
-  set('pbody',data.map(p=>{const prod=prods.find(x=>x.id===p.product_id);const sp=sps.find(x=>x.id===p.supplier_product_id);const iB=Number(p.unit_price)===bm[p.product_id];return`<tr><td>${prod?.friendly_name||prod?.name||'—'}</td><td>${sN(p.supplier_id)}</td><td style="font-family:monospace;font-size:11px">${sp?.supplier_code||p.supplier_code||'—'}</td><td>${sp?.supplier_description||p.supplier_description||'—'}</td><td>${p.package_unit||'—'} (${p.package_qty||1} ${prod?.base_unit||''})</td><td>${fmt(p.package_price)} €</td><td class="${iB?'bprice':''}">${fmt(p.unit_price)} €/${prod?.base_unit||''} ${iB?'★':''}</td><td>${fd(p.recorded_at)}</td></tr>`;}).join(''));
+  const fps=document.getElementById('pfps')?.value;
+  let data=[...prs];
+  if(fp)data=data.filter(p=>p.product_id===fp);
+  if(fps)data=data.filter(p=>p.supplier_id===fps);
+
+  // Ομαδοποίηση ανά προϊόν+προμηθευτή, κρατάμε τις 3 τελευταίες
+  const groups={};
+  data.forEach(p=>{
+    const key=p.product_id+'_'+p.supplier_id;
+    if(!groups[key])groups[key]=[];
+    groups[key].push(p);
+  });
+
+  // Βρες min τιμή/τμχ ανά προϊόν για best price
+  const bestByProd={};
+  data.forEach(p=>{
+    const up=Number(p.unit_price)||0;
+    if(!bestByProd[p.product_id]||up<bestByProd[p.product_id])bestByProd[p.product_id]=up;
+  });
+
+  if(!Object.keys(groups).length){set('pbody','<tr><td colspan="8" class="ld">Δεν υπάρχουν τιμές</td></tr>');return;}
+
+  let rows='';
+  Object.values(groups).forEach(grp=>{
+    grp.sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at));
+    const top3=grp.slice(0,3);
+    const prod=prods.find(x=>x.id===top3[0].product_id);
+    const sp=sps.find(x=>x.id===top3[0].supplier_product_id);
+    top3.forEach((p,idx)=>{
+      const isLatest=idx===0;
+      const isBest=isLatest&&(Number(p.unit_price)===bestByProd[p.product_id]);
+      const color=isLatest?'color:var(--gn);font-weight:600':'color:var(--t2)';
+      rows+=`<tr class="${idx===0?'price-group-first':''} ${idx===top3.length-1?'price-group-last':''}">
+        <td style="${idx===0?'':'opacity:0'}">${idx===0?(prod?.friendly_name||prod?.name||'—'):''}</td>
+        <td style="${idx===0?'':'opacity:0'}">${idx===0?sN(p.supplier_id):''}</td>
+        <td style="font-family:monospace;font-size:11px;${idx===0?'':'opacity:0'}">${idx===0?(sp?.supplier_code||p.supplier_code||'—'):''}</td>
+        <td style="${idx===0?'':'opacity:0'}">${idx===0?(sp?.supplier_description||p.supplier_description||'—'):''}</td>
+        <td style="${idx===0?'':'opacity:0'}">${idx===0?(p.package_unit||'—')+' ('+( p.package_qty||1)+' '+(prod?.base_unit||'')+')':''}</td>
+        <td style="${color}">${fmt(p.package_price)} €</td>
+        <td style="${color}">${fmt(p.unit_price)} €/${prod?.base_unit||''} ${isBest?'★':''}</td>
+        <td style="color:var(--td);font-size:11px">${fd(p.recorded_at)}</td>
+      </tr>`;
+    });
+  });
+  set('pbody',rows);
 }
 async function savePrice(){
   const sid=document.getElementById('psup').value,pid=document.getElementById('pprod').value;
@@ -1000,9 +1108,12 @@ async function savePrice(){
   const pqty=parseFloat(document.getElementById('ppqty').value)||1;
   const ppr=parseFloat(document.getElementById('ppprice').value)||0;
   if(!sid||!pid){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r}=await getDb().from('prices').insert({product_id:pid,supplier_id:sid,supplier_product_id:spId,supplier_code:document.getElementById('pcode').value,supplier_description:document.getElementById('pdesc').value,package_unit:document.getElementById('ppkg').value,package_qty:pqty,package_price:ppr,recorded_at:document.getElementById('pdt').value,notes:document.getElementById('pnotes').value}).select();prs.unshift(r[0]);cm('mpr');rPrices();toast('Τιμή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('prices').insert({product_id:pid,supplier_id:sid,supplier_product_id:spId,supplier_code:document.getElementById('pcode').value,supplier_description:document.getElementById('pdesc').value,package_unit:document.getElementById('ppkg').value,package_qty:pqty,package_price:ppr,unit_price:pqty>0?ppr/pqty:0,recorded_at:document.getElementById('pdt').value,notes:document.getElementById('pnotes').value}).select();prs.unshift(r[0]);cm('mpr');rPrices();toast('Τιμή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 
+// ══════════════════════════════════════════════════════
+// PAYMENTS
+// ══════════════════════════════════════════════════════
 function swPV(v,el){document.querySelectorAll('.vb').forEach(b=>b.classList.remove('active'));el.classList.add('active');aPV=v;rPay();}
 function fPay(f,el){document.querySelectorAll('#pf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aPF=f;rPay();}
 function rPay(){
@@ -1010,48 +1121,39 @@ function rPay(){
   const kwm={lm:'Κεντρική',lg:'Γέρακα',lp:'Παγκράτι',lma:'Μαρούσι'};
   if(!iF){
     ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0).forEach(o=>{const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();const dl=Math.ceil((due-now)/86400000);items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Υπόλοιπο παραγγελίας · '+lN(o.location_id),amount:Number(o.balance),due,dl,lid:o.location_id});});
-    recs.filter(r=>r.active).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl<=0)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id});});
+    recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl<=0)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id});});
     oths.filter(o=>!o.paid).forEach(o=>{const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:Number(o.amount),due,dl,lid:o.location_id});});
   }else{
     ords.filter(o=>o.status==='pending'&&Number(o.balance)>0).forEach(o=>{const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();const dl=Math.ceil((due-now)/86400000);if(dl>0&&dl<=60)items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Εκκρ. παράδοση · '+lN(o.location_id),amount:Number(o.balance),due,dl,lid:o.location_id,fc:true});});
-    recs.filter(r=>r.active).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl>0&&dl<=60)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,fc:true});});
+    recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl>0&&dl<=60)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,fc:true});});
   }
   let fl=items;
   if(aPF!=='all'){const kw=kwm[aPF];if(kw)fl=items.filter(i=>{const l=locs.find(x=>x.id===i.lid);return l&&l.name.includes(kw);});}
   fl.sort((a,b)=>a.dl-b.dl);
   set('pc',fl.length);set('pt',fmt(fl.reduce((s,i)=>s+i.amount,0))+' €');
   set('pov',fl.filter(i=>i.dl<0).length);set('psn',fl.filter(i=>i.dl>=0&&i.dl<=7).length);
-  if(!fl.length){set('plist',`<div class="empty"><div class="ic">&#128197;</div><p>${iF?'Δεν υπάρχουν προγραμματισμένες':'Δεν υπάρχουν εκκρεμείς'} πληρωμές</p></div>`);return;}
-  set('plist',fl.map(i=>{const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';const cb=i.fc?'':`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="Πληρώθηκε">&#10003;</button>`;return`<div class="pi"><div class="pd2 ${cl}">${lb}</div><div class="pinf"><div class="pnm">${i.name}</div><div class="psb">${i.sub} · Λήξη: ${fd(i.due)}</div></div><div class="pam">${fmt(i.amount)} €</div><div class="pact">${cb}</div></div>`;}).join(''));
+  if(!fl.length){set('plist',`<div class="empty"><div class="ic">📅</div><p>${iF?'Δεν υπάρχουν προγραμματισμένες':'Δεν υπάρχουν εκκρεμείς'} πληρωμές</p></div>`);return;}
+  set('plist',fl.map(i=>{const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';const cb=i.fc?'':`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="Πληρώθηκε">✓</button>`;return`<div class="pi"><div class="pd2 ${cl}">${lb}</div><div class="pinf"><div class="pnm">${i.name}</div><div class="psb">${i.sub} · Λήξη: ${fd(i.due)}</div></div><div class="pam">${fmt(i.amount)} €</div><div class="pact">${cb}</div></div>`;}).join(''));
 }
 async function confPI(t,id){
-  if(t==='rec') await confRec(id);
-  else if(t==='other') await confOth(id);
-  else if(t==='order') await confOrderPayment(id);
+  if(t==='rec')await confRec(id);
+  else if(t==='other')await confOth(id);
+  else if(t==='order')await confOrderPayment(id);
 }
-
 async function confOrderPayment(id){
   if(!confirm('Επιβεβαίωση πληρωμής υπολοίπου;'))return;
-  const o=ords.find(x=>x.id===id);
-  if(!o)return;
-  // Μηδένισε το υπόλοιπο — prepayment = total_amount
+  const o=ords.find(x=>x.id===id);if(!o)return;
   const{error}=await getDb().from('orders').update({prepayment:o.total_amount}).eq('id',id);
   if(error){toast('Σφάλμα: '+error.message,'err');return;}
-  // Καταχώρηση στο payments
-  await getDb().from('payments').insert({
-    order_id:id,
-    amount:Number(o.balance),
-    payment_date:td(),
-    confirmed:true,
-    confirmed_at:new Date().toISOString()
-  });
-  // Ενημέρωση τοπικά — φέρε την ενημερωμένη εγγραφή
+  await getDb().from('payments').insert({order_id:id,amount:Number(o.balance),payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString()});
   const{data:updated}=await getDb().from('orders').select('*').eq('id',id).single();
   if(updated){const idx=ords.findIndex(x=>x.id===id);if(idx>=0)ords[idx]=updated;}
-  rOrders();rPay();
-  toast('Πληρωμή επιβεβαιώθηκε! ✓');
+  rOrders();rPay();toast('Πληρωμή επιβεβαιώθηκε! ✓');
 }
 
+// ══════════════════════════════════════════════════════
+// CASH
+// ══════════════════════════════════════════════════════
 function fCash(f,el){document.querySelectorAll('#clf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aCF=f;rCash();}
 function rCash(){
   let en=[...ces],py=[...cps];
@@ -1061,8 +1163,8 @@ function rCash(){
   const av=ti-to;
   set('cin',fmt(ti)+' €');set('cout',fmt(to)+' €');
   const ae=document.getElementById('cavail');if(ae){ae.textContent=fmt(av)+' €';ae.style.color=av>=0?'var(--gn)':'var(--rd)';}
-  set('celist',en.length?en.map(e=>`<div class="crow"><div class="cri"><div class="crd">${fd(e.entry_date)} · ${lN(e.location_id)}</div><div class="crds">${e.notes||'Ημερήσιο σύνολο'}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span><button class="ib" onclick="delCE('${e.id}')" style="color:var(--rd)">&#215;</button></div></div>`).join(''):'<div class="empty"><div class="ic">&#128181;</div><p>Δεν υπάρχουν εισπράξεις</p></div>');
-  set('cplist',py.length?py.map(p=>`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span><button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">&#215;</button></div></div>`).join(''):'<div class="empty"><div class="ic">&#128181;</div><p>Δεν υπάρχουν πληρωμές</p></div>');
+  set('celist',en.length?en.map(e=>`<div class="crow"><div class="cri"><div class="crd">${fd(e.entry_date)} · ${lN(e.location_id)}</div><div class="crds">${e.notes||'Ημερήσιο σύνολο'}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span><button class="ib" onclick="delCE('${e.id}')" style="color:var(--rd)">✕</button></div></div>`).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν εισπράξεις</p></div>');
+  set('cplist',py.length?py.map(p=>`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span><button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">✕</button></div></div>`).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν πληρωμές</p></div>');
 }
 async function saveCE(){
   const d={location_id:document.getElementById('celoc').value,entry_date:document.getElementById('cedt').value,amount:parseFloat(document.getElementById('ceamt').value)||0,notes:document.getElementById('cenotes').value,created_by:cU.id};
@@ -1077,162 +1179,155 @@ async function saveCP(){
 async function delCE(id){if(!confirm('Διαγραφή;'))return;await getDb().from('cash_entries').delete().eq('id',id);ces=ces.filter(e=>e.id!==id);rCash();toast('Διαγράφηκε.');}
 async function delCP(id){if(!confirm('Διαγραφή;'))return;await getDb().from('cash_payments').delete().eq('id',id);cps=cps.filter(p=>p.id!==id);rCash();toast('Διαγράφηκε.');}
 
+// ══════════════════════════════════════════════════════
+// EXCEL
+// ══════════════════════════════════════════════════════
 function getXD(){const fr=document.getElementById('xfrom').value,to=document.getElementById('xto').value,lid=document.getElementById('xloc').value,st=document.getElementById('xst').value;return ords.filter(o=>{if(fr&&o.order_date<fr)return false;if(to&&o.order_date>to)return false;if(lid&&o.location_id!==lid)return false;if(st&&o.status!==st)return false;return true;});}
 function prevXL(){
   const data=getXD();document.getElementById('xprev').style.display='block';
   if(!data.length){set('xbody','<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--td)">Δεν βρέθηκαν εγγραφές</td></tr>');return;}
-  set('xbody',data.map(o=>{const s=sups.find(x=>x.id===o.supplier_id);return`<tr><td>${s?.name||'—'}</td><td style="font-family:monospace;font-size:11px">${s?.iban||'—'}</td><td>${s?.bank||i2b(s?.iban)}</td><td>Παραγγελία ${fd(o.order_date)}</td><td>${fmt(o.total_amount)} €</td><td>${fmt(o.prepayment)} €</td><td style="color:var(--am);font-weight:500">${fmt(o.balance)} €</td><td>${fd(o.estimated_delivery)}</td><td>${lN(o.location_id)}</td></tr>`;}).join(''));
+  set('xbody',data.map(o=>{const s=sups.find(x=>x.id===o.supplier_id);return`<tr><td>${s?.name||'—'}</td><td style="font-family:monospace;font-size:11px">${s?.iban||'—'}</td><td>${s?.bank||i2b(s?.iban)}</td><td>Παραγγελία ${fd(o.order_date)}</td><td>${fmt(o.total_amount)} €</td><td>${fmt(o.prepayment)} €</td><td style="color:var(--am);font-weight:600">${fmt(o.balance)} €</td><td>${fd(o.estimated_delivery)}</td><td>${lN(o.location_id)}</td></tr>`;}).join(''));
 }
 function exportXL(){
   const data=getXD();if(!data.length){toast('Δεν βρέθηκαν εγγραφές','err');return;}
-  const rows=data.map(o=>{const s=sups.find(x=>x.id===o.supplier_id);return{'Προμηθευτής':s?.name||'—','IBAN':s?.iban||'—','Τράπεζα':i2b(s?.iban),'Περιγραφή':'Παραγγελία '+fd(o.order_date),'Σύνολο (€)':Number(o.total_amount),'Προκαταβολή (€)':Number(o.prepayment),'Υπόλοιπο (€)':Number(o.balance),'Εκτ. Παράδοση':fd(o.estimated_delivery),'Τοποθεσία':lN(o.location_id),'Κατάσταση':o.status==='pending'?'Εκκρεμής':'Παραδόθηκε'};});
+  const rows=data.map(o=>{const s=sups.find(x=>x.id===o.supplier_id);return{'Προμηθευτής':s?.name||'—','IBAN':s?.iban||'—','Τράπεζα':s?.bank||i2b(s?.iban),'Περιγραφή':'Παραγγελία '+fd(o.order_date),'Σύνολο (€)':Number(o.total_amount),'Προκαταβολή (€)':Number(o.prepayment),'Υπόλοιπο (€)':Number(o.balance),'Εκτ. Παράδοση':fd(o.estimated_delivery),'Τοποθεσία':lN(o.location_id),'Κατάσταση':o.status==='pending'?'Εκκρεμής':'Παραδόθηκε'};});
   const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Εκκρεμότητες');XLSX.writeFile(wb,'orderflow-'+td()+'.xlsx');toast('Excel εξήχθη!');
 }
 
+// ══════════════════════════════════════════════════════
+// MANAGEMENT SIDE PANEL
+// ══════════════════════════════════════════════════════
 function openMgmt(){document.getElementById('spbg').classList.add('open');rMgmt();}
 function closeMgmt(){document.getElementById('spbg').classList.remove('open');}
 document.getElementById('spbg').addEventListener('click',e=>{if(e.target===document.getElementById('spbg'))closeMgmt();});
-function swMT(t,el){document.querySelectorAll('.sptab').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');['suppliers','products','users','categories'].forEach(n=>{const e=document.getElementById('msp-'+n);if(e)e.style.display=n===t?'block':'none';});rMgmt();}
+
+function swMT(t,el){
+  document.querySelectorAll('.sptab').forEach(x=>x.classList.remove('active'));
+  if(el)el.classList.add('active');
+  ['suppliers','products','catalog','users','categories'].forEach(n=>{const e=document.getElementById('msp-'+n);if(e)e.style.display=n===t?'block':'none';});
+  if(t==='catalog')rCat2();else rMgmt();
+}
+
 function rMgmt(){
   set('stbl',sups.length?sups.map(s=>`<tr>
-    <td>${s.name}</td>
+    <td style="font-weight:500">${s.name}</td>
     <td style="color:var(--pk)">${s.friendly_name||'—'}</td>
-    <td style="font-family:monospace;font-size:11px">${s.iban||'—'}</td>
     <td>${s.bank||'—'}</td>
-    <td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="openCat('${s.id}')">&#128218;</button></td>
+    <td style="font-family:monospace;font-size:10px">${s.iban||'—'}</td>
     <td style="display:flex;gap:4px">
-      <button class="ib" onclick="editSup('${s.id}')" title="Επεξεργασία">&#9998;</button>
-      <button class="ib" onclick="delSup('${s.id}')" style="color:var(--rd)">&#215;</button>
-    </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν προμηθευτές</td></tr>');
+      <button class="ib" onclick="editSup('${s.id}')" title="Επεξεργασία">✎</button>
+      <button class="ib" onclick="delSup('${s.id}')" style="color:var(--rd)">✕</button>
+    </td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν προμηθευτές</td></tr>');
+
   set('ptbl',prods.length?prods.map(p=>`<tr>
-    <td>${p.name}</td>
-    <td style="color:var(--pk)">${p.friendly_name||'—'}</td>
+    <td style="font-weight:500">${p.friendly_name||p.name}</td>
     <td>${p.category||'—'}</td>
     <td>${p.base_unit}</td>
     <td>${p.daily_consumption||0}</td>
     <td style="display:flex;gap:4px">
-      <button class="ib" onclick="editProd('${p.id}')" title="Επεξεργασία">&#9998;</button>
-      <button class="ib" onclick="delProd('${p.id}')" style="color:var(--rd)">&#215;</button>
-    </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν είδη</td></tr>');
-  set('utbl',ups.length?ups.map(u=>`<tr><td>${u.full_name||'—'}</td><td style="font-size:11px">${u.email}</td><td><span class="badge ${u.role==='admin'?'bd':'br'}">${u.role}</span></td><td>${lN(u.location_id)}</td><td><span style="color:${u.active?'var(--gn)':'var(--rd)'}">${u.active?'✓':'✗'}</span></td><td>${u.id!==cU?.id?`<button class="ib" onclick="togU('${u.id}',${!u.active})" style="color:var(--am)">&#9711;</button>`:'—'}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν χρήστες</td></tr>');
-  set('catlist',cats.map(c=>`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${c.type==='product'?'Προϊόν':'Παραγγελία'})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">&#215;</button></div>`).join(''));
+      <button class="ib" onclick="editProd('${p.id}')" title="Επεξεργασία">✎</button>
+      <button class="ib" onclick="delProd('${p.id}')" style="color:var(--rd)">✕</button>
+    </td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν είδη</td></tr>');
+
+  set('utbl',ups.length?ups.map(u=>`<tr><td>${u.full_name||'—'}</td><td style="font-size:11px">${u.email}</td><td><span class="badge ${u.role==='admin'?'bd':'br'}">${u.role}</span></td><td>${lN(u.location_id)}</td><td><span style="color:${u.active?'var(--gn)':'var(--rd)'}">${u.active?'✓':'✗'}</span></td><td>${u.id!==cU?.id?`<button class="ib" onclick="togU('${u.id}',${!u.active})" style="color:var(--am)">⊙</button>`:'—'}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν χρήστες</td></tr>');
+
+  set('catlist',cats.map(c=>`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${c.type==='product'?'Προϊόν':'Παραγγελία'})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">✕</button></div>`).join(''));
 }
 
+// CATALOG TAB
+function rCat2(){
+  const fs=document.getElementById('cat2-filter-sup')?.value;
+  const fp=document.getElementById('cat2-filter-prod')?.value;
+  let data=[...sps];
+  if(fs)data=data.filter(x=>x.supplier_id===fs);
+  if(fp)data=data.filter(x=>x.product_id===fp);
+  set('cat2tbl',data.length?data.map(x=>`<tr>
+    <td style="color:var(--pk)">${sN(x.supplier_id)}</td>
+    <td style="font-weight:500">${pN(x.product_id)}</td>
+    <td>${x.supplier_description||'—'}</td>
+    <td style="font-family:monospace;font-size:11px">${x.supplier_code||'—'}</td>
+    <td>${x.package_unit||'—'}</td>
+    <td>${x.package_qty||1}</td>
+    <td><button class="ib" onclick="delSP2('${x.id}')" style="color:var(--rd)">✕</button></td>
+  </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--td)">Δεν υπάρχουν εγγραφές στον κατάλογο</td></tr>');
+}
+async function saveCat2(){
+  const d={supplier_id:document.getElementById('cat2-sup').value,product_id:document.getElementById('cat2-prod').value,supplier_description:document.getElementById('cat2-desc').value,supplier_code:document.getElementById('cat2-code').value,package_unit:document.getElementById('cat2-pkg').value,package_qty:parseFloat(document.getElementById('cat2-qty').value)||1};
+  if(!d.supplier_id||!d.product_id){toast('Επίλεξε προμηθευτή και είδος','err');return;}
+  try{const{data:r,error}=await getDb().from('supplier_products').insert(d).select();if(error)throw error;sps.push(r[0]);['cat2-desc','cat2-code','cat2-pkg'].forEach(i=>document.getElementById(i).value='');document.getElementById('cat2-qty').value='1';rCat2();toast('Προστέθηκε στον κατάλογο!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
+async function delSP2(id){if(!confirm('Αφαίρεση;'))return;await getDb().from('supplier_products').delete().eq('id',id);sps=sps.filter(x=>x.id!==id);rCat2();toast('Αφαιρέθηκε.');}
+
+// SUPPLIERS CRUD
 function editSup(id){
   const s=sups.find(x=>x.id===id);if(!s)return;
   document.getElementById('sedit-id').value=id;
-  document.getElementById('sname').value=s.name||'';
-  document.getElementById('sfr').value=s.friendly_name||'';
-  document.getElementById('siban').value=s.iban||'';
-  document.getElementById('sbank').value=s.bank||'';
-  document.getElementById('sphone').value=s.phone||'';
-  document.getElementById('semail').value=s.email||'';
-  document.getElementById('snotes').value=s.notes||'';
-  document.getElementById('sup-form-title').textContent='✏ Επεξεργασία προμηθευτή';
+  document.getElementById('sname').value=s.name||'';document.getElementById('sfr').value=s.friendly_name||'';
+  document.getElementById('siban').value=s.iban||'';document.getElementById('sbank').value=s.bank||'';
+  document.getElementById('sphone').value=s.phone||'';document.getElementById('semail').value=s.email||'';document.getElementById('snotes').value=s.notes||'';
+  set('sup-form-title','✎ Επεξεργασία προμηθευτή');
   document.getElementById('sup-cancel-edit').style.display='inline-flex';
   document.getElementById('sup-save-btn').textContent='Ενημέρωση';
   document.getElementById('sname').scrollIntoView({behavior:'smooth'});
 }
 function cancelSupEdit(){
-  document.getElementById('sedit-id').value='';
-  ['sname','sfr','siban','sbank','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('sup-form-title').textContent='+ Νέος προμηθευτής';
-  document.getElementById('sup-cancel-edit').style.display='none';
-  document.getElementById('sup-save-btn').textContent='Αποθήκευση';
+  document.getElementById('sedit-id').value='';['sname','sfr','siban','sbank','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');
+  set('sup-form-title','+ Νέος προμηθευτής');document.getElementById('sup-cancel-edit').style.display='none';document.getElementById('sup-save-btn').textContent='Αποθήκευση';
 }
-function editProd(id){
-  const p=prods.find(x=>x.id===id);if(!p)return;
-  document.getElementById('predit-id').value=id;
-  document.getElementById('prname').value=p.name||'';
-  document.getElementById('prfr').value=p.friendly_name||'';
-  document.getElementById('prcat').value=p.category||'';
-  document.getElementById('prunit').value=p.base_unit||'τμχ';
-  document.getElementById('prcons').value=p.daily_consumption||0;
-  document.getElementById('prnotes').value=p.notes||'';
-  document.getElementById('prod-form-title').textContent='✏ Επεξεργασία είδους';
-  document.getElementById('prod-cancel-edit').style.display='inline-flex';
-  document.getElementById('prname').scrollIntoView({behavior:'smooth'});
-}
-function cancelProdEdit(){
-  document.getElementById('predit-id').value='';
-  ['prname','prfr','prcons','prnotes'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('prod-form-title').textContent='+ Νέο είδος';
-  document.getElementById('prod-cancel-edit').style.display='none';
-}
-
 async function saveSup(){
   const editId=document.getElementById('sedit-id').value;
   const d={name:document.getElementById('sname').value.trim(),friendly_name:document.getElementById('sfr').value.trim(),iban:document.getElementById('siban').value.trim(),bank:document.getElementById('sbank').value.trim(),phone:document.getElementById('sphone').value.trim(),email:document.getElementById('semail').value.trim(),notes:document.getElementById('snotes').value.trim()};
   if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
   try{
-    if(editId){
-      const{error}=await getDb().from('suppliers').update(d).eq('id',editId);
-      if(error)throw error;
-      const idx=sups.findIndex(x=>x.id===editId);if(idx>=0)sups[idx]={...sups[idx],...d};
-      cancelSupEdit();toast('Προμηθευτής ενημερώθηκε!');
-    }else{
-      const{data:r}=await getDb().from('suppliers').insert(d).select();sups.push(r[0]);sups.sort((a,b)=>a.name.localeCompare(b.name,'el'));
-      ['sname','sfr','siban','sbank','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');
-      toast('Προμηθευτής αποθηκεύτηκε!');
-    }
-    rMgmt();popSel();
-  }catch(e){toast('Σφάλμα: '+e.message,'err');}
-}
-
-async function saveProd(){
-  const editId=document.getElementById('predit-id').value;
-  const d={name:document.getElementById('prname').value.trim(),friendly_name:document.getElementById('prfr').value.trim(),category:document.getElementById('prcat').value,base_unit:document.getElementById('prunit').value,daily_consumption:parseFloat(document.getElementById('prcons').value)||0,notes:document.getElementById('prnotes').value.trim()};
-  if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
-  try{
-    if(editId){
-      const{error}=await getDb().from('products').update(d).eq('id',editId);
-      if(error)throw error;
-      const idx=prods.findIndex(x=>x.id===editId);if(idx>=0)prods[idx]={...prods[idx],...d};
-      cancelProdEdit();toast('Είδος ενημερώθηκε!');
-    }else{
-      const{data:r}=await getDb().from('products').insert(d).select();prods.push(r[0]);prods.sort((a,b)=>a.name.localeCompare(b.name,'el'));
-      ['prname','prfr','prcons','prnotes'].forEach(i=>document.getElementById(i).value='');
-      toast('Είδος αποθηκεύτηκε!');
-    }
+    if(editId){await getDb().from('suppliers').update(d).eq('id',editId);const idx=sups.findIndex(x=>x.id===editId);if(idx>=0)sups[idx]={...sups[idx],...d};cancelSupEdit();toast('Ενημερώθηκε!');}
+    else{const{data:r}=await getDb().from('suppliers').insert(d).select();sups.push(r[0]);sups.sort((a,b)=>a.name.localeCompare(b.name,'el'));['sname','sfr','siban','sbank','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');toast('Αποθηκεύτηκε!');}
     rMgmt();popSel();
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 async function delSup(id){if(!confirm('Διαγραφή;'))return;await getDb().from('suppliers').delete().eq('id',id);sups=sups.filter(s=>s.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
+
+// PRODUCTS CRUD
+function editProd(id){
+  const p=prods.find(x=>x.id===id);if(!p)return;
+  document.getElementById('predit-id').value=id;
+  document.getElementById('prname').value=p.friendly_name||p.name||'';
+  document.getElementById('prcat').value=p.category||'';
+  document.getElementById('prunit').value=p.base_unit||'τμχ';
+  document.getElementById('prcons').value=p.daily_consumption||0;
+  set('prod-form-title','✎ Επεξεργασία είδους');
+  document.getElementById('prod-cancel-edit').style.display='inline-flex';
+  document.getElementById('prname').scrollIntoView({behavior:'smooth'});
+}
+function cancelProdEdit(){
+  document.getElementById('predit-id').value='';['prname','prcons'].forEach(i=>document.getElementById(i).value='');
+  set('prod-form-title','+ Νέο είδος');document.getElementById('prod-cancel-edit').style.display='none';
+}
+async function saveProd(){
+  const editId=document.getElementById('predit-id').value;
+  const fname=document.getElementById('prname').value.trim();
+  const d={name:fname,friendly_name:fname,category:document.getElementById('prcat').value,base_unit:document.getElementById('prunit').value,daily_consumption:parseFloat(document.getElementById('prcons').value)||0};
+  if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
+  try{
+    if(editId){await getDb().from('products').update(d).eq('id',editId);const idx=prods.findIndex(x=>x.id===editId);if(idx>=0)prods[idx]={...prods[idx],...d};cancelProdEdit();toast('Ενημερώθηκε!');}
+    else{const{data:r}=await getDb().from('products').insert(d).select();prods.push(r[0]);prods.sort((a,b)=>(a.friendly_name||a.name).localeCompare(b.friendly_name||b.name,'el'));['prname','prcons'].forEach(i=>document.getElementById(i).value='');toast('Αποθηκεύτηκε!');}
+    rMgmt();popSel();
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
 async function delProd(id){if(!confirm('Διαγραφή;'))return;await getDb().from('products').delete().eq('id',id);prods=prods.filter(p=>p.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
+
+// CATEGORIES
 async function saveCat(){
   const d={name:document.getElementById('catname').value.trim(),type:document.getElementById('cattype').value};
   if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
   try{const{data:r}=await getDb().from('categories').insert(d).select();cats.push(r[0]);document.getElementById('catname').value='';rMgmt();popSel();toast('Κατηγορία αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 async function delCat(id){if(!confirm('Διαγραφή;'))return;await getDb().from('categories').delete().eq('id',id);cats=cats.filter(c=>c.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
+
+// USERS
 async function saveUser(){
-  const em=document.getElementById('uemail').value.trim(),pw=document.getElementById('upass').value,fn=document.getElementById('uname').value.trim(),role=document.getElementById('urole').value,lid=document.getElementById('uloc').value||null;
-  if(!em||!pw||!fn){toast('Συμπλήρωσε όλα τα υποχρεωτικά πεδία','err');return;}
-  if(pw.length<6){toast('Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες','err');return;}
-  try{
-    const{data,error}=await getDb().auth.admin.createUser({email:em,password:pw,user_metadata:{full_name:fn,role},email_confirm:true});
-    if(error)throw error;
-    await getDb().from('user_profiles').update({role,location_id:lid,full_name:fn,active:true}).eq('id',data.user.id);
-    await load();['uname','uemail','upass'].forEach(i=>document.getElementById(i).value='');rMgmt();toast('Χρήστης δημιουργήθηκε!');
-  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+  toast('Η δημιουργία χρηστών γίνεται από τον διαχειριστή του συστήματος.','err');
 }
 async function togU(id,active){await getDb().from('user_profiles').update({active}).eq('id',id);const u=ups.find(x=>x.id===id);if(u)u.active=active;rMgmt();toast(active?'Ενεργοποιήθηκε':'Απενεργοποιήθηκε');}
-
-async function openCat(sid){
-  aCatSup=sid;const s=sups.find(x=>x.id===sid);
-  set('cattitle','Κατάλογος ειδών — '+(s?.friendly_name||s?.name||''));
-  rCat();om('mcat');
-}
-function rCat(){
-  const sp=sps.filter(x=>x.supplier_id===aCatSup);
-  set('catbody',sp.length?sp.map(x=>`<tr><td>${pN(x.product_id)}</td><td style="font-family:monospace;font-size:11px">${x.supplier_code||'—'}</td><td>${x.supplier_description||'—'}</td><td>${x.package_unit||'—'} (${x.package_qty||1})</td><td><button class="ib" onclick="delSP('${x.id}')" style="color:var(--rd)">&#215;</button></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν είδη στον κατάλογο</td></tr>');
-}
-async function saveSP(){
-  const d={supplier_id:aCatSup,product_id:document.getElementById('catprod').value,supplier_code:document.getElementById('catcode').value,supplier_description:document.getElementById('catdesc').value,package_unit:document.getElementById('catpkg').value,package_qty:parseFloat(document.getElementById('catqty').value)||1};
-  if(!d.product_id){toast('Επίλεξε προϊόν','err');return;}
-  try{const{data:r,error}=await getDb().from('supplier_products').insert(d).select();if(error)throw error;sps.push(r[0]);rCat();['catcode','catdesc','catpkg'].forEach(i=>document.getElementById(i).value='');document.getElementById('catqty').value='1';toast('Προστέθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
-}
-async function delSP(id){if(!confirm('Αφαίρεση;'))return;await getDb().from('supplier_products').delete().eq('id',id);sps=sps.filter(x=>x.id!==id);rCat();toast('Αφαιρέθηκε.');}
 </script>
 </body>
 </html>
