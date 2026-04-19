@@ -745,23 +745,35 @@ function rOrders(){
   set('olist',h||'<div class="empty"><div class="ic">&#128230;</div><p>Δεν βρέθηκαν εγγραφές</p></div>');
 }
 
-function loadSP(){const sid=document.getElementById('osup').value;document.getElementById('ibody').innerHTML='';addRow();}
-function addRow(){
-  const sid=document.getElementById('osup')?.value;
+function loadSP(){
+  const sid=document.getElementById('osup').value;
+  document.getElementById('ibody').innerHTML='';
+  addRow();
+}
+function getSupOpts(sid, selProdId){
   const sp=sps.filter(x=>x.supplier_id===sid);
-  const opts=sp.length?sp.map(x=>`<option value="${x.product_id}" data-sp="${x.id}" data-c="${x.supplier_code||''}" data-d="${x.supplier_description||''}" data-p="${x.package_unit||''}" data-q="${x.package_qty||1}">${pN(x.product_id)}</option>`).join(''):prods.map(p=>`<option value="${p.id}">${p.friendly_name||p.name}</option>`).join('');
+  if(sp.length){
+    return sp.map(x=>`<option value="${x.product_id}" data-sp="${x.id}" data-c="${x.supplier_code||''}" data-d="${x.supplier_description||''}" data-p="${x.package_unit||''}" data-q="${x.package_qty||1}" ${x.product_id===selProdId?'selected':''}>${pN(x.product_id)}</option>`).join('');
+  }
+  // Αν δεν υπάρχει κατάλογος, δείξε όλα τα προϊόντα
+  return prods.map(p=>`<option value="${p.id}" ${p.id===selProdId?'selected':''}>${p.friendly_name||p.name}</option>`).join('');
+}
+function addRow(selProdId){
+  const sid=document.getElementById('osup')?.value;
+  const opts=getSupOpts(sid,selProdId);
   const tr=document.createElement('tr');
   tr.innerHTML=`<td><select class="ip" onchange="fillR(this)" style="width:110px">${opts}</select></td>
     <td><input type="text" class="isc" style="width:70px" placeholder="κωδ."></td>
     <td><input type="text" class="isd" style="min-width:140px;width:140px" placeholder="περιγραφή"></td>
     <td><input type="text" class="ipkg" style="width:65px" placeholder="Κιβ."></td>
     <td><input type="number" class="iqp" value="1" step="0.001" style="width:55px" title="Τεμάχια ανά συσκευασία" oninput="calcRowTot(this)"></td>
-    <td><input type="number" class="iq" value="1" step="1" style="width:55px" title="Πόσες συσκευασίες παραγγέλνεις" oninput="calcRowTot(this)"></td>
+    <td><input type="number" class="iq" value="1" step="1" style="width:55px" title="Αριθμός συσκευασιών" oninput="calcRowTot(this)"></td>
     <td><input type="number" class="ipr" step="0.01" placeholder="0.00" style="width:75px" title="Τιμή ανά συσκευασία" oninput="calcRowTot(this)"></td>
     <td><input type="number" class="itot" readonly step="0.01" placeholder="0.00" style="width:75px;opacity:.7;background:var(--nd)" title="Ποσ.Συσκ × Τιμή/Συσκ"></td>
     <td><button class="ib" onclick="this.closest('tr').remove();calcTotFromRows()">&#215;</button></td>`;
   document.getElementById('ibody').appendChild(tr);
-  fillR(tr.querySelector('.ip'));
+  if(!selProdId) fillR(tr.querySelector('.ip'));
+  return tr;
 }
 function fillR(sel){
   const o=sel.options[sel.selectedIndex];const row=sel.closest('tr');
@@ -776,39 +788,80 @@ async function saveOrder(){
   const sid=document.getElementById('osup').value,lid=document.getElementById('oloc').value,od=document.getElementById('odt').value;
   const ta=parseFloat(document.getElementById('otot').value)||0,pp=parseFloat(document.getElementById('opp').value)||0;
   if(!sid||!lid||!od){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
+
+  // Συλλογή items ΠΡΙΝ κλείσει το modal
+  const itemRows=[];
+  document.querySelectorAll('#ibody tr').forEach(row=>{
+    const pid=row.querySelector('.ip')?.value;
+    if(!pid)return;
+    itemRows.push({
+      product_id:pid,
+      supplier_code:row.querySelector('.isc')?.value||'',
+      supplier_description:row.querySelector('.isd')?.value||'',
+      package_unit:row.querySelector('.ipkg')?.value||'',
+      package_qty:parseFloat(row.querySelector('.iqp')?.value)||1,
+      quantity:parseFloat(row.querySelector('.iq')?.value)||1,
+      package_price:parseFloat(row.querySelector('.ipr')?.value)||0
+    });
+  });
+
+  // Κλείσε το modal ΠΡΩΤΑ για καλύτερη εμπειρία
+  cm('mord');
+
   try{
     let ordId=oeditId;
     if(oeditId){
-      // UPDATE mode
       const{error:err}=await getDb().from('orders').update({supplier_id:sid,location_id:lid,order_date:od,estimated_delivery:document.getElementById('odlv').value||null,total_amount:ta,prepayment:pp,notes:document.getElementById('onotes').value||''}).eq('id',oeditId);
       if(err)throw err;
       const idx=ords.findIndex(x=>x.id===oeditId);
-      if(idx>=0){ords[idx]={...ords[idx],supplier_id:sid,location_id:lid,order_date:od,estimated_delivery:document.getElementById('odlv').value||null,total_amount:ta,prepayment:pp,balance:ta-pp,notes:document.getElementById('onotes').value||''};}
-      // Delete old items and re-insert
+      if(idx>=0)ords[idx]={...ords[idx],supplier_id:sid,location_id:lid,order_date:od,estimated_delivery:document.getElementById('odlv').value||null,total_amount:ta,prepayment:pp,balance:ta-pp,notes:document.getElementById('onotes').value||''};
       await getDb().from('order_items').delete().eq('order_id',oeditId);
       oitems=oitems.filter(i=>i.order_id!==oeditId);
-      toast('Παραγγελία ενημερώθηκε!');
     }else{
-      // INSERT mode
       const{data:r,error:err}=await getDb().from('orders').insert({supplier_id:sid,location_id:lid,order_date:od,estimated_delivery:document.getElementById('odlv').value||null,total_amount:ta,prepayment:pp,notes:document.getElementById('onotes').value||'',status:'pending',type:'order'}).select();
       if(err)throw err;
       if(!r||!r[0])throw new Error('Δεν επιστράφηκε εγγραφή');
       ords.unshift(r[0]);ordId=r[0].id;
-      toast('Παραγγελία αποθηκεύτηκε!');
     }
+
     // Save items
-    for(const row of document.querySelectorAll('#ibody tr')){
-      const pid=row.querySelector('.ip')?.value;if(!pid)continue;
-      const pqty=parseFloat(row.querySelector('.iqp')?.value)||1;
-      const ppr=parseFloat(row.querySelector('.ipr')?.value)||0;
-      const qty=parseFloat(row.querySelector('.iq')?.value)||1;
-      const{data:ni}=await getDb().from('order_items').insert({order_id:ordId,product_id:pid,supplier_code:row.querySelector('.isc')?.value||'',supplier_description:row.querySelector('.isd')?.value||'',package_unit:row.querySelector('.ipkg')?.value||'',package_qty:pqty,quantity:qty,unit_price:pqty>0?ppr/pqty:0,package_price:ppr}).select();
-      if(ni&&ni[0])oitems.push(ni[0]);
+    if(itemRows.length>0){
+      const itemsToInsert=itemRows.map(i=>({
+        order_id:ordId,
+        product_id:i.product_id,
+        supplier_code:i.supplier_code,
+        supplier_description:i.supplier_description,
+        package_unit:i.package_unit,
+        package_qty:i.package_qty,
+        quantity:i.quantity,
+        unit_price:i.package_qty>0?i.package_price/i.package_qty:0,
+        package_price:i.package_price
+      }));
+      const{data:ni,error:ie}=await getDb().from('order_items').insert(itemsToInsert).select();
+      if(ie)toast('Προειδοποίηση είδών: '+ie.message,'err');
+      else if(ni)ni.forEach(x=>oitems.push(x));
     }
-    cm('mord');rOrders();
+
+    rOrders();
+    toast(oeditId?'Παραγγελία ενημερώθηκε!':'Παραγγελία αποθηκεύτηκε!');
+    oeditId=null;
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function confDlv(id){if(!confirm('Επιβεβαίωση παράδοσης;'))return;await getDb().from('orders').update({status:'delivered'}).eq('id',id);const o=ords.find(x=>x.id===id);if(o)o.status='delivered';rOrders();toast('Παράδοση επιβεβαιώθηκε!');}
+async function confDlv(id){
+  if(!confirm('Επιβεβαίωση παράδοσης;'))return;
+  const{error}=await getDb().from('orders').update({status:'delivered'}).eq('id',id);
+  if(error){toast('Σφάλμα: '+error.message,'err');return;}
+  const o=ords.find(x=>x.id===id);if(o)o.status='delivered';
+  // Φόρτωσε τα items από τη βάση για να ενημερώσεις το stock
+  const{data:items}=await getDb().from('order_items').select('*').eq('order_id',id);
+  if(items&&items.length){
+    items.forEach(i=>{if(!oitems.find(x=>x.id===i.id))oitems.push(i);});
+    // Φόρτωσε νέα stock entries
+    const{data:newStk}=await getDb().from('stock_entries').select('*').eq('order_id',id);
+    if(newStk)newStk.forEach(s=>{if(!stk.find(x=>x.id===s.id))stk.unshift(s);});
+  }
+  rOrders();rStock();toast('Παράδοση επιβεβαιώθηκε! Το απόθεμα ενημερώθηκε.');
+}
 async function delOrd(id){if(!confirm('Διαγραφή;'))return;await getDb().from('orders').delete().eq('id',id);ords=ords.filter(o=>o.id!==id);oitems=oitems.filter(i=>i.order_id!==id);rOrders();toast('Διαγράφηκε.');}
 
 async function editOrd(id){
@@ -819,27 +872,40 @@ async function editOrd(id){
   document.getElementById('oloc').value=o.location_id||'';
   document.getElementById('odt').value=o.order_date||'';
   document.getElementById('odlv').value=o.estimated_delivery||'';
-  document.getElementById('ocat').value=o.notes||'';
+  document.getElementById('ocat').value='';
   document.getElementById('opp').value=o.prepayment||'';
   document.getElementById('onotes').value=o.notes||'';
-  // Load existing items
-  loadSP();
-  const items=oitems.filter(i=>i.order_id===id);
   document.getElementById('ibody').innerHTML='';
+
+  // Φόρτωσε items από τη βάση αν δεν τα έχουμε
+  let items=oitems.filter(i=>i.order_id===id);
+  if(!items.length){
+    const{data:dbItems}=await getDb().from('order_items').select('*').eq('order_id',id);
+    if(dbItems&&dbItems.length){
+      dbItems.forEach(i=>{if(!oitems.find(x=>x.id===i.id))oitems.push(i);});
+      items=dbItems;
+    }
+  }
+
   if(items.length){
     items.forEach(i=>{
-      addRow();
-      const rows=document.querySelectorAll('#ibody tr');
-      const row=rows[rows.length-1];
-      if(row){
-        row.querySelector('.ip').value=i.product_id;
-        row.querySelector('.isc').value=i.supplier_code||'';
-        row.querySelector('.isd').value=i.supplier_description||'';
-        row.querySelector('.ipkg').value=i.package_unit||'';
-        row.querySelector('.iqp').value=i.package_qty||1;
-        row.querySelector('.iq').value=i.quantity||1;
-        row.querySelector('.ipr').value=i.package_price||0;
-        const tot=row.querySelector('.itot');
+      // Δημιούργησε row με το σωστό product pre-selected
+      const tr=addRow(i.product_id);
+      if(tr){
+        // Αν το product δεν βρίσκεται στο dropdown (κατάλογος άδειος), πρόσθεσέ το
+        const sel=tr.querySelector('.ip');
+        if(sel&&!Array.from(sel.options).find(o=>o.value===i.product_id)){
+          const p=prods.find(x=>x.id===i.product_id);
+          if(p){const opt=new Option(p.friendly_name||p.name,p.id,true,true);sel.add(opt);}
+        }
+        if(sel)sel.value=i.product_id;
+        tr.querySelector('.isc').value=i.supplier_code||'';
+        tr.querySelector('.isd').value=i.supplier_description||'';
+        tr.querySelector('.ipkg').value=i.package_unit||'';
+        tr.querySelector('.iqp').value=i.package_qty||1;
+        tr.querySelector('.iq').value=i.quantity||1;
+        tr.querySelector('.ipr').value=i.package_price||0;
+        const tot=tr.querySelector('.itot');
         if(tot)tot.value=((i.quantity||1)*(i.package_price||0)).toFixed(2);
       }
     });
@@ -847,6 +913,7 @@ async function editOrd(id){
   }else{
     document.getElementById('otot').value=o.total_amount||0;
     calcB();
+    addRow();
   }
   document.getElementById('mord').classList.add('open');
 }
