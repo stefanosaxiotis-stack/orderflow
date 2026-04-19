@@ -535,7 +535,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <script>
 const SURL='https://gaxdvpmabrqsxtvsysoz.supabase.co';
 const SKEY='sb_publishable_gyYvpY477T0pv8FqhlrLSg_KNERhv0l';
-const db=window.supabase.createClient(SURL,SKEY);
+let db=null;
+function getDb(){if(!db)db=window.supabase.createClient(SURL,SKEY);return db;}
 
 let cU=null,cP=null;
 let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[];
@@ -558,14 +559,14 @@ async function doLogin(){
   const pw=document.getElementById('lpass').value;
   const er=document.getElementById('lerr');er.textContent='';
   if(!em||!pw){er.textContent='Συμπλήρωσε email και κωδικό';return;}
-  const{data,error}=await db.auth.signInWithPassword({email:em,password:pw});
+  const{data,error}=await getDb().auth.signInWithPassword({email:em,password:pw});
   if(error){er.textContent='Λάθος email ή κωδικός';return;}
   await init(data.user);
 }
-async function doLogout(){await db.auth.signOut();location.reload();}
+async function doLogout(){await getDb().auth.signOut();location.reload();}
 async function init(user){
   cU=user;
-  const{data:p}=await db.from('user_profiles').select('*').eq('id',user.id).single();
+  const{data:p}=await getDb().from('user_profiles').select('*').eq('id',user.id).single();
   cP=p;
   document.getElementById('ls').style.display='none';
   document.getElementById('app').style.display='block';
@@ -576,7 +577,7 @@ async function init(user){
   }
   await load();
 }
-db.auth.getSession().then(({data:{session}})=>{if(session)init(session.user);});
+getDb().auth.getSession().then(({data:{session}})=>{if(session)init(session.user);});
 document.getElementById('lpass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
 async function load(){
@@ -584,30 +585,30 @@ async function load(){
     const isA=cP?.role==='admin';
     const uid=cP?.location_id;
     const[r0,r1,r2,r3,r4]=await Promise.all([
-      db.from('suppliers').select('*').order('name'),
-      db.from('locations').select('*').order('name'),
-      db.from('products').select('*').order('name'),
-      db.from('categories').select('*').order('name'),
-      db.from('supplier_products').select('*')
+      getDb().from('suppliers').select('*').order('name'),
+      getDb().from('locations').select('*').order('name'),
+      getDb().from('products').select('*').order('name'),
+      getDb().from('categories').select('*').order('name'),
+      getDb().from('supplier_products').select('*')
     ]);
     sups=r0.data||[];locs=r1.data||[];prods=r2.data||[];cats=r3.data||[];sps=r4.data||[];
     if(isA){
       const[a,b,c,d,e,f,g,h]=await Promise.all([
-        db.from('orders').select('*').order('order_date',{ascending:false}),
-        db.from('recurring_obligations').select('*').order('next_due_date'),
-        db.from('prices').select('*').order('recorded_at',{ascending:false}),
-        db.from('stock_entries').select('*').order('entry_date',{ascending:false}),
-        db.from('other_obligations').select('*').order('created_at',{ascending:false}),
-        db.from('user_profiles').select('*').order('created_at'),
-        db.from('cash_entries').select('*').order('entry_date',{ascending:false}),
-        db.from('cash_payments').select('*').order('payment_date',{ascending:false})
+        getDb().from('orders').select('*').order('order_date',{ascending:false}),
+        getDb().from('recurring_obligations').select('*').order('next_due_date'),
+        getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
+        getDb().from('stock_entries').select('*').order('entry_date',{ascending:false}),
+        getDb().from('other_obligations').select('*').order('created_at',{ascending:false}),
+        getDb().from('user_profiles').select('*').order('created_at'),
+        getDb().from('cash_entries').select('*').order('entry_date',{ascending:false}),
+        getDb().from('cash_payments').select('*').order('payment_date',{ascending:false})
       ]);
       ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];
     }else{
       ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];
       const[g,h]=await Promise.all([
-        db.from('cash_entries').select('*').eq('location_id',uid).order('entry_date',{ascending:false}),
-        db.from('cash_payments').select('*').eq('location_id',uid).order('payment_date',{ascending:false})
+        getDb().from('cash_entries').select('*').eq('location_id',uid).order('entry_date',{ascending:false}),
+        getDb().from('cash_payments').select('*').eq('location_id',uid).order('payment_date',{ascending:false})
       ]);
       ces=g.data||[];cps=h.data||[];
     }
@@ -715,39 +716,39 @@ async function saveOrder(){
   const ta=parseFloat(document.getElementById('otot').value)||0,pp=parseFloat(document.getElementById('opp').value)||0;
   if(!sid||!lid||!od){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
   try{
-    const{data:r}=await db.from('orders').insert({supplier_id:sid,location_id:lid,order_date:od,estimated_delivery:document.getElementById('odlv').value,total_amount:ta,prepayment:pp,notes:document.getElementById('onotes').value,status:'pending',type:'order'}).select();
+    const{data:r}=await getDb().from('orders').insert({supplier_id:sid,location_id:lid,order_date:od,estimated_delivery:document.getElementById('odlv').value,total_amount:ta,prepayment:pp,notes:document.getElementById('onotes').value,status:'pending',type:'order'}).select();
     const no=r[0];
     for(const row of document.querySelectorAll('#ibody tr')){
       const pid=row.querySelector('.ip')?.value;if(!pid)continue;
       const pqty=parseFloat(row.querySelector('.iqp')?.value)||1;
       const ppr=parseFloat(row.querySelector('.ipr')?.value)||0;
-      await db.from('order_items').insert({order_id:no.id,product_id:pid,supplier_code:row.querySelector('.isc')?.value||'',supplier_description:row.querySelector('.isd')?.value||'',package_unit:row.querySelector('.ipkg')?.value||'',package_qty:pqty,quantity:parseFloat(row.querySelector('.iq')?.value)||1,unit_price:pqty>0?ppr/pqty:0,package_price:ppr});
+      await getDb().from('order_items').insert({order_id:no.id,product_id:pid,supplier_code:row.querySelector('.isc')?.value||'',supplier_description:row.querySelector('.isd')?.value||'',package_unit:row.querySelector('.ipkg')?.value||'',package_qty:pqty,quantity:parseFloat(row.querySelector('.iq')?.value)||1,unit_price:pqty>0?ppr/pqty:0,package_price:ppr});
     }
     ords.unshift(no);cm('mord');rOrders();toast('Παραγγελία αποθηκεύτηκε!');
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function confDlv(id){if(!confirm('Επιβεβαίωση παράδοσης;'))return;await db.from('orders').update({status:'delivered'}).eq('id',id);const o=ords.find(x=>x.id===id);if(o)o.status='delivered';rOrders();toast('Παράδοση επιβεβαιώθηκε!');}
-async function delOrd(id){if(!confirm('Διαγραφή;'))return;await db.from('orders').delete().eq('id',id);ords=ords.filter(o=>o.id!==id);rOrders();toast('Διαγράφηκε.');}
+async function confDlv(id){if(!confirm('Επιβεβαίωση παράδοσης;'))return;await getDb().from('orders').update({status:'delivered'}).eq('id',id);const o=ords.find(x=>x.id===id);if(o)o.status='delivered';rOrders();toast('Παράδοση επιβεβαιώθηκε!');}
+async function delOrd(id){if(!confirm('Διαγραφή;'))return;await getDb().from('orders').delete().eq('id',id);ords=ords.filter(o=>o.id!==id);rOrders();toast('Διαγράφηκε.');}
 async function saveRec(){
   const d={name:document.getElementById('rname').value,supplier_id:document.getElementById('rsup').value||null,location_id:document.getElementById('rloc').value,category:document.getElementById('rcat').value,frequency:document.getElementById('rfreq').value,amount:parseFloat(document.getElementById('ramt').value)||0,next_due_date:document.getElementById('rdue').value,auto_repeat:document.getElementById('rauto').checked,notes:document.getElementById('rnotes').value};
   if(!d.name||!d.location_id||!d.next_due_date){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r}=await db.from('recurring_obligations').insert(d).select();recs.push(r[0]);recs.sort((a,b)=>new Date(a.next_due_date)-new Date(b.next_due_date));cm('mr');rOrders();toast('Πάγια αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('recurring_obligations').insert(d).select();recs.push(r[0]);recs.sort((a,b)=>new Date(a.next_due_date)-new Date(b.next_due_date));cm('mr');rOrders();toast('Πάγια αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 async function confRec(id){
   if(!confirm('Επιβεβαίωση πληρωμής;'))return;
   const r=recs.find(x=>x.id===id);
-  await db.from('payments').insert({recurring_id:id,amount:r.amount,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString()});
-  if(r.auto_repeat){const d=new Date(r.next_due_date);if(r.frequency==='monthly')d.setMonth(d.getMonth()+1);else if(r.frequency==='biannual')d.setMonth(d.getMonth()+6);else if(r.frequency==='annual')d.setFullYear(d.getFullYear()+1);const nd=d.toISOString().split('T')[0];await db.from('recurring_obligations').update({next_due_date:nd}).eq('id',id);r.next_due_date=nd;}
+  await getDb().from('payments').insert({recurring_id:id,amount:r.amount,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString()});
+  if(r.auto_repeat){const d=new Date(r.next_due_date);if(r.frequency==='monthly')d.setMonth(d.getMonth()+1);else if(r.frequency==='biannual')d.setMonth(d.getMonth()+6);else if(r.frequency==='annual')d.setFullYear(d.getFullYear()+1);const nd=d.toISOString().split('T')[0];await getDb().from('recurring_obligations').update({next_due_date:nd}).eq('id',id);r.next_due_date=nd;}
   rOrders();rPay();toast('Πληρωμή επιβεβαιώθηκε!');
 }
-async function delRec(id){if(!confirm('Διαγραφή;'))return;await db.from('recurring_obligations').delete().eq('id',id);recs=recs.filter(r=>r.id!==id);rOrders();toast('Διαγράφηκε.');}
+async function delRec(id){if(!confirm('Διαγραφή;'))return;await getDb().from('recurring_obligations').delete().eq('id',id);recs=recs.filter(r=>r.id!==id);rOrders();toast('Διαγράφηκε.');}
 async function saveOther(){
   const d={name:document.getElementById('oname').value,category:document.getElementById('ocat2').value,location_id:document.getElementById('oloc2').value,supplier_id:document.getElementById('osup2').value||null,amount:parseFloat(document.getElementById('oamt').value)||0,due_date:document.getElementById('odue').value,notes:document.getElementById('onotes2').value};
   if(!d.name||!d.location_id){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r}=await db.from('other_obligations').insert(d).select();oths.unshift(r[0]);cm('mo');rOrders();toast('Αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('other_obligations').insert(d).select();oths.unshift(r[0]);cm('mo');rOrders();toast('Αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function confOth(id){if(!confirm('Επιβεβαίωση πληρωμής;'))return;await db.from('other_obligations').update({paid:true,paid_at:new Date().toISOString()}).eq('id',id);const o=oths.find(x=>x.id===id);if(o)o.paid=true;rOrders();rPay();toast('Πληρωμή επιβεβαιώθηκε!');}
-async function delOth(id){if(!confirm('Διαγραφή;'))return;await db.from('other_obligations').delete().eq('id',id);oths=oths.filter(o=>o.id!==id);rOrders();toast('Διαγράφηκε.');}
+async function confOth(id){if(!confirm('Επιβεβαίωση πληρωμής;'))return;await getDb().from('other_obligations').update({paid:true,paid_at:new Date().toISOString()}).eq('id',id);const o=oths.find(x=>x.id===id);if(o)o.paid=true;rOrders();rPay();toast('Πληρωμή επιβεβαιώθηκε!');}
+async function delOth(id){if(!confirm('Διαγραφή;'))return;await getDb().from('other_obligations').delete().eq('id',id);oths=oths.filter(o=>o.id!==id);rOrders();toast('Διαγράφηκε.');}
 
 function fStk(f,el){document.querySelectorAll('#sf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aSF=f;rStock();}
 function rStock(){
@@ -769,7 +770,7 @@ async function saveInv(){
   const qty=parseFloat(document.getElementById('iqty').value)||0;
   const d={product_id:document.getElementById('iprod').value,location_id:document.getElementById('iloc').value,quantity:qty,entry_date:document.getElementById('idt').value+'T12:00:00',entry_type:'inventory',notes:document.getElementById('inotes').value};
   if(!d.product_id||!d.location_id||qty===0){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r}=await db.from('stock_entries').insert(d).select();stk.unshift(r[0]);cm('minv');rStock();toast('Απογραφή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('stock_entries').insert(d).select();stk.unshift(r[0]);cm('minv');rStock();toast('Απογραφή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 
 function loadSPP(){
@@ -795,7 +796,7 @@ async function savePrice(){
   const pqty=parseFloat(document.getElementById('ppqty').value)||1;
   const ppr=parseFloat(document.getElementById('ppprice').value)||0;
   if(!sid||!pid){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r}=await db.from('prices').insert({product_id:pid,supplier_id:sid,supplier_product_id:spId,supplier_code:document.getElementById('pcode').value,supplier_description:document.getElementById('pdesc').value,package_unit:document.getElementById('ppkg').value,package_qty:pqty,package_price:ppr,recorded_at:document.getElementById('pdt').value,notes:document.getElementById('pnotes').value}).select();prs.unshift(r[0]);cm('mpr');rPrices();toast('Τιμή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('prices').insert({product_id:pid,supplier_id:sid,supplier_product_id:spId,supplier_code:document.getElementById('pcode').value,supplier_description:document.getElementById('pdesc').value,package_unit:document.getElementById('ppkg').value,package_qty:pqty,package_price:ppr,recorded_at:document.getElementById('pdt').value,notes:document.getElementById('pnotes').value}).select();prs.unshift(r[0]);cm('mpr');rPrices();toast('Τιμή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 
 function swPV(v,el){document.querySelectorAll('.vb').forEach(b=>b.classList.remove('active'));el.classList.add('active');aPV=v;rPay();}
@@ -836,15 +837,15 @@ function rCash(){
 async function saveCE(){
   const d={location_id:document.getElementById('celoc').value,entry_date:document.getElementById('cedt').value,amount:parseFloat(document.getElementById('ceamt').value)||0,notes:document.getElementById('cenotes').value,created_by:cU.id};
   if(!d.location_id||d.amount===0){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r,error}=await db.from('cash_entries').insert(d).select();if(error)throw error;ces.unshift(r[0]);cm('mce');rCash();toast('Καταχωρήθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r,error}=await getDb().from('cash_entries').insert(d).select();if(error)throw error;ces.unshift(r[0]);cm('mce');rCash();toast('Καταχωρήθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 async function saveCP(){
   const d={location_id:document.getElementById('cploc').value,payment_date:document.getElementById('cpdt').value,description:document.getElementById('cpdesc').value,amount:parseFloat(document.getElementById('cpamt').value)||0,notes:document.getElementById('cpnotes').value,created_by:cU.id};
   if(!d.location_id||!d.description||d.amount===0){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r,error}=await db.from('cash_payments').insert(d).select();if(error)throw error;cps.unshift(r[0]);cm('mcp');rCash();toast('Πληρωμή καταχωρήθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r,error}=await getDb().from('cash_payments').insert(d).select();if(error)throw error;cps.unshift(r[0]);cm('mcp');rCash();toast('Πληρωμή καταχωρήθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function delCE(id){if(!confirm('Διαγραφή;'))return;await db.from('cash_entries').delete().eq('id',id);ces=ces.filter(e=>e.id!==id);rCash();toast('Διαγράφηκε.');}
-async function delCP(id){if(!confirm('Διαγραφή;'))return;await db.from('cash_payments').delete().eq('id',id);cps=cps.filter(p=>p.id!==id);rCash();toast('Διαγράφηκε.');}
+async function delCE(id){if(!confirm('Διαγραφή;'))return;await getDb().from('cash_entries').delete().eq('id',id);ces=ces.filter(e=>e.id!==id);rCash();toast('Διαγράφηκε.');}
+async function delCP(id){if(!confirm('Διαγραφή;'))return;await getDb().from('cash_payments').delete().eq('id',id);cps=cps.filter(p=>p.id!==id);rCash();toast('Διαγράφηκε.');}
 
 function getXD(){const fr=document.getElementById('xfrom').value,to=document.getElementById('xto').value,lid=document.getElementById('xloc').value,st=document.getElementById('xst').value;return ords.filter(o=>{if(fr&&o.order_date<fr)return false;if(to&&o.order_date>to)return false;if(lid&&o.location_id!==lid)return false;if(st&&o.status!==st)return false;return true;});}
 function prevXL(){
@@ -872,33 +873,33 @@ function rMgmt(){
 async function saveSup(){
   const d={name:document.getElementById('sname').value.trim(),friendly_name:document.getElementById('sfr').value.trim(),iban:document.getElementById('siban').value.trim(),phone:document.getElementById('sphone').value.trim(),email:document.getElementById('semail').value.trim(),notes:document.getElementById('snotes').value.trim()};
   if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
-  try{const{data:r}=await db.from('suppliers').insert(d).select();sups.push(r[0]);sups.sort((a,b)=>a.name.localeCompare(b.name,'el'));['sname','sfr','siban','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');rMgmt();popSel();toast('Προμηθευτής αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('suppliers').insert(d).select();sups.push(r[0]);sups.sort((a,b)=>a.name.localeCompare(b.name,'el'));['sname','sfr','siban','sphone','semail','snotes'].forEach(i=>document.getElementById(i).value='');rMgmt();popSel();toast('Προμηθευτής αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function delSup(id){if(!confirm('Διαγραφή;'))return;await db.from('suppliers').delete().eq('id',id);sups=sups.filter(s=>s.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
+async function delSup(id){if(!confirm('Διαγραφή;'))return;await getDb().from('suppliers').delete().eq('id',id);sups=sups.filter(s=>s.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
 async function saveProd(){
   const d={name:document.getElementById('prname').value.trim(),friendly_name:document.getElementById('prfr').value.trim(),category:document.getElementById('prcat').value,base_unit:document.getElementById('prunit').value,daily_consumption:parseFloat(document.getElementById('prcons').value)||0,notes:document.getElementById('prnotes').value.trim()};
   if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
-  try{const{data:r}=await db.from('products').insert(d).select();prods.push(r[0]);prods.sort((a,b)=>a.name.localeCompare(b.name,'el'));['prname','prfr','prcons','prnotes'].forEach(i=>document.getElementById(i).value='');rMgmt();popSel();toast('Είδος αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('products').insert(d).select();prods.push(r[0]);prods.sort((a,b)=>a.name.localeCompare(b.name,'el'));['prname','prfr','prcons','prnotes'].forEach(i=>document.getElementById(i).value='');rMgmt();popSel();toast('Είδος αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function delProd(id){if(!confirm('Διαγραφή;'))return;await db.from('products').delete().eq('id',id);prods=prods.filter(p=>p.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
+async function delProd(id){if(!confirm('Διαγραφή;'))return;await getDb().from('products').delete().eq('id',id);prods=prods.filter(p=>p.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
 async function saveCat(){
   const d={name:document.getElementById('catname').value.trim(),type:document.getElementById('cattype').value};
   if(!d.name){toast('Συμπλήρωσε το όνομα','err');return;}
-  try{const{data:r}=await db.from('categories').insert(d).select();cats.push(r[0]);document.getElementById('catname').value='';rMgmt();popSel();toast('Κατηγορία αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('categories').insert(d).select();cats.push(r[0]);document.getElementById('catname').value='';rMgmt();popSel();toast('Κατηγορία αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function delCat(id){if(!confirm('Διαγραφή;'))return;await db.from('categories').delete().eq('id',id);cats=cats.filter(c=>c.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
+async function delCat(id){if(!confirm('Διαγραφή;'))return;await getDb().from('categories').delete().eq('id',id);cats=cats.filter(c=>c.id!==id);rMgmt();popSel();toast('Διαγράφηκε.');}
 async function saveUser(){
   const em=document.getElementById('uemail').value.trim(),pw=document.getElementById('upass').value,fn=document.getElementById('uname').value.trim(),role=document.getElementById('urole').value,lid=document.getElementById('uloc').value||null;
   if(!em||!pw||!fn){toast('Συμπλήρωσε όλα τα υποχρεωτικά πεδία','err');return;}
   if(pw.length<6){toast('Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες','err');return;}
   try{
-    const{data,error}=await db.auth.admin.createUser({email:em,password:pw,user_metadata:{full_name:fn,role},email_confirm:true});
+    const{data,error}=await getDb().auth.admin.createUser({email:em,password:pw,user_metadata:{full_name:fn,role},email_confirm:true});
     if(error)throw error;
-    await db.from('user_profiles').update({role,location_id:lid,full_name:fn,active:true}).eq('id',data.user.id);
+    await getDb().from('user_profiles').update({role,location_id:lid,full_name:fn,active:true}).eq('id',data.user.id);
     await load();['uname','uemail','upass'].forEach(i=>document.getElementById(i).value='');rMgmt();toast('Χρήστης δημιουργήθηκε!');
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function togU(id,active){await db.from('user_profiles').update({active}).eq('id',id);const u=ups.find(x=>x.id===id);if(u)u.active=active;rMgmt();toast(active?'Ενεργοποιήθηκε':'Απενεργοποιήθηκε');}
+async function togU(id,active){await getDb().from('user_profiles').update({active}).eq('id',id);const u=ups.find(x=>x.id===id);if(u)u.active=active;rMgmt();toast(active?'Ενεργοποιήθηκε':'Απενεργοποιήθηκε');}
 
 async function openCat(sid){
   aCatSup=sid;const s=sups.find(x=>x.id===sid);
@@ -912,9 +913,9 @@ function rCat(){
 async function saveSP(){
   const d={supplier_id:aCatSup,product_id:document.getElementById('catprod').value,supplier_code:document.getElementById('catcode').value,supplier_description:document.getElementById('catdesc').value,package_unit:document.getElementById('catpkg').value,package_qty:parseFloat(document.getElementById('catqty').value)||1};
   if(!d.product_id){toast('Επίλεξε προϊόν','err');return;}
-  try{const{data:r,error}=await db.from('supplier_products').insert(d).select();if(error)throw error;sps.push(r[0]);rCat();['catcode','catdesc','catpkg'].forEach(i=>document.getElementById(i).value='');document.getElementById('catqty').value='1';toast('Προστέθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r,error}=await getDb().from('supplier_products').insert(d).select();if(error)throw error;sps.push(r[0]);rCat();['catcode','catdesc','catpkg'].forEach(i=>document.getElementById(i).value='');document.getElementById('catqty').value='1';toast('Προστέθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
-async function delSP(id){if(!confirm('Αφαίρεση;'))return;await db.from('supplier_products').delete().eq('id',id);sps=sps.filter(x=>x.id!==id);rCat();toast('Αφαιρέθηκε.');}
+async function delSP(id){if(!confirm('Αφαίρεση;'))return;await getDb().from('supplier_products').delete().eq('id',id);sps=sps.filter(x=>x.id!==id);rCat();toast('Αφαιρέθηκε.');}
 </script>
 </body>
 </html>
