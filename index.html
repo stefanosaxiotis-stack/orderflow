@@ -6,6 +6,7 @@
 <title>OrderFlow</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --nd:#0d0d12;--nm:#111118;--nc:#161b32;--ni:#1a2040;--nb:#252d58;--nh:#2d3668;
@@ -241,11 +242,12 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <div id="app">
 <div class="topbar">
   <div class="logo">✦ OrderFlow</div>
-  <div class="tab active" id="tab-orders" onclick="sw('orders',this)">Παραγγελίες</div>
+  <div class="tab active" id="tab-dash" onclick="sw('dash',this)">Dashboard</div>
+  <div class="tab" id="tab-orders" onclick="sw('orders',this)">Παραγγελίες</div>
   <div class="tab" id="tab-stock" onclick="sw('stock',this)">Αποθήκη</div>
-  <div class="tab" id="tab-prices" onclick="sw('prices',this)">Τιμές</div>
+  <div class="tab" id="tab-prices" onclick="sw('prices',this)">Παρατηρητήριο Τιμών</div>
   <div class="tab" id="tab-payments" onclick="sw('payments',this)">Πληρωμές</div>
-  <div class="tab" id="tab-cash" onclick="sw('cash',this)">Ταμείο</div>
+  <div class="tab" id="tab-cash" onclick="sw('cash',this)">Μετρητά Καταστημάτων</div>
   <div class="tab ao" id="tab-excel" onclick="sw('excel',this)">Excel</div>
   <div class="ts"></div>
   <div class="tbr">
@@ -255,8 +257,31 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- DASHBOARD -->
+<div id="page-dash" class="page active ao">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px" id="dash-metrics"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+    <div class="card"><div style="font-size:13px;font-weight:600;color:var(--pk);margin-bottom:14px">📊 Έξοδα ανά μήνα (€)</div><canvas id="chart-monthly" height="180"></canvas></div>
+    <div class="card"><div style="font-size:13px;font-weight:600;color:var(--pk);margin-bottom:14px">🥧 Κατανομή ανά προμηθευτή</div><canvas id="chart-supplier" height="180"></canvas></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:12px">🔴 Επείγουσες πληρωμές</div>
+      <div id="dash-urgent"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;color:var(--pk);margin-bottom:12px">📦 Τελευταίες παραγγελίες</div>
+      <div id="dash-recent"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:12px">📈 Πρόσφατες τιμές</div>
+      <div id="dash-prices"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ΠΑΡΑΓΓΕΛΙΕΣ -->
-<div id="page-orders" class="page active ao">
+<div id="page-orders" class="page ao">
   <div class="mets">
     <div class="met"><label>Σύνολο</label><div class="mv pk" id="m-tot">—</div></div>
     <div class="met"><label>Εκκρεμείς</label><div class="mv am" id="m-pnd">—</div></div>
@@ -532,6 +557,34 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Πιστωτικό -->
+<div class="mbg" id="mcredit">
+  <div class="modal"><h2>💳 Καταχώρηση πιστωτικού</h2>
+    <input type="hidden" id="cr-order-id">
+    <div class="fg2">
+      <div class="f s2"><label>Προμηθευτής</label><input type="text" id="cr-supplier" readonly style="opacity:.7"></div>
+      <div class="f"><label>Ποσό πιστωτικού (€) *</label><input type="number" id="cr-amount" step="0.01" placeholder="0.00" style="font-size:18px;font-weight:700"></div>
+      <div class="f"><label>Αιτία</label>
+        <select id="cr-reason">
+          <option value="Επιστροφή εμπορευμάτων">Επιστροφή εμπορευμάτων</option>
+          <option value="Ζημιά / ελαττωματικά">Ζημιά / ελαττωματικά</option>
+          <option value="Έκπτωση">Έκπτωση</option>
+          <option value="Τιμολογιακή διαφορά">Τιμολογιακή διαφορά</option>
+          <option value="Άλλο">Άλλο</option>
+        </select>
+      </div>
+      <div class="f s2"><label>Εφαρμογή</label>
+        <select id="cr-type">
+          <option value="order">Αφαίρεση από αυτή την παραγγελία (μειώνει το υπόλοιπο)</option>
+          <option value="general">Γενικό πιστωτικό (για μελλοντική χρήση)</option>
+        </select>
+      </div>
+      <div class="f s2"><label>Σημειώσεις</label><input type="text" id="cr-notes" placeholder="προαιρετικό"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('mcredit')">Ακύρωση</button><button class="btn p" onclick="saveCredit()">Αποθήκευση</button></div>
+  </div>
+</div>
+
 <!-- ══ SIDE PANEL ΔΙΑΧΕΙΡΙΣΗ ══ -->
 <div class="spbg" id="spbg">
   <div class="sp">
@@ -652,8 +705,9 @@ function getDb(){if(!_db)_db=window.supabase.createClient(SURL,SKEY);return _db;
 // STATE
 // ══════════════════════════════════════════════════════
 let cU=null,cP=null;
-let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[],oitems=[];
+let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[],oitems=[],credits=[];
 let aOF='all',aSF='all',aPF='all',aCF='all',aPV='pending',oeditId=null;
+let chartMonthly=null,chartSupplier=null;
 
 // ══════════════════════════════════════════════════════
 // HELPERS
@@ -693,6 +747,7 @@ async function init(user){
   document.getElementById('app').style.display='block';
   document.getElementById('ubadge').textContent=p?.full_name||user.email;
   if(p?.role==='store'){document.querySelectorAll('.ao').forEach(e=>e.style.display='none');sw('cash',document.getElementById('tab-cash'));}
+  else sw('dash',document.getElementById('tab-dash'));
   await load();
 }
 getDb().auth.getSession().then(({data:{session}})=>{if(session)init(session.user);});
@@ -713,7 +768,7 @@ async function load(){
     ]);
     sups=r0.data||[];locs=r1.data||[];prods=r2.data||[];cats=r3.data||[];sps=r4.data||[];
     if(isA){
-      const[a,b,c,d,e,f,g,h,oi]=await Promise.all([
+      const[a,b,c,d,e,f,g,h,oi,r9]=await Promise.all([
         getDb().from('orders').select('*').order('order_date',{ascending:false}),
         getDb().from('recurring_obligations').select('*').order('next_due_date'),
         getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
@@ -722,9 +777,10 @@ async function load(){
         getDb().from('user_profiles').select('*').order('created_at'),
         getDb().from('cash_entries').select('*').order('entry_date',{ascending:false}),
         getDb().from('cash_payments').select('*').order('payment_date',{ascending:false}),
-        getDb().from('order_items').select('*')
+        getDb().from('order_items').select('*'),
+        getDb().from('credits').select('*').order('created_at',{ascending:false})
       ]);
-      ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];
+      ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];
     }else{
       ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];
       const[g,h]=await Promise.all([
@@ -735,7 +791,8 @@ async function load(){
     }
     popSel();
     const ap=document.querySelector('.page.active');
-    if(ap?.id==='page-orders')rOrders();
+    if(ap?.id==='page-dash')rDash();
+    else if(ap?.id==='page-orders')rOrders();
     else if(ap?.id==='page-stock')rStock();
     else if(ap?.id==='page-prices')rPrices();
     else if(ap?.id==='page-payments')rPay();
@@ -780,6 +837,7 @@ function sw(n,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   const pg=document.getElementById('page-'+n);if(pg)pg.classList.add('active');
   if(el)el.classList.add('active');
+  if(n==='dash')rDash();
   if(n==='orders')rOrders();if(n==='stock')rStock();if(n==='prices')rPrices();if(n==='payments')rPay();if(n==='cash')rCash();
 }
 function om(id){
@@ -842,6 +900,7 @@ function rOrders(){
           </div>
           <div class="acts">
             <button class="ib" onclick="editOrd('${o.id}')" title="Επεξεργασία">✎</button>
+            <button class="ib" onclick="openCredit('${o.id}')" title="Πιστωτικό" style="color:var(--gn);border-color:var(--gn)">₊</button>
             ${o.status==='pending'?`<button class="ib cf" onclick="confDlv('${o.id}')" title="Επιβεβαίωση παράδοσης">✓</button>`:''}
             <button class="ib" onclick="delOrd('${o.id}')" style="color:var(--rd)" title="Διαγραφή">✕</button>
           </div>
@@ -1196,8 +1255,128 @@ function exportXL(){
 }
 
 // ══════════════════════════════════════════════════════
-// MANAGEMENT SIDE PANEL
+// DASHBOARD
 // ══════════════════════════════════════════════════════
+function rDash(){
+  const now=new Date();
+  // Metrics
+  const totalBal=ords.reduce((s,o)=>s+Number(o.balance||0),0);
+  const pendingOrd=ords.filter(o=>o.status==='pending').length;
+  const overdue=ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0&&o.estimated_delivery&&new Date(o.estimated_delivery)<now).length
+    +recs.filter(r=>new Date(r.next_due_date)<now).length
+    +oths.filter(o=>!o.paid&&o.due_date&&new Date(o.due_date)<now).length;
+  const cashIn=ces.reduce((s,e)=>s+Number(e.amount),0);
+  const cashOut=cps.reduce((s,p)=>s+Number(p.amount),0);
+  const cashAvail=cashIn-cashOut;
+
+  set('dash-metrics',`
+    <div class="met" style="border-color:var(--rd)"><label>💰 Υπόλοιπο προς πληρωμή</label><div class="mv rd">${fmt(totalBal)} €</div></div>
+    <div class="met" style="border-color:var(--am)"><label>📦 Εκκρεμείς παραγγελίες</label><div class="mv am">${pendingOrd}</div></div>
+    <div class="met" style="border-color:var(--rd)"><label>⚠️ Ληγμένες πληρωμές</label><div class="mv rd">${overdue}</div></div>
+    <div class="met" style="border-color:var(--gn)"><label>💵 Διαθέσιμα μετρητά</label><div class="mv gn">${fmt(cashAvail)} €</div></div>
+  `);
+
+  // Επείγουσες πληρωμές
+  const urgent=[];
+  ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0).forEach(o=>{
+    const dl=Math.ceil((new Date(o.estimated_delivery||now)-now)/86400000);
+    if(dl<=7)urgent.push({name:sN(o.supplier_id),amount:Number(o.balance),dl,color:dl<0?'var(--rd)':'var(--am)'});
+  });
+  recs.filter(r=>{const dl=Math.ceil((new Date(r.next_due_date)-now)/86400000);return dl<=7;}).forEach(r=>{
+    const dl=Math.ceil((new Date(r.next_due_date)-now)/86400000);
+    urgent.push({name:r.name,amount:Number(r.amount),dl,color:dl<0?'var(--rd)':'var(--am)'});
+  });
+  urgent.sort((a,b)=>a.dl-b.dl);
+  set('dash-urgent',urgent.length?urgent.map(u=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--nb);font-size:12px"><span style="color:var(--t2)">${u.name}</span><span style="color:${u.color};font-weight:600">${u.dl<0?'ΛΗΞΗ':u.dl+'ημ'} · ${fmt(u.amount)}€</span></div>`).join(''):'<div style="color:var(--td);font-size:12px;padding:10px 0">✓ Δεν υπάρχουν επείγουσες</div>');
+
+  // Τελευταίες παραγγελίες
+  const recent=[...ords].slice(0,5);
+  set('dash-recent',recent.length?recent.map(o=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--nb);font-size:12px"><div><div style="color:var(--t2)">${sN(o.supplier_id)}</div><div style="color:var(--td);font-size:11px">${fd(o.order_date)}</div></div><span class="badge ${o.status==='pending'?'bp':'bd'}" style="font-size:10px">${o.status==='pending'?'Εκκρεμής':'Παραδόθηκε'}</span></div>`).join(''):'<div style="color:var(--td);font-size:12px;padding:10px 0">Δεν υπάρχουν παραγγελίες</div>');
+
+  // Πρόσφατες τιμές
+  const recentPrices=[...prs].slice(0,5);
+  set('dash-prices',recentPrices.length?recentPrices.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--nb);font-size:12px"><div><div style="color:var(--t2)">${pN(p.product_id)}</div><div style="color:var(--td);font-size:11px">${sN(p.supplier_id)}</div></div><span style="color:var(--gn);font-weight:600">${fmt(p.unit_price)} €/τμχ</span></div>`).join(''):'<div style="color:var(--td);font-size:12px;padding:10px 0">Δεν υπάρχουν τιμές</div>');
+
+  // Charts
+  rDashCharts();
+}
+
+function rDashCharts(){
+  // Monthly expenses chart
+  const monthly={};
+  ords.forEach(o=>{
+    if(!o.order_date)return;
+    const m=o.order_date.substring(0,7);
+    monthly[m]=(monthly[m]||0)+Number(o.total_amount||0);
+  });
+  const mLabels=Object.keys(monthly).sort().slice(-6);
+  const mData=mLabels.map(m=>monthly[m]);
+  const mLabelsFmt=mLabels.map(m=>{const[y,mo]=m.split('-');const mn=['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'];return mn[parseInt(mo)-1]+' '+y.slice(2);});
+
+  const ctxM=document.getElementById('chart-monthly');
+  if(ctxM){
+    if(chartMonthly)chartMonthly.destroy();
+    chartMonthly=new Chart(ctxM,{type:'bar',data:{labels:mLabelsFmt,datasets:[{label:'Έξοδα (€)',data:mData,backgroundColor:'rgba(200,80,122,0.6)',borderColor:'rgb(200,80,122)',borderWidth:1,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6898'},grid:{color:'#252d58'}},y:{ticks:{color:'#5a6898',callback:v=>fmt(v)+'€'},grid:{color:'#252d58'}}}}});
+  }
+
+  // Supplier pie chart
+  const supTotals={};
+  ords.forEach(o=>{const n=sN(o.supplier_id);supTotals[n]=(supTotals[n]||0)+Number(o.total_amount||0);});
+  const sLabels=Object.keys(supTotals).filter(k=>supTotals[k]>0);
+  const sData=sLabels.map(k=>supTotals[k]);
+  const colors=['#c8507a','#3080e8','#30b878','#d4a020','#9060c8','#e86080','#50a8d8','#60c860'];
+
+  const ctxS=document.getElementById('chart-supplier');
+  if(ctxS){
+    if(chartSupplier)chartSupplier.destroy();
+    if(sLabels.length){
+      chartSupplier=new Chart(ctxS,{type:'doughnut',data:{labels:sLabels,datasets:[{data:sData,backgroundColor:colors,borderColor:'#161b32',borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{color:'#9aa4d0',font:{size:11},boxWidth:12}}}}});
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// ΠΙΣΤΩΤΙΚΟ
+// ══════════════════════════════════════════════════════
+function openCredit(ordId){
+  const o=ords.find(x=>x.id===ordId);if(!o)return;
+  document.getElementById('cr-order-id').value=ordId;
+  document.getElementById('cr-supplier').value=sN(o.supplier_id);
+  document.getElementById('cr-amount').value='';
+  document.getElementById('cr-notes').value='';
+  document.getElementById('mcredit').classList.add('open');
+}
+
+async function saveCredit(){
+  const ordId=document.getElementById('cr-order-id').value;
+  const amount=parseFloat(document.getElementById('cr-amount').value)||0;
+  const reason=document.getElementById('cr-reason').value;
+  const type=document.getElementById('cr-type').value;
+  const notes=document.getElementById('cr-notes').value;
+  if(!amount||amount<=0){toast('Συμπλήρωσε ποσό πιστωτικού','err');return;}
+  const o=ords.find(x=>x.id===ordId);if(!o)return;
+
+  try{
+    // Αποθήκευση πιστωτικού
+    const{data:cr,error:ce}=await getDb().from('credits').insert({supplier_id:o.supplier_id,order_id:ordId,amount,reason,credit_type:type,notes,applied:type==='order'}).select();
+    if(ce)throw ce;
+    credits.unshift(cr[0]);
+
+    // Αν αφορά συγκεκριμένη παραγγελία → μείωσε το υπόλοιπο
+    if(type==='order'){
+      const newPrepay=Math.min(Number(o.total_amount), Number(o.prepayment)+amount);
+      const{error:oe}=await getDb().from('orders').update({prepayment:newPrepay}).eq('id',ordId);
+      if(oe)throw oe;
+      const{data:updated}=await getDb().from('orders').select('*').eq('id',ordId).single();
+      if(updated){const idx=ords.findIndex(x=>x.id===ordId);if(idx>=0)ords[idx]=updated;}
+      toast(`Πιστωτικό ${fmt(amount)}€ αφαιρέθηκε από το υπόλοιπο!`);
+    }else{
+      toast(`Γενικό πιστωτικό ${fmt(amount)}€ καταχωρήθηκε!`);
+    }
+    cm('mcredit');rOrders();rPay();
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
+
 function openMgmt(){document.getElementById('spbg').classList.add('open');rMgmt();}
 function closeMgmt(){document.getElementById('spbg').classList.remove('open');}
 document.getElementById('spbg').addEventListener('click',e=>{if(e.target===document.getElementById('spbg'))closeMgmt();});
