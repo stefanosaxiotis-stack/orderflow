@@ -585,6 +585,31 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Edit User Modal -->
+<div class="mbg" id="medituser">
+  <div class="modal"><h2>✎ Επεξεργασία χρήστη</h2>
+    <input type="hidden" id="eu-id">
+    <div class="fg2">
+      <div class="f s2"><label>Όνομα</label><input type="text" id="eu-name" readonly style="opacity:.7"></div>
+      <div class="f s2"><label>Email</label><input type="text" id="eu-email" readonly style="opacity:.7"></div>
+      <div class="f"><label>Ρόλος</label>
+        <select id="eu-role">
+          <option value="admin">Admin (Διαχειριστής)</option>
+          <option value="store">Store (Κατάστημα)</option>
+        </select>
+      </div>
+      <div class="f"><label>Τοποθεσία (για store)</label><select id="eu-loc"></select></div>
+      <div class="f"><label>Ενεργός</label>
+        <select id="eu-active">
+          <option value="true">Ενεργός</option>
+          <option value="false">Ανενεργός</option>
+        </select>
+      </div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('medituser')">Ακύρωση</button><button class="btn p" onclick="saveUserEdit()">Αποθήκευση</button></div>
+  </div>
+</div>
+
 <!-- ══ SIDE PANEL ΔΙΑΧΕΙΡΙΣΗ ══ -->
 <div class="spbg" id="spbg">
   <div class="sp">
@@ -1410,7 +1435,15 @@ function rMgmt(){
       <button class="ib" onclick="delProd('${p.id}')" style="color:var(--rd)">✕</button>
     </td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν είδη</td></tr>');
 
-  set('utbl',ups.length?ups.map(u=>`<tr><td>${u.full_name||'—'}</td><td style="font-size:11px">${u.email}</td><td><span class="badge ${u.role==='admin'?'bd':'br'}">${u.role}</span></td><td>${lN(u.location_id)}</td><td><span style="color:${u.active?'var(--gn)':'var(--rd)'}">${u.active?'✓':'✗'}</span></td><td>${u.id!==cU?.id?`<button class="ib" onclick="togU('${u.id}',${!u.active})" style="color:var(--am)">⊙</button>`:'—'}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν χρήστες</td></tr>');
+  set('utbl',ups.length?ups.map(u=>`<tr>
+    <td>${u.full_name||'—'}</td>
+    <td style="font-size:11px">${u.email}</td>
+    <td><span class="badge ${u.role==='admin'?'bd':'br'}">${u.role}</span></td>
+    <td>${lN(u.location_id)}</td>
+    <td><span style="color:${u.active?'var(--gn)':'var(--rd)'}">${u.active?'✓':'✗'}</span></td>
+    <td style="display:flex;gap:4px">
+      <button class="ib" onclick="editUser('${u.id}')" title="Επεξεργασία">✎</button>
+    </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν χρήστες</td></tr>');
 
   set('catlist',cats.map(c=>`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${c.type==='product'?'Προϊόν':'Παραγγελία'})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">✕</button></div>`).join(''));
 }
@@ -1510,6 +1543,34 @@ async function saveUser(){
   toast('Η δημιουργία χρηστών γίνεται από τον διαχειριστή του συστήματος.','err');
 }
 async function togU(id,active){await getDb().from('user_profiles').update({active}).eq('id',id);const u=ups.find(x=>x.id===id);if(u)u.active=active;rMgmt();toast(active?'Ενεργοποιήθηκε':'Απενεργοποιήθηκε');}
+
+function editUser(id){
+  const u=ups.find(x=>x.id===id);if(!u)return;
+  document.getElementById('eu-id').value=id;
+  document.getElementById('eu-name').value=u.full_name||'';
+  document.getElementById('eu-email').value=u.email||'';
+  document.getElementById('eu-role').value=u.role||'store';
+  document.getElementById('eu-active').value=u.active?'true':'false';
+  // Populate locations
+  const lo='<option value="">— Χωρίς —</option>'+locs.map(l=>`<option value="${l.id}" ${l.id===u.location_id?'selected':''}>${l.name}</option>`).join('');
+  document.getElementById('eu-loc').innerHTML=lo;
+  document.getElementById('medituser').classList.add('open');
+}
+
+async function saveUserEdit(){
+  const id=document.getElementById('eu-id').value;
+  const role=document.getElementById('eu-role').value;
+  const loc=document.getElementById('eu-loc').value||null;
+  const active=document.getElementById('eu-active').value==='true';
+  try{
+    const{error}=await getDb().from('user_profiles').update({role,location_id:loc,active}).eq('id',id);
+    if(error)throw error;
+    const u=ups.find(x=>x.id===id);
+    if(u){u.role=role;u.location_id=loc;u.active=active;}
+    cm('medituser');rMgmt();
+    toast('Χρήστης ενημερώθηκε!');
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
 </script>
 </body>
 </html>
