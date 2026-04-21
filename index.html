@@ -298,10 +298,11 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
   <div class="fils" id="of">
     <div class="pill active" onclick="fOrd('all',this)">Όλες</div>
-    <div class="pill" onclick="fOrd('pending',this)">Εκκρεμείς</div>
+    <div class="pill" onclick="fOrd('pending',this)">Εκκρεμείς παραγγελίες</div>
     <div class="pill" onclick="fOrd('delivered',this)">Παραδόθηκαν</div>
-    <div class="pill" onclick="fOrd('recurring',this)">Πάγιες</div>
-    <div class="pill" onclick="fOrd('other',this)">Άλλες</div>
+    <div class="pill" onclick="fOrd('recurring',this)">Πάγιες υποχρεώσεις</div>
+    <div class="pill" onclick="fOrd('other',this)">Άλλες υποχρεώσεις</div>
+    <div style="width:1px;background:var(--nb);margin:0 4px;align-self:stretch"></div>
     <div class="pill" onclick="fOrd('lm',this)">Κεντρική</div>
     <div class="pill" onclick="fOrd('lg',this)">Γέρακας</div>
     <div class="pill" onclick="fOrd('lp',this)">Παγκράτι</div>
@@ -357,6 +358,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     </div>
     <div class="fils" id="pf" style="margin:0">
       <div class="pill active" onclick="fPay('all',this)">Όλα</div>
+      <div style="width:1px;background:var(--nb);margin:0 4px;align-self:stretch"></div>
       <div class="pill" onclick="fPay('lm',this)">Κεντρική</div>
       <div class="pill" onclick="fPay('lg',this)">Γέρακας</div>
       <div class="pill" onclick="fPay('lp',this)">Παγκράτι</div>
@@ -377,7 +379,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="fils" id="clf" style="margin:0"><div class="pill active" onclick="fCash('all',this)">Όλα</div></div>
     <div class="tbr2">
       <button class="btn" onclick="om('mcp')">+ Πληρωμή</button>
-      <button class="btn p" onclick="om('mce')">+ Καταχώρηση ημέρας</button>
+      <button class="btn p" onclick="om('mce')">+ Καταχώρηση μετρητών ημέρας</button>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -532,7 +534,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 
 <!-- Ταμείο - Καταχώρηση -->
 <div class="mbg" id="mce">
-  <div class="modal"><h2>Καταχώρηση ημέρας ταμείου</h2>
+  <div class="modal"><h2>Καταχώρηση μετρητών ημέρας</h2>
     <div class="fg2">
       <div class="f"><label>Τοποθεσία *</label><select id="celoc"></select></div>
       <div class="f"><label>Ημερομηνία *</label><input type="date" id="cedt"></div>
@@ -915,7 +917,7 @@ function rOrders(){
         </div>
         <div class="cbody">
           <div class="fi"><label>Εκτ. παράδοση</label><span>${fd(o.estimated_delivery)}</span></div>
-          <div class="fi"><label>Σημειώσεις</label><span>${o.notes||'—'}</span></div>
+          ${o.notes?`<div class="fi"><label>Σημειώσεις</label><span style="color:var(--t1)">${o.notes}</span></div>`:''}
         </div>
         ${itemsHtml}
         <div class="cfoot">
@@ -936,10 +938,49 @@ function rOrders(){
   }
   if(f==='all'||f==='recurring'){
     const fm={monthly:'Μηνιαία',biannual:'Εξαμηνιαία',annual:'Ετήσια',once:'Εφάπαξ'};
-    h+=recs.map(r=>{const dl=Math.ceil((new Date(r.next_due_date)-new Date())/86400000);return`<div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="csup">${r.name}</span><span class="loc ${lC(r.location_id)}">${lN(r.location_id)}</span></div><div class="cmeta"><span class="badge br">Πάγια · ${fm[r.frequency]||r.frequency}</span></div></div><div class="cbody"><div class="fi"><label>Κατηγορία</label><span>${r.category||'—'}</span></div><div class="fi"><label>Επόμενη λήξη</label><span style="color:${dl<=7?'var(--rd)':dl<=30?'var(--am)':'var(--gn)'}">${fd(r.next_due_date)} (${dl>0?dl+' ημ.':'ΛΗΞΗ'})</span></div></div><div class="cfoot"><div class="amts"><div class="amt"><label>Ποσό</label><span style="color:var(--am)">${fmt(r.amount)} €</span></div></div><div class="acts"><button class="ib cf" onclick="confRec('${r.id}')" title="Πληρώθηκε">✓</button><button class="ib" onclick="delRec('${r.id}')" style="color:var(--rd)">✕</button></div></div></div>`;}).join('');
+    h+=recs.map(r=>{const dl=Math.ceil((new Date(r.next_due_date)-new Date())/86400000);return`<div class="card">
+      <div class="ch">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="csup">${r.name}</span>
+          <span class="loc ${lC(r.location_id)}">${lN(r.location_id)}</span>
+        </div>
+        <div class="cmeta"><span class="badge br">Πάγια · ${fm[r.frequency]||r.frequency}</span></div>
+      </div>
+      <div class="cbody">
+        <div class="fi"><label>Κατηγορία</label><span>${r.category||'—'}</span></div>
+        <div class="fi"><label>Επόμενη λήξη</label><span style="color:${dl<=7?'var(--rd)':dl<=30?'var(--am)':'var(--gn)'}">${fd(r.next_due_date)} (${dl>0?dl+' ημ.':'ΛΗΞΗ'})</span></div>
+        ${r.notes?`<div class="fi" style="grid-column:1/-1"><label>Σημειώσεις</label><span style="color:var(--t1)">${r.notes}</span></div>`:''}
+      </div>
+      <div class="cfoot">
+        <div class="amts"><div class="amt"><label>Ποσό</label><span style="color:var(--am)">${fmt(r.amount)} €</span></div></div>
+        <div class="acts">
+          <button class="ib cf" onclick="confRec('${r.id}')" title="Πληρώθηκε">✓</button>
+          <button class="ib" onclick="delRec('${r.id}')" style="color:var(--rd)">✕</button>
+        </div>
+      </div>
+    </div>`;}).join('');
   }
   if(f==='all'||f==='other'){
-    h+=oths.filter(o=>!o.paid).map(o=>`<div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="csup">${o.name}</span><span class="loc ${lC(o.location_id)}">${lN(o.location_id)}</span></div><div class="cmeta"><span class="badge bo">Άλλη υποχρέωση</span><span class="cdate">${fd(o.due_date)}</span></div></div><div class="cbody"><div class="fi"><label>Κατηγορία</label><span>${o.category||'—'}</span></div><div class="fi"><label>Ποσό</label><span style="color:var(--am)">${fmt(o.amount)} €</span></div></div><div class="cfoot"><div class="amts"></div><div class="acts"><button class="ib cf" onclick="confOth('${o.id}')" title="Πληρώθηκε">✓</button><button class="ib" onclick="delOth('${o.id}')" style="color:var(--rd)">✕</button></div></div></div>`).join('');
+    h+=oths.filter(o=>!o.paid).map(o=>`<div class="card">
+      <div class="ch">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="csup">${o.name}</span>
+          <span class="loc ${lC(o.location_id)}">${lN(o.location_id)}</span>
+        </div>
+        <div class="cmeta"><span class="badge bo">Άλλη υποχρέωση</span><span class="cdate">${fd(o.due_date)}</span></div>
+      </div>
+      <div class="cbody">
+        <div class="fi"><label>Κατηγορία</label><span>${o.category||'—'}</span></div>
+        <div class="fi"><label>Ποσό</label><span style="color:var(--am)">${fmt(o.amount)} €</span></div>
+        ${o.notes?`<div class="fi" style="grid-column:1/-1"><label>Σημειώσεις</label><span style="color:var(--t1)">${o.notes}</span></div>`:''}
+      </div>
+      <div class="cfoot"><div class="amts"></div>
+        <div class="acts">
+          <button class="ib cf" onclick="confOth('${o.id}')" title="Πληρώθηκε">✓</button>
+          <button class="ib" onclick="delOth('${o.id}')" style="color:var(--rd)">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
   }
   set('olist',h||'<div class="empty"><div class="ic">📦</div><p>Δεν βρέθηκαν εγγραφές</p></div>');
 }
