@@ -704,7 +704,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
         <div class="spf"><h4>+ Νέα κατηγορία</h4>
           <div class="spg">
             <div class="fg"><label>Όνομα *</label><input type="text" id="catname" placeholder="π.χ. Αναλώσιμα"></div>
-            <div class="fg"><label>Τύπος</label><select id="cattype"><option value="product">Προϊόν</option><option value="order">Παραγγελία</option></select></div>
+            <div class="fg"><label>Τύπος</label><select id="cattype"><option value="product">Προϊόν</option><option value="order">Παραγγελία</option><option value="operational">Λειτουργικά έξοδα</option></select></div>
           </div>
           <div class="spff"><button class="btn p" onclick="saveCat()">Αποθήκευση</button></div>
         </div>
@@ -1446,7 +1446,7 @@ function rMgmt(){
       <button class="ib" onclick="editUser('${u.id}')" title="Επεξεργασία">✎</button>
     </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν χρήστες</td></tr>');
 
-  set('catlist',cats.map(c=>`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${c.type==='product'?'Προϊόν':'Παραγγελία'})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">✕</button></div>`).join(''));
+  set('catlist',cats.map(c=>{const tl={product:'Προϊόν',order:'Παραγγελία',operational:'Λειτουργικά'};return`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${tl[c.type]||c.type})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">✕</button></div>`}).join(''));
 }
 
 // CATALOG TAB
