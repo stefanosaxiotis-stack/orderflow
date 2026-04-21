@@ -739,6 +739,7 @@ let chartMonthly=null,chartSupplier=null;
 // ══════════════════════════════════════════════════════
 const td=()=>new Date().toISOString().split('T')[0];
 const fmt=n=>Number(n||0).toLocaleString('el-GR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtU=n=>{const v=Number(n||0);if(v===0)return'0,00';if(v<0.01)return v.toLocaleString('el-GR',{minimumFractionDigits:4,maximumFractionDigits:5});if(v<0.1)return v.toLocaleString('el-GR',{minimumFractionDigits:3,maximumFractionDigits:4});return v.toLocaleString('el-GR',{minimumFractionDigits:2,maximumFractionDigits:3});};
 const fd=d=>d?new Date(d).toLocaleDateString('el-GR'):'—';
 const lN=id=>locs.find(x=>x.id===id)?.name||'—';
 const sN=id=>{const s=sups.find(x=>x.id===id);return s?(s.friendly_name||s.name):'—';};
@@ -1179,7 +1180,7 @@ function rPrices(){
         <td style="${idx===0?'':'opacity:0'}">${idx===0?(sp?.supplier_description||p.supplier_description||'—'):''}</td>
         <td style="${idx===0?'':'opacity:0'}">${idx===0?(p.package_unit||'—')+' ('+( p.package_qty||1)+' '+(prod?.base_unit||'')+')':''}</td>
         <td style="${color}">${fmt(p.package_price)} €</td>
-        <td style="${color}">${fmt(p.unit_price)} €/${prod?.base_unit||''} ${isBest?'★':''}</td>
+        <td style="${color}">${fmtU(p.unit_price)} €/${prod?.base_unit||''} ${isBest?'★':''}</td>
         <td style="color:var(--td);font-size:11px">${fd(p.recorded_at)}</td>
       </tr>`;
     });
@@ -1320,7 +1321,7 @@ function rDash(){
 
   // Πρόσφατες τιμές
   const recentPrices=[...prs].slice(0,5);
-  set('dash-prices',recentPrices.length?recentPrices.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--nb);font-size:12px"><div><div style="color:var(--t2)">${pN(p.product_id)}</div><div style="color:var(--td);font-size:11px">${sN(p.supplier_id)}</div></div><span style="color:var(--gn);font-weight:600">${fmt(p.unit_price)} €/τμχ</span></div>`).join(''):'<div style="color:var(--td);font-size:12px;padding:10px 0">Δεν υπάρχουν τιμές</div>');
+  set('dash-prices',recentPrices.length?recentPrices.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--nb);font-size:12px"><div><div style="color:var(--t2)">${pN(p.product_id)}</div><div style="color:var(--td);font-size:11px">${sN(p.supplier_id)}</div></div><span style="color:var(--gn);font-weight:600">${fmtU(p.unit_price)} €/τμχ</span></div>`).join(''):'<div style="color:var(--td);font-size:12px;padding:10px 0">Δεν υπάρχουν τιμές</div>');
 
   // Charts
   rDashCharts();
