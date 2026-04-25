@@ -253,6 +253,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="tbr">
     <span class="ub" id="ubadge"></span>
     <button class="mbtn ao" onclick="openMgmt()">⚙ Διαχείριση</button>
+    <button class="lout" onclick="load().then(()=>toast('Ανανεώθηκε!'))" title="Ανανέωση δεδομένων">🔄</button>
     <button class="lout" onclick="doLogout()">→ Έξοδος</button>
   </div>
 </div>
@@ -376,9 +377,15 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="cc av"><div class="cl2">💵 Διαθέσιμα μετρητά</div><div class="ca" id="cavail" style="color:var(--gn)">—</div></div>
   </div>
   <div class="tlb">
-    <div class="fils" id="clf" style="margin:0"><div class="pill active" onclick="fCash('all',this)">Όλα</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <div class="fils" id="clf" style="margin:0"><div class="pill active" onclick="fCash('all',this)">Όλα</div></div>
+      <div style="width:1px;background:var(--nb);height:20px"></div>
+      <div class="vb" id="cf-week" onclick="fCashTime('week',this)">Τρέχουσα εβδομάδα</div>
+      <div class="vb" id="cf-month" onclick="fCashTime('month',this)">Τρέχων μήνας</div>
+      <div class="vb active" id="cf-all" onclick="fCashTime('all',this)">Όλο το ιστορικό</div>
+    </div>
     <div class="tbr2">
-      <button class="btn" onclick="om('mcp')">+ Πληρωμή</button>
+      <button class="btn" onclick="om('mcp')">− Πληρωμή</button>
       <button class="btn p" onclick="om('mce')">+ Καταχώρηση μετρητών ημέρας</button>
     </div>
   </div>
@@ -559,6 +566,51 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Επεξεργασία άλλης υποχρέωσης -->
+<div class="mbg" id="meditoth">
+  <div class="modal"><h2>✎ Επεξεργασία υποχρέωσης</h2>
+    <input type="hidden" id="eoth-id">
+    <div class="fg2">
+      <div class="f s2"><label>Περιγραφή *</label><input type="text" id="eoth-name"></div>
+      <div class="f"><label>Κατηγορία</label><select id="eoth-cat"></select></div>
+      <div class="f"><label>Τοποθεσία *</label><select id="eoth-loc"></select></div>
+      <div class="f"><label>Προμηθευτής</label><select id="eoth-sup"></select></div>
+      <div class="f"><label>Ποσό (€)</label><input type="number" id="eoth-amt" step="0.01"></div>
+      <div class="f"><label>Ημερομηνία λήξης</label><input type="date" id="eoth-due"></div>
+      <div class="f s2"><label>Σημειώσεις</label><input type="text" id="eoth-notes"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('meditoth')">Ακύρωση</button><button class="btn p" onclick="saveOthEdit()">Αποθήκευση</button></div>
+  </div>
+</div>
+
+<!-- IBAN Modal -->
+<div class="mbg" id="miban">
+  <div class="modal" style="max-width:440px"><h2>🏦 Στοιχεία πληρωμής</h2>
+    <div id="iban-content" style="display:flex;flex-direction:column;gap:16px">
+      <div>
+        <div style="font-size:11px;color:var(--td);margin-bottom:4px">Δικαιούχος</div>
+        <div id="iban-benef" style="font-size:15px;font-weight:600;color:var(--t1)">—</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--td);margin-bottom:4px">Τράπεζα</div>
+        <div id="iban-bank" style="font-size:14px;color:var(--t2)">—</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--td);margin-bottom:6px">IBAN</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="iban-num" style="font-family:monospace;font-size:16px;font-weight:600;color:var(--pk);letter-spacing:1px;flex:1">—</div>
+          <button class="btn p" onclick="copyIban()" style="white-space:nowrap">📋 Αντιγραφή</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--td);margin-bottom:4px">Ποσό προς πληρωμή</div>
+        <div id="iban-amount" style="font-size:22px;font-weight:700;color:var(--am)">—</div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('miban')">Κλείσιμο</button></div>
+  </div>
+</div>
+
 <!-- Πιστωτικό -->
 <div class="mbg" id="mcredit">
   <div class="modal"><h2>💳 Καταχώρηση πιστωτικού</h2>
@@ -597,6 +649,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <div class="f"><label>Ρόλος</label>
         <select id="eu-role">
           <option value="admin">Admin (Διαχειριστής)</option>
+          <option value="manager">Manager</option>
           <option value="store">Store (Κατάστημα)</option>
         </select>
       </div>
@@ -607,6 +660,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
           <option value="false">Ανενεργός</option>
         </select>
       </div>
+      <div class="f"><label>Νέος κωδικός (προαιρετικό)</label><input type="password" id="eu-pass" placeholder="Αφήστε κενό για να μην αλλάξει"></div>
     </div>
     <div class="mf"><button class="btn" onclick="cm('medituser')">Ακύρωση</button><button class="btn p" onclick="saveUserEdit()">Αποθήκευση</button></div>
   </div>
@@ -696,8 +750,6 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <div class="fg"><label>Τοποθεσία (store)</label><select id="uloc"></select></div>
           </div>
           <div class="spff"><button class="btn p" onclick="saveUser()">Δημιουργία</button></div>
-        </div>
-        <p style="font-size:11px;color:var(--td);margin-bottom:10px">⚠ Η δημιουργία χρηστών γίνεται από τον διαχειριστή του συστήματος.</p>
         <table class="sptbl"><thead><tr><th>Όνομα</th><th>Email</th><th>Ρόλος</th><th>Τοποθεσία</th><th>Ενεργός</th><th></th></tr></thead><tbody id="utbl"></tbody></table>
       </div>
 
@@ -775,6 +827,10 @@ async function init(user){
   document.getElementById('app').style.display='block';
   document.getElementById('ubadge').textContent=p?.full_name||user.email;
   if(p?.role==='store'){document.querySelectorAll('.ao').forEach(e=>e.style.display='none');sw('cash',document.getElementById('tab-cash'));}
+  else if(p?.role==='manager'){
+    // Manager βλέπει όλα εκτός από tab Χρήστες στη Διαχείριση
+    sw('dash',document.getElementById('tab-dash'));
+  }
   else sw('dash',document.getElementById('tab-dash'));
   await load();
 }
@@ -900,6 +956,8 @@ function rOrders(){
     else if(kwm[f]){const kw=kwm[f];fl=fl.filter(o=>{const l=locs.find(x=>x.id===o.location_id);return l&&l.name.includes(kw);});}
     const sm={pending:'Εκκρεμής',delivered:'Παραδόθηκε',cancelled:'Ακυρώθηκε'};
     const bc={pending:'bp',delivered:'bd',cancelled:'bc'};
+    // Στο "Όλες" κρύβουμε παραδοθείσες + εξοφλημένες
+    if(f==='all')fl=fl.filter(o=>!(o.status==='delivered'&&Number(o.balance||0)===0));
     h+=fl.map(o=>{
       const bal=Number(o.balance||0);
       const items=oitems.filter(i=>i.order_id===o.id);
@@ -929,7 +987,8 @@ function rOrders(){
           <div class="acts">
             <button class="ib" onclick="editOrd('${o.id}')" title="Επεξεργασία">✎</button>
             <button class="ib" onclick="openCredit('${o.id}')" title="Πιστωτικό" style="color:var(--gn);border-color:var(--gn)">₊</button>
-            ${o.status==='pending'?`<button class="ib cf" onclick="confDlv('${o.id}')" title="Επιβεβαίωση παράδοσης">✓</button>`:''}
+            ${bal>0?`<button class="ib cf" onclick="confOrderPayment('${o.id}')" title="Καταχώρηση πληρωμής">💳</button>`:''}
+            ${o.status==='pending'?`<button class="ib cf" onclick="confDlv('${o.id}')" title="Επιβεβαίωση παράδοσης" style="font-size:16px">🚚</button>`:''}
             <button class="ib" onclick="delOrd('${o.id}')" style="color:var(--rd)" title="Διαγραφή">✕</button>
           </div>
         </div>
@@ -976,7 +1035,8 @@ function rOrders(){
       </div>
       <div class="cfoot"><div class="amts"></div>
         <div class="acts">
-          <button class="ib cf" onclick="confOth('${o.id}')" title="Πληρώθηκε">✓</button>
+          <button class="ib" onclick="editOth('${o.id}')" title="Επεξεργασία">✎</button>
+          <button class="ib cf" onclick="confOth('${o.id}')" title="💳 Πληρώθηκε">💳</button>
           <button class="ib" onclick="delOth('${o.id}')" style="color:var(--rd)">✕</button>
         </div>
       </div>
@@ -1260,7 +1320,23 @@ function rPay(){
   set('pc',fl.length);set('pt',fmt(fl.reduce((s,i)=>s+i.amount,0))+' €');
   set('pov',fl.filter(i=>i.dl<0).length);set('psn',fl.filter(i=>i.dl>=0&&i.dl<=7).length);
   if(!fl.length){set('plist',`<div class="empty"><div class="ic">📅</div><p>${iF?'Δεν υπάρχουν προγραμματισμένες':'Δεν υπάρχουν εκκρεμείς'} πληρωμές</p></div>`);return;}
-  set('plist',fl.map(i=>{const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';const cb=i.fc?'':`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="Πληρώθηκε">✓</button>`;return`<div class="pi"><div class="pd2 ${cl}">${lb}</div><div class="pinf"><div class="pnm">${i.name}</div><div class="psb">${i.sub} · Λήξη: ${fd(i.due)}</div></div><div class="pam">${fmt(i.amount)} €</div><div class="pact">${cb}</div></div>`;}).join(''));
+  set('plist',fl.map(i=>{
+    const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';
+    const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';
+    const s=i.type==='order'?sups.find(x=>x.id===ords.find(o=>o.id===i.id)?.supplier_id):null;
+    const hasIban=s?.iban;
+    const cb=i.fc?'':`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="💳 Πληρώθηκε">💳</button>`;
+    const ibBtn=hasIban?`<button class="ib" onclick="showIban('${i.id}','${i.type}',${i.amount})" title="Στοιχεία πληρωμής" style="color:var(--gn);border-color:var(--gn)">🏦</button>`:'';
+    return`<div class="pi">
+      <div class="pd2 ${cl}">${lb}</div>
+      <div class="pinf">
+        <div class="pnm">${i.name}</div>
+        <div class="psb">${i.sub} · Λήξη: ${fd(i.due)}</div>
+      </div>
+      <div class="pam">${fmt(i.amount)} €</div>
+      <div class="pact">${ibBtn}${cb}</div>
+    </div>`;
+  }).join(''));
 }
 async function confPI(t,id){
   if(t==='rec')await confRec(id);
@@ -1283,8 +1359,18 @@ async function confOrderPayment(id){
 // ══════════════════════════════════════════════════════
 function fCash(f,el){document.querySelectorAll('#clf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aCF=f;rCash();}
 function rCash(){
+  const now=new Date();
   let en=[...ces],py=[...cps];
   if(aCF!=='all'){en=en.filter(e=>e.location_id===aCF);py=py.filter(p=>p.location_id===aCF);}
+  // Χρονικά φίλτρα
+  if(aCashTime==='week'){
+    const start=new Date(now);start.setDate(now.getDate()-now.getDay()+1);start.setHours(0,0,0,0);
+    const startStr=start.toISOString().split('T')[0];
+    en=en.filter(e=>e.entry_date>=startStr);py=py.filter(p=>p.payment_date>=startStr);
+  }else if(aCashTime==='month'){
+    const startStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+    en=en.filter(e=>e.entry_date>=startStr);py=py.filter(p=>p.payment_date>=startStr);
+  }
   const ti=en.reduce((s,e)=>s+Number(e.amount),0);
   const to=py.reduce((s,p)=>s+Number(p.amount),0);
   const av=ti-to;
@@ -1444,7 +1530,56 @@ async function saveCredit(){
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 
-function openMgmt(){document.getElementById('spbg').classList.add('open');rMgmt();}
+// ══ IBAN MODAL ══
+function showIban(id,type,amount){
+  let sup=null;
+  if(type==='order'){const o=ords.find(x=>x.id===id);sup=sups.find(x=>x.id===o?.supplier_id);}
+  else if(type==='rec'){const r=recs.find(x=>x.id===id);sup=sups.find(x=>x.id===r?.supplier_id);}
+  set('iban-benef',sup?.beneficiary||sup?.name||'—');
+  set('iban-bank',sup?.bank||'—');
+  set('iban-num',sup?.iban||'Δεν υπάρχει IBAN');
+  set('iban-amount',fmt(amount)+' €');
+  document.getElementById('miban').classList.add('open');
+}
+function copyIban(){
+  const iban=document.getElementById('iban-num').textContent;
+  navigator.clipboard.writeText(iban).then(()=>toast('IBAN αντιγράφηκε! 📋'));
+}
+
+// ══ CASH TIME FILTERS ══
+let aCashTime='all';
+function fCashTime(f,el){
+  document.querySelectorAll('#cf-week,#cf-month,#cf-all').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');aCashTime=f;rCash();
+}
+
+// ══ EDIT OTHER OBLIGATION ══
+function editOth(id){
+  const o=oths.find(x=>x.id===id);if(!o)return;
+  document.getElementById('eoth-id').value=id;
+  document.getElementById('eoth-name').value=o.name||'';
+  document.getElementById('eoth-cat').innerHTML='<option value="">— Επιλογή —</option>'+cats.map(c=>`<option value="${c.name}" ${c.name===o.category?'selected':''}>${c.name}</option>`).join('');
+  document.getElementById('eoth-loc').innerHTML=locs.map(l=>`<option value="${l.id}" ${l.id===o.location_id?'selected':''}>${l.name}</option>`).join('');
+  document.getElementById('eoth-sup').innerHTML='<option value="">— Χωρίς —</option>'+sups.map(s=>`<option value="${s.id}" ${s.id===o.supplier_id?'selected':''}>${s.friendly_name||s.name}</option>`).join('');
+  document.getElementById('eoth-amt').value=o.amount||0;
+  document.getElementById('eoth-due').value=o.due_date||'';
+  document.getElementById('eoth-notes').value=o.notes||'';
+  document.getElementById('meditoth').classList.add('open');
+}
+async function saveOthEdit(){
+  const id=document.getElementById('eoth-id').value;
+  const d={name:document.getElementById('eoth-name').value,category:document.getElementById('eoth-cat').value,location_id:document.getElementById('eoth-loc').value,supplier_id:document.getElementById('eoth-sup').value||null,amount:parseFloat(document.getElementById('eoth-amt').value)||0,due_date:document.getElementById('eoth-due').value||null,notes:document.getElementById('eoth-notes').value};
+  if(!d.name||!d.location_id){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
+  try{const{error}=await getDb().from('other_obligations').update(d).eq('id',id);if(error)throw error;const idx=oths.findIndex(x=>x.id===id);if(idx>=0)oths[idx]={...oths[idx],...d};cm('meditoth');rOrders();toast('Υποχρέωση ενημερώθηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
+
+function openMgmt(){
+  document.getElementById('spbg').classList.add('open');
+  // Manager δεν βλέπει tab Χρήστες
+  const usersTab=document.querySelector('.sptab:nth-child(4)');
+  if(usersTab)usersTab.style.display=cP?.role==='manager'?'none':'block';
+  rMgmt();
+}
 function closeMgmt(){document.getElementById('spbg').classList.remove('open');}
 document.getElementById('spbg').addEventListener('click',e=>{if(e.target===document.getElementById('spbg'))closeMgmt();});
 
@@ -1480,11 +1615,12 @@ function rMgmt(){
   set('utbl',ups.length?ups.map(u=>`<tr>
     <td>${u.full_name||'—'}</td>
     <td style="font-size:11px">${u.email}</td>
-    <td><span class="badge ${u.role==='admin'?'bd':'br'}">${u.role}</span></td>
+    <td><span class="badge ${u.role==='admin'?'bd':u.role==='manager'?'bp':'br'}">${u.role}</span></td>
     <td>${lN(u.location_id)}</td>
     <td><span style="color:${u.active?'var(--gn)':'var(--rd)'}">${u.active?'✓':'✗'}</span></td>
     <td style="display:flex;gap:4px">
       <button class="ib" onclick="editUser('${u.id}')" title="Επεξεργασία">✎</button>
+      ${u.id!==cU?.id?`<button class="ib" onclick="deleteUser('${u.id}')" style="color:var(--rd)" title="Διαγραφή">✕</button>`:''}
     </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν χρήστες</td></tr>');
 
   set('catlist',cats.map(c=>{const tl={product:'Προϊόν',order:'Παραγγελία',operational:'Λειτουργικά'};return`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${tl[c.type]||c.type})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">✕</button></div>`}).join(''));
@@ -1582,10 +1718,34 @@ async function delCat(id){if(!confirm('Διαγραφή;'))return;await getDb().
 
 // USERS
 async function saveUser(){
-  toast('Η δημιουργία χρηστών γίνεται από τον διαχειριστή του συστήματος.','err');
+  const email=document.getElementById("uemail").value.trim();
+  const pw=document.getElementById("upass").value;
+  const fn=document.getElementById("uname").value.trim();
+  const role=document.getElementById("urole").value;
+  const lid=document.getElementById("uloc").value||null;
+  if(!email||!pw||!fn){toast("Συμπλήρωσε όλα τα υποχρεωτικά πεδία","err");return;}
+  if(pw.length<6){toast("Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες","err");return;}
+  try{
+    const session=await getDb().auth.getSession();
+    const token=session.data.session?.access_token;
+    const res=await fetch(`${SURL}/functions/v1/manage-user`,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"create",email,password:pw,full_name:fn,role,location_id:lid})});
+    const data=await res.json();
+    if(!data.success)throw new Error(data.error);
+    ["uname","uemail","upass"].forEach(i=>document.getElementById(i).value="");
+    await load();rMgmt();toast("Χρήστης δημιουργήθηκε!");
+  }catch(e){toast("Σφάλμα: "+e.message,"err");}
 }
-async function togU(id,active){await getDb().from('user_profiles').update({active}).eq('id',id);const u=ups.find(x=>x.id===id);if(u)u.active=active;rMgmt();toast(active?'Ενεργοποιήθηκε':'Απενεργοποιήθηκε');}
-
+async function togU(id,active){
+  try{
+    const session=await getDb().auth.getSession();
+    const token=session.data.session?.access_token;
+    const res=await fetch(`${SURL}/functions/v1/manage-user`,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"update_role",user_id:id,active})});
+    const data=await res.json();
+    if(!data.success)throw new Error(data.error);
+    const u=ups.find(x=>x.id===id);if(u)u.active=active;
+    rMgmt();toast(active?"Ενεργοποιήθηκε":"Απενεργοποιήθηκε");
+  }catch(e){toast("Σφάλμα: "+e.message,"err");}
+}
 function editUser(id){
   const u=ups.find(x=>x.id===id);if(!u)return;
   document.getElementById('eu-id').value=id;
@@ -1604,13 +1764,29 @@ async function saveUserEdit(){
   const role=document.getElementById('eu-role').value;
   const loc=document.getElementById('eu-loc').value||null;
   const active=document.getElementById('eu-active').value==='true';
+  const newPass=document.getElementById('eu-pass').value;
   try{
+    const session=await getDb().auth.getSession();
+    const token=session.data.session?.access_token;
+    // Αλλαγή ρόλου/τοποθεσίας/ενεργός
     const{error}=await getDb().from('user_profiles').update({role,location_id:loc,active}).eq('id',id);
     if(error)throw error;
     const u=ups.find(x=>x.id===id);
     if(u){u.role=role;u.location_id=loc;u.active=active;}
+    // Αλλαγή κωδικού αν συμπληρώθηκε
+    if(newPass){
+      if(newPass.length<6){toast('Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες','err');return;}
+      const res=await fetch(`${SURL}/functions/v1/manage-user`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body:JSON.stringify({action:'update_password',user_id:id,password:newPass})
+      });
+      const data=await res.json();
+      if(!data.success)throw new Error(data.error);
+    }
+    document.getElementById('eu-pass').value='';
     cm('medituser');rMgmt();
-    toast('Χρήστης ενημερώθηκε!');
+    toast('Χρήστης ενημερώθηκε!'+(newPass?' (κωδικός άλλαξε)':''));
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 </script>
