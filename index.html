@@ -1797,7 +1797,11 @@ function buildTabChecks(selTabs){
 
 function buildLocChecks(selLocs){
   const cont=document.getElementById('eu-locs-checks');
-  cont.innerHTML=locs.map(l=>`<div class="chk-btn on-loc ${selLocs.includes(l.id)?'on-loc':'':''}" onclick="toggleChk(this,'locs')" data-val="${l.id}" style="${selLocs.includes(l.id)?'background:#0d1a30;border-color:#5080c0;color:#7090d0':'background:var(--ni);border-color:var(--nb);color:var(--tm)'}">${l.name}</div>`).join('');
+  cont.innerHTML=locs.map(l=>{
+    const on=selLocs.includes(l.id);
+    const st=on?'background:#0d1a30;border-color:#5080c0;color:#7090d0;font-weight:500':'background:var(--ni);border-color:var(--nb);color:var(--tm)';
+    return`<div class="chk-btn" onclick="toggleChk(this,'locs')" data-val="${l.id}" style="${st};padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid ${on?'#5080c0':'var(--nb)'};cursor:pointer;transition:all .15s">${l.name}</div>`;
+  }).join('');
 }
 
 function toggleChk(el,type){
