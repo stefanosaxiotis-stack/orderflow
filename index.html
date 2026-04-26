@@ -905,7 +905,7 @@ async function load(){
       ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];
     }else{
       // Manager/Store φορτώνουν δεδομένα βάσει ρόλου
-      if(p?.role==='manager'){
+      if(cP?.role==='manager'){
         // Manager φορτώνει όλα όπως admin
         const[a,b,c,d,e,g,h,oi,r9]=await Promise.all([
           getDb().from('orders').select('*').order('order_date',{ascending:false}),
@@ -923,7 +923,7 @@ async function load(){
       }else{
         // Store φορτώνει μόνο cash για τα καταστήματά του
         ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];credits=[];
-        const permLocs=p?.permissions?.locations||[];
+        const permLocs=cP?.permissions?.locations||[];
         let ceQ=getDb().from('cash_entries').select('*').order('entry_date',{ascending:false});
         let cpQ=getDb().from('cash_payments').select('*').order('payment_date',{ascending:false});
         if(permLocs.length===1){ceQ=ceQ.eq('location_id',permLocs[0]);cpQ=cpQ.eq('location_id',permLocs[0]);}
