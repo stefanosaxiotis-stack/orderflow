@@ -217,6 +217,9 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .iccr{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:end}
 .iccop{font-size:18px;color:var(--td);text-align:center;padding-bottom:8px}
 
+.chk-btn{padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s;user-select:none}
+.chk-btn.on{background:var(--pd);border-color:var(--pk);color:var(--pk);font-weight:500}
+.chk-btn.on-loc{background:#0d1a30;border-color:#5080c0;color:#7090d0;font-weight:500}
 @media(max-width:600px){
   .fg2{grid-template-columns:1fr}.fg2 .f.s2{grid-column:span 1}
   .spg{grid-template-columns:1fr}.fg.full{grid-column:span 1}
@@ -641,26 +644,33 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 
 <!-- Edit User Modal -->
 <div class="mbg" id="medituser">
-  <div class="modal"><h2>✎ Επεξεργασία χρήστη</h2>
+  <div class="modal" style="max-width:580px"><h2>✎ Επεξεργασία χρήστη</h2>
     <input type="hidden" id="eu-id">
     <div class="fg2">
       <div class="f s2"><label>Όνομα</label><input type="text" id="eu-name" readonly style="opacity:.7"></div>
       <div class="f s2"><label>Email</label><input type="text" id="eu-email" readonly style="opacity:.7"></div>
       <div class="f"><label>Ρόλος</label>
-        <select id="eu-role">
-          <option value="admin">Admin (Διαχειριστής)</option>
+        <select id="eu-role" onchange="updPermFields()">
+          <option value="admin">Admin</option>
           <option value="manager">Manager</option>
-          <option value="store">Store (Κατάστημα)</option>
+          <option value="store">Store</option>
         </select>
       </div>
-      <div class="f"><label>Τοποθεσία (για store)</label><select id="eu-loc"></select></div>
       <div class="f"><label>Ενεργός</label>
         <select id="eu-active">
           <option value="true">Ενεργός</option>
           <option value="false">Ανενεργός</option>
         </select>
       </div>
-      <div class="f"><label>Νέος κωδικός (προαιρετικό)</label><input type="password" id="eu-pass" placeholder="Αφήστε κενό για να μην αλλάξει"></div>
+      <div class="f s2"><label>Νέος κωδικός (προαιρετικό)</label><input type="password" id="eu-pass" placeholder="Αφήστε κενό για να μην αλλάξει"></div>
+    </div>
+    <div id="eu-tabs-section" style="display:none;margin-top:16px">
+      <div style="font-size:12px;color:var(--td);margin-bottom:8px;font-weight:500">📋 Tabs πρόσβασης</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px" id="eu-tabs-checks"></div>
+    </div>
+    <div id="eu-locs-section" style="display:none;margin-top:16px">
+      <div style="font-size:12px;color:var(--td);margin-bottom:8px;font-weight:500">📍 Καταστήματα πρόσβασης</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px" id="eu-locs-checks"></div>
     </div>
     <div class="mf"><button class="btn" onclick="cm('medituser')">Ακύρωση</button><button class="btn p" onclick="saveUserEdit()">Αποθήκευση</button></div>
   </div>
@@ -746,7 +756,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <div class="fg full"><label>Πλήρες όνομα *</label><input type="text" id="uname"></div>
             <div class="fg full"><label>Email *</label><input type="email" id="uemail"></div>
             <div class="fg full"><label>Κωδικός * (min 6 χαρ.)</label><input type="password" id="upass"></div>
-            <div class="fg"><label>Ρόλος</label><select id="urole"><option value="store">Store</option><option value="admin">Admin</option></select></div>
+            <div class="fg"><label>Ρόλος</label><select id="urole"><option value="store">Store</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div>
             <div class="fg"><label>Τοποθεσία (store)</label><select id="uloc"></select></div>
           </div>
           <div class="spff"><button class="btn p" onclick="saveUser()">Δημιουργία</button></div>
@@ -826,12 +836,13 @@ async function init(user){
   document.getElementById('ls').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('ubadge').textContent=p?.full_name||user.email;
-  if(p?.role==='store'){document.querySelectorAll('.ao').forEach(e=>e.style.display='none');sw('cash',document.getElementById('tab-cash'));}
-  else if(p?.role==='manager'){
-    // Manager βλέπει όλα εκτός από tab Χρήστες στη Διαχείριση
+  if(p?.role==='store'){
+    document.querySelectorAll('.ao').forEach(e=>e.style.display='none');
+    sw('cash',document.getElementById('tab-cash'));
+  }else if(p?.role==='manager'){
+    applyPermissions(p);
     sw('dash',document.getElementById('tab-dash'));
-  }
-  else sw('dash',document.getElementById('tab-dash'));
+  }else sw('dash',document.getElementById('tab-dash'));
   await load();
 }
 getDb().auth.getSession().then(({data:{session}})=>{if(session)init(session.user);});
@@ -1746,6 +1757,61 @@ async function togU(id,active){
     rMgmt();toast(active?"Ενεργοποιήθηκε":"Απενεργοποιήθηκε");
   }catch(e){toast("Σφάλμα: "+e.message,"err");}
 }
+function applyPermissions(profile){
+  const perms=profile.permissions||{tabs:ALL_TABS.map(t=>t.id),locations:[]};
+  const allowedTabs=perms.tabs||ALL_TABS.map(t=>t.id);
+  // Κρύψε tabs που δεν επιτρέπονται
+  const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',excel:'tab-excel'};
+  Object.entries(tabMap).forEach(([key,tabId])=>{
+    const el=document.getElementById(tabId);
+    if(el)el.style.display=allowedTabs.includes(key)?'':'none';
+  });
+  // Κρύψε διαχείριση αν δεν έχει δικαίωμα
+  const mgmtBtn=document.querySelector('.mbtn');
+  if(mgmtBtn)mgmtBtn.style.display=allowedTabs.includes('mgmt')?'':'none';
+}
+
+const ALL_TABS=[
+  {id:'dashboard',label:'📊 Dashboard'},
+  {id:'orders',label:'📦 Παραγγελίες'},
+  {id:'stock',label:'🏭 Αποθήκη'},
+  {id:'prices',label:'💹 Τιμές'},
+  {id:'payments',label:'💳 Πληρωμές'},
+  {id:'cash',label:'💵 Μετρητά'},
+  {id:'excel',label:'📊 Excel'},
+  {id:'mgmt',label:'⚙ Διαχείριση'}
+];
+
+function updPermFields(){
+  const role=document.getElementById('eu-role').value;
+  const tabsSec=document.getElementById('eu-tabs-section');
+  const locsSec=document.getElementById('eu-locs-section');
+  tabsSec.style.display=role==='manager'?'block':'none';
+  locsSec.style.display=(role==='manager'||role==='store')?'block':'none';
+}
+
+function buildTabChecks(selTabs){
+  const cont=document.getElementById('eu-tabs-checks');
+  cont.innerHTML=ALL_TABS.map(t=>`<div class="chk-btn ${selTabs.includes(t.id)?'on':''}" onclick="toggleChk(this,'tabs')" data-val="${t.id}">${t.label}</div>`).join('');
+}
+
+function buildLocChecks(selLocs){
+  const cont=document.getElementById('eu-locs-checks');
+  cont.innerHTML=locs.map(l=>`<div class="chk-btn on-loc ${selLocs.includes(l.id)?'on-loc':'':''}" onclick="toggleChk(this,'locs')" data-val="${l.id}" style="${selLocs.includes(l.id)?'background:#0d1a30;border-color:#5080c0;color:#7090d0':'background:var(--ni);border-color:var(--nb);color:var(--tm)'}">${l.name}</div>`).join('');
+}
+
+function toggleChk(el,type){
+  if(type==='tabs'){el.classList.toggle('on');}
+  else{
+    const isOn=el.style.borderColor==='rgb(80, 128, 192)';
+    if(isOn){el.style.cssText='background:var(--ni);border-color:var(--nb);color:var(--tm);padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);cursor:pointer;transition:all .15s';}
+    else{el.style.cssText='background:#0d1a30;border-color:#5080c0;color:#7090d0;font-weight:500;padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid #5080c0;cursor:pointer;transition:all .15s';}
+  }
+}
+
+function getSelTabs(){return Array.from(document.querySelectorAll('#eu-tabs-checks .chk-btn.on')).map(el=>el.dataset.val);}
+function getSelLocs(){return Array.from(document.querySelectorAll('#eu-locs-checks .chk-btn')).filter(el=>el.style.borderColor==='rgb(80, 128, 192)').map(el=>el.dataset.val);}
+
 function editUser(id){
   const u=ups.find(x=>x.id===id);if(!u)return;
   document.getElementById('eu-id').value=id;
@@ -1753,34 +1819,42 @@ function editUser(id){
   document.getElementById('eu-email').value=u.email||'';
   document.getElementById('eu-role').value=u.role||'store';
   document.getElementById('eu-active').value=u.active?'true':'false';
-  // Populate locations
-  const lo='<option value="">— Χωρίς —</option>'+locs.map(l=>`<option value="${l.id}" ${l.id===u.location_id?'selected':''}>${l.name}</option>`).join('');
-  document.getElementById('eu-loc').innerHTML=lo;
+  document.getElementById('eu-pass').value='';
+  // Permissions
+  const perms=u.permissions||{tabs:ALL_TABS.map(t=>t.id),locations:[]};
+  const selTabs=perms.tabs||ALL_TABS.map(t=>t.id);
+  const selLocs=perms.locations||[];
+  buildTabChecks(selTabs);
+  buildLocChecks(selLocs);
+  updPermFields();
   document.getElementById('medituser').classList.add('open');
 }
 
 async function saveUserEdit(){
   const id=document.getElementById('eu-id').value;
   const role=document.getElementById('eu-role').value;
-  const loc=document.getElementById('eu-loc').value||null;
   const active=document.getElementById('eu-active').value==='true';
   const newPass=document.getElementById('eu-pass').value;
+  // Permissions
+  let permissions={tabs:ALL_TABS.map(t=>t.id),locations:[]};
+  if(role==='manager'){
+    permissions.tabs=getSelTabs();
+    permissions.locations=getSelLocs();
+  }else if(role==='store'){
+    permissions.tabs=['cash'];
+    permissions.locations=getSelLocs();
+  }
   try{
-    const session=await getDb().auth.getSession();
-    const token=session.data.session?.access_token;
-    // Αλλαγή ρόλου/τοποθεσίας/ενεργός
-    const{error}=await getDb().from('user_profiles').update({role,location_id:loc,active}).eq('id',id);
+    const{error}=await getDb().from('user_profiles').update({role,active,permissions}).eq('id',id);
     if(error)throw error;
     const u=ups.find(x=>x.id===id);
-    if(u){u.role=role;u.location_id=loc;u.active=active;}
+    if(u){u.role=role;u.active=active;u.permissions=permissions;}
     // Αλλαγή κωδικού αν συμπληρώθηκε
     if(newPass){
       if(newPass.length<6){toast('Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες','err');return;}
-      const res=await fetch(`${SURL}/functions/v1/manage-user`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body:JSON.stringify({action:'update_password',user_id:id,password:newPass})
-      });
+      const session=await getDb().auth.getSession();
+      const token=session.data.session?.access_token;
+      const res=await fetch(`${SURL}/functions/v1/manage-user`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action:'update_password',user_id:id,password:newPass})});
       const data=await res.json();
       if(!data.success)throw new Error(data.error);
     }
