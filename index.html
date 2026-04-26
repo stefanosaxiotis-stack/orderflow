@@ -920,8 +920,9 @@ function popSel(){
   s('cat2-filter-prod','<option value="">Όλα τα είδη</option>'+pr);
   const pf=document.getElementById('pfp');if(pf)pf.innerHTML='<option value="">Όλα τα είδη</option>'+pr;
   const pfs=document.getElementById('pfps');if(pfs)pfs.innerHTML='<option value="">Όλοι οι προμηθευτές</option>'+su;
+  const allowedLocs2=cP?.role==='admin'?locs:(locs.filter(l=>(cP?.permissions?.locations||[]).includes(l.id)));
   const clf=document.getElementById('clf');
-  if(clf)clf.innerHTML='<div class="pill active" onclick="fCash(\'all\',this)">Όλα</div>'+locs.map(l=>`<div class="pill" onclick="fCash('${l.id}',this)">${l.name}</div>`).join('');
+  if(clf)clf.innerHTML='<div class="pill active" onclick="fCash(\'all\',this)">Όλα</div>'+allowedLocs2.map(l=>`<div class="pill" onclick="fCash('${l.id}',this)">${l.name}</div>`).join('');
 }
 
 // ══════════════════════════════════════════════════════
@@ -1372,7 +1373,19 @@ function fCash(f,el){document.querySelectorAll('#clf .pill').forEach(p=>p.classL
 function rCash(){
   const now=new Date();
   let en=[...ces],py=[...cps];
-  if(aCF!=='all'){en=en.filter(e=>e.location_id===aCF);py=py.filter(p=>p.location_id===aCF);}
+
+  // Φίλτρο βάσει permissions.locations
+  const allowedLocs=cP?.role==='admin'?null:(cP?.permissions?.locations||[]);
+  if(allowedLocs&&allowedLocs.length>0){
+    en=en.filter(e=>allowedLocs.includes(e.location_id));
+    py=py.filter(p=>allowedLocs.includes(p.location_id));
+  }
+
+  // Φίλτρο τοποθεσίας (από pills)
+  if(aCF!=='all'){
+    en=en.filter(e=>e.location_id===aCF);
+    py=py.filter(p=>p.location_id===aCF);
+  }
   // Χρονικά φίλτρα
   if(aCashTime==='week'){
     const start=new Date(now);start.setDate(now.getDate()-now.getDay()+1);start.setHours(0,0,0,0);
