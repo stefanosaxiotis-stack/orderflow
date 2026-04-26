@@ -877,12 +877,33 @@ async function load(){
       ]);
       ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];
     }else{
-      ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];
-      const[g,h]=await Promise.all([
-        getDb().from('cash_entries').select('*').eq('location_id',uid).order('entry_date',{ascending:false}),
-        getDb().from('cash_payments').select('*').eq('location_id',uid).order('payment_date',{ascending:false})
+      ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];credits=[];
+      // Για manager/store φόρτωσε βάσει permissions.locations
+      const permLocs=p?.permissions?.locations||[];
+      let ceQ=getDb().from('cash_entries').select('*').order('entry_date',{ascending:false});
+      let cpQ=getDb().from('cash_payments').select('*').order('payment_date',{ascending:false});
+      if(permLocs.length===1){
+        ceQ=ceQ.eq('location_id',permLocs[0]);
+        cpQ=cpQ.eq('location_id',permLocs[0]);
+      }else if(permLocs.length>1){
+        ceQ=ceQ.in('location_id',permLocs);
+        cpQ=cpQ.in('location_id',permLocs);
+      }else if(uid){
+        ceQ=ceQ.eq('location_id',uid);
+        cpQ=cpQ.eq('location_id',uid);
+      }
+      // Manager φορτώνει και παραγγελίες/πληρωμές αν έχει δικαίωμα
+      const tabs=p?.permissions?.tabs||[];
+      const loadAll=p?.role==='manager';
+      const[g,h,a,b,c,e]=await Promise.all([
+        ceQ, cpQ,
+        loadAll?getDb().from('orders').select('*').order('order_date',{ascending:false}):Promise.resolve({data:[]}),
+        loadAll?getDb().from('recurring_obligations').select('*').order('next_due_date'):Promise.resolve({data:[]}),
+        loadAll?getDb().from('prices').select('*').order('recorded_at',{ascending:false}):Promise.resolve({data:[]}),
+        loadAll?getDb().from('other_obligations').select('*').order('created_at',{ascending:false}):Promise.resolve({data:[]})
       ]);
       ces=g.data||[];cps=h.data||[];
+      ords=a.data||[];recs=b.data||[];prs=c.data||[];oths=e.data||[];
     }
     popSel();
     const ap=document.querySelector('.page.active');
@@ -1386,14 +1407,18 @@ function rCash(){
     en=en.filter(e=>e.location_id===aCF);
     py=py.filter(p=>p.location_id===aCF);
   }
-  // Χρονικά φίλτρα
+  // Χρονικά φίλτρα — σύγκριση με substring για να δουλεύει και με timestamps
   if(aCashTime==='week'){
-    const start=new Date(now);start.setDate(now.getDate()-now.getDay()+1);start.setHours(0,0,0,0);
+    const start=new Date(now);
+    const day=now.getDay()||7;
+    start.setDate(now.getDate()-day+1);start.setHours(0,0,0,0);
     const startStr=start.toISOString().split('T')[0];
-    en=en.filter(e=>e.entry_date>=startStr);py=py.filter(p=>p.payment_date>=startStr);
+    en=en.filter(e=>(e.entry_date||'').substring(0,10)>=startStr);
+    py=py.filter(p=>(p.payment_date||'').substring(0,10)>=startStr);
   }else if(aCashTime==='month'){
     const startStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
-    en=en.filter(e=>e.entry_date>=startStr);py=py.filter(p=>p.payment_date>=startStr);
+    en=en.filter(e=>(e.entry_date||'').substring(0,10)>=startStr);
+    py=py.filter(p=>(p.payment_date||'').substring(0,10)>=startStr);
   }
   const ti=en.reduce((s,e)=>s+Number(e.amount),0);
   const to=py.reduce((s,p)=>s+Number(p.amount),0);
