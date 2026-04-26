@@ -877,33 +877,34 @@ async function load(){
       ]);
       ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];
     }else{
-      ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];credits=[];
-      // Για manager/store φόρτωσε βάσει permissions.locations
-      const permLocs=p?.permissions?.locations||[];
-      let ceQ=getDb().from('cash_entries').select('*').order('entry_date',{ascending:false});
-      let cpQ=getDb().from('cash_payments').select('*').order('payment_date',{ascending:false});
-      if(permLocs.length===1){
-        ceQ=ceQ.eq('location_id',permLocs[0]);
-        cpQ=cpQ.eq('location_id',permLocs[0]);
-      }else if(permLocs.length>1){
-        ceQ=ceQ.in('location_id',permLocs);
-        cpQ=cpQ.in('location_id',permLocs);
-      }else if(uid){
-        ceQ=ceQ.eq('location_id',uid);
-        cpQ=cpQ.eq('location_id',uid);
+      // Manager/Store φορτώνουν δεδομένα βάσει ρόλου
+      if(p?.role==='manager'){
+        // Manager φορτώνει όλα όπως admin
+        const[a,b,c,d,e,g,h,oi,r9]=await Promise.all([
+          getDb().from('orders').select('*').order('order_date',{ascending:false}),
+          getDb().from('recurring_obligations').select('*').order('next_due_date'),
+          getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
+          getDb().from('stock_entries').select('*').order('entry_date',{ascending:false}),
+          getDb().from('other_obligations').select('*').order('created_at',{ascending:false}),
+          getDb().from('cash_entries').select('*').order('entry_date',{ascending:false}),
+          getDb().from('cash_payments').select('*').order('payment_date',{ascending:false}),
+          getDb().from('order_items').select('*'),
+          getDb().from('credits').select('*').order('created_at',{ascending:false})
+        ]);
+        ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];
+        ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];ups=[];
+      }else{
+        // Store φορτώνει μόνο cash για τα καταστήματά του
+        ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];credits=[];
+        const permLocs=p?.permissions?.locations||[];
+        let ceQ=getDb().from('cash_entries').select('*').order('entry_date',{ascending:false});
+        let cpQ=getDb().from('cash_payments').select('*').order('payment_date',{ascending:false});
+        if(permLocs.length===1){ceQ=ceQ.eq('location_id',permLocs[0]);cpQ=cpQ.eq('location_id',permLocs[0]);}
+        else if(permLocs.length>1){ceQ=ceQ.in('location_id',permLocs);cpQ=cpQ.in('location_id',permLocs);}
+        else if(uid){ceQ=ceQ.eq('location_id',uid);cpQ=cpQ.eq('location_id',uid);}
+        const[g,h]=await Promise.all([ceQ,cpQ]);
+        ces=g.data||[];cps=h.data||[];
       }
-      // Manager φορτώνει και παραγγελίες/πληρωμές αν έχει δικαίωμα
-      const tabs=p?.permissions?.tabs||[];
-      const loadAll=p?.role==='manager';
-      const[g,h,a,b,c,e]=await Promise.all([
-        ceQ, cpQ,
-        loadAll?getDb().from('orders').select('*').order('order_date',{ascending:false}):Promise.resolve({data:[]}),
-        loadAll?getDb().from('recurring_obligations').select('*').order('next_due_date'):Promise.resolve({data:[]}),
-        loadAll?getDb().from('prices').select('*').order('recorded_at',{ascending:false}):Promise.resolve({data:[]}),
-        loadAll?getDb().from('other_obligations').select('*').order('created_at',{ascending:false}):Promise.resolve({data:[]})
-      ]);
-      ces=g.data||[];cps=h.data||[];
-      ords=a.data||[];recs=b.data||[];prs=c.data||[];oths=e.data||[];
     }
     popSel();
     const ap=document.querySelector('.page.active');
