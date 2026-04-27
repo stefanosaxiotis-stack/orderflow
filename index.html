@@ -212,6 +212,23 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .vt{display:flex;gap:6px;margin-bottom:16px}
 .vb{padding:6px 16px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
 .vb.active{background:var(--pd);border-color:var(--pk);color:var(--pk)}
+
+/* SEGMENTED CONTROL για καταστήματα (μπλε χρώμα για διαχωρισμό από φίλτρα) */
+.locseg{display:inline-flex;background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;padding:3px;flex-wrap:wrap;gap:2px;margin-bottom:14px;max-width:100%}
+.locseg .seg{padding:7px 14px;color:var(--tm);cursor:pointer;font-size:12px;font-weight:500;border-radius:7px;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border:none;background:transparent}
+.locseg .seg:hover{color:var(--t1);background:rgba(144,202,249,.06)}
+.locseg .seg.active{background:rgba(144,202,249,.18);color:#90caf9;font-weight:600}
+.loclbl{font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--td);margin-bottom:6px;font-weight:600;display:flex;align-items:center;gap:5px}
+
+/* CARDS με stats για cash tab */
+.loccards{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.loccard{padding:9px 14px;border-radius:10px;background:var(--ni);border:0.5px solid var(--nb);cursor:pointer;min-width:110px;transition:all .15s}
+.loccard:hover{border-color:#90caf9;transform:translateY(-1px)}
+.loccard.active{background:rgba(144,202,249,.10);border-color:#90caf9}
+.loccard .lc-name{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.loccard.active .lc-name{color:#90caf9}
+.loccard .lc-meta{font-size:11px;color:var(--td);font-weight:500}
+.loccard.active .lc-meta{color:var(--gn)}
 .icc{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;padding:14px;margin-top:12px}
 .icct{font-size:12px;color:var(--pk);margin-bottom:10px;font-weight:500}
 .iccr{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:end}
@@ -300,17 +317,14 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <button class="btn p" onclick="om('mord')">+ Νέα παραγγελία</button>
     </div>
   </div>
+  <div class="loclbl">📍 Κατάστημα</div>
+  <div class="locseg" id="of-locs"></div>
   <div class="fils" id="of">
     <div class="pill active" onclick="fOrd('all',this)">Όλες</div>
     <div class="pill" onclick="fOrd('pending',this)">Εκκρεμείς παραγγελίες</div>
     <div class="pill" onclick="fOrd('delivered',this)">Παραδόθηκαν</div>
     <div class="pill" onclick="fOrd('recurring',this)">Πάγιες υποχρεώσεις</div>
     <div class="pill" onclick="fOrd('other',this)">Άλλες υποχρεώσεις</div>
-    <div style="width:1px;background:var(--nb);margin:0 4px;align-self:stretch"></div>
-    <div class="pill" onclick="fOrd('lm',this)">Κεντρική</div>
-    <div class="pill" onclick="fOrd('lg',this)">Γέρακας</div>
-    <div class="pill" onclick="fOrd('lp',this)">Παγκράτι</div>
-    <div class="pill" onclick="fOrd('lma',this)">Μαρούσι</div>
   </div>
   <div class="cards" id="olist"><div class="ld">Φόρτωση...</div></div>
 </div>
@@ -321,13 +335,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <span class="tlt">Επάρκεια αποθήκης</span>
     <div class="tbr2"><button class="btn p" onclick="om('minv')">+ Καταχώρηση απογραφής</button></div>
   </div>
-  <div class="fils" id="sf">
-    <div class="pill active" onclick="fStk('all',this)">Όλες</div>
-    <div class="pill" onclick="fStk('main',this)">Κεντρική</div>
-    <div class="pill" onclick="fStk('gerakas',this)">Γέρακας</div>
-    <div class="pill" onclick="fStk('pagkrati',this)">Παγκράτι</div>
-    <div class="pill" onclick="fStk('maroussi',this)">Μαρούσι</div>
-  </div>
+  <div class="loclbl">📍 Κατάστημα</div>
+  <div class="locseg" id="sf-locs"></div>
   <div class="sg" id="slist"><div class="ld">Φόρτωση...</div></div>
 </div>
 
@@ -355,18 +364,12 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="met"><label>Ληγμένες</label><div class="mv rd" id="pov">—</div></div>
     <div class="met"><label>Εντός 7 ημ.</label><div class="mv am" id="psn">—</div></div>
   </div>
+  <div class="loclbl">📍 Κατάστημα</div>
+  <div class="locseg" id="pf-locs"></div>
   <div class="tlb" style="flex-wrap:wrap;gap:12px">
     <div class="vt">
       <button class="vb active" onclick="swPV('pending',this)">● Εκκρεμείς</button>
       <button class="vb" onclick="swPV('forecast',this)">▶ Forecast</button>
-    </div>
-    <div class="fils" id="pf" style="margin:0">
-      <div class="pill active" onclick="fPay('all',this)">Όλα</div>
-      <div style="width:1px;background:var(--nb);margin:0 4px;align-self:stretch"></div>
-      <div class="pill" onclick="fPay('lm',this)">Κεντρική</div>
-      <div class="pill" onclick="fPay('lg',this)">Γέρακας</div>
-      <div class="pill" onclick="fPay('lp',this)">Παγκράτι</div>
-      <div class="pill" onclick="fPay('lma',this)">Μαρούσι</div>
     </div>
   </div>
   <div class="pl" id="plist"><div class="ld">Φόρτωση...</div></div>
@@ -379,10 +382,13 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="cc"><div class="cl2">Πληρωμές</div><div class="ca" id="cout" style="color:var(--rd)">—</div></div>
     <div class="cc av"><div class="cl2">💵 Διαθέσιμα μετρητά</div><div class="ca" id="cavail" style="color:var(--gn)">—</div></div>
   </div>
+  <div style="margin-bottom:12px">
+    <div class="loclbl">📍 Κατάστημα</div>
+    <div class="loccards" id="clf"></div>
+  </div>
   <div class="tlb">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <div class="fils" id="clf" style="margin:0"><div class="pill active" onclick="fCash('all',this)">Όλα</div></div>
-      <div style="width:1px;background:var(--nb);height:20px"></div>
+      <span class="loclbl" style="margin-bottom:0">🗓️ Περίοδος:</span>
       <div class="vb" id="cf-week" onclick="fCashTime('week',this)">Τρέχουσα εβδομάδα</div>
       <div class="vb" id="cf-month" onclick="fCashTime('month',this)">Τρέχων μήνας</div>
       <div class="vb active" id="cf-all" onclick="fCashTime('all',this)">Όλο το ιστορικό</div>
@@ -845,6 +851,8 @@ function getDb(){if(!_db)_db=window.supabase.createClient(SURL,SKEY);return _db;
 let cU=null,cP=null;
 let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[],oitems=[],credits=[];
 let aOF='all',aSF='all',aPF='all',aCF='all',aPV='pending',oeditId=null;
+// Νέα: location filters ανεξάρτητα από τα status filters
+let aOL='all',aSL='all',aPL='all';
 let chartMonthly=null,chartSupplier=null;
 
 // ══════════════════════════════════════════════════════
@@ -1016,29 +1024,8 @@ function popSel(){
   s('cat2-filter-prod','<option value="">Όλα τα είδη</option>'+pr);
   const pf=document.getElementById('pfp');if(pf)pf.innerHTML='<option value="">Όλα τα είδη</option>'+pr;
   const pfs=document.getElementById('pfps');if(pfs)pfs.innerHTML='<option value="">Όλοι οι προμηθευτές</option>'+su;
-  const allowedLocs2=cP?.role==='admin'
-    ? locs
-    : cP?.role==='manager'
-      ? locs.filter(l=>(cP?.permissions?.locations||[]).includes(l.id))
-      : cP?.role==='store'
-        ? locs.filter(l=>{
-            const permLocs=cP?.permissions?.locations||[];
-            if(permLocs.length>0)return permLocs.includes(l.id);
-            return cP?.location_id?l.id===cP.location_id:false;
-          })
-        : [];
-  const clf=document.getElementById('clf');
-  if(clf){
-    // Αν έχει 1 location, μην δείχνεις "Όλα" — μόνο το όνομα του καταστήματος
-    if(allowedLocs2.length===1){
-      const l=allowedLocs2[0];
-      clf.innerHTML=`<div class="pill active" onclick="fCash('${l.id}',this)">${l.name}</div>`;
-      // Set initial filter στο μοναδικό location
-      if(window.aCF==='all')window.aCF=l.id;
-    }else{
-      clf.innerHTML='<div class="pill active" onclick="fCash(\'all\',this)">Όλα</div>'+allowedLocs2.map(l=>`<div class="pill" onclick="fCash('${l.id}',this)">${l.name}</div>`).join('');
-    }
-  }
+  // Render location cards για cash tab
+  renderCashCards();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1068,20 +1055,102 @@ document.querySelectorAll('.mbg').forEach(m=>m.addEventListener('click',e=>{if(e
 // ══════════════════════════════════════════════════════
 // ORDERS
 // ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// LOCATION FILTERS — Generic
+// ══════════════════════════════════════════════════════
+// Επιστρέφει τα locations που επιτρέπεται να βλέπει ο τρέχων χρήστης
+function getAllowedLocs(){
+  if(!cP)return [];
+  if(cP.role==='admin')return locs;
+  if(cP.role==='manager'){
+    const pl=cP.permissions?.locations||[];
+    return locs.filter(l=>pl.includes(l.id));
+  }
+  if(cP.role==='store'){
+    const pl=cP.permissions?.locations||[];
+    if(pl.length>0)return locs.filter(l=>pl.includes(l.id));
+    if(cP.location_id)return locs.filter(l=>l.id===cP.location_id);
+    return [];
+  }
+  return [];
+}
+
+// Render segmented control για κατάστημα (Παραγγελίες, Αποθήκη, Πληρωμές)
+function renderLocSeg(containerId,activeId,clickHandler){
+  const c=document.getElementById(containerId);if(!c)return;
+  const allowed=getAllowedLocs();
+  // Αν έχει 1 μόνο, μην δείξεις "Όλα" — μόνο το όνομα
+  if(allowed.length<=1){
+    if(allowed.length===0){c.innerHTML='<span class="seg" style="color:var(--rd);cursor:default">Δεν έχετε πρόσβαση σε καταστήματα</span>';return;}
+    const l=allowed[0];
+    c.innerHTML=`<span class="seg active" onclick="${clickHandler}('${l.id}',this)">📍 ${l.name}</span>`;
+    return;
+  }
+  let h=`<span class="seg ${activeId==='all'?'active':''}" onclick="${clickHandler}('all',this)">📍 Όλα</span>`;
+  allowed.forEach(l=>{
+    h+=`<span class="seg ${activeId===l.id?'active':''}" onclick="${clickHandler}('${l.id}',this)">${l.name}</span>`;
+  });
+  c.innerHTML=h;
+}
+
+// Render cards με stats για cash tab
+function renderCashCards(){
+  const c=document.getElementById('clf');if(!c)return;
+  const allowed=getAllowedLocs();
+  if(allowed.length===0){c.innerHTML='<div style="color:var(--rd);font-size:13px;padding:8px">Δεν έχετε πρόσβαση σε καταστήματα</div>';return;}
+  // Υπολογισμός διαθέσιμων μετρητών ανά κατάστημα
+  const calcAvail=(locId)=>{
+    const ein=ces.filter(e=>!locId||e.location_id===locId).reduce((s,e)=>s+Number(e.amount||0),0);
+    const eout=cps.filter(p=>!locId||p.location_id===locId).reduce((s,p)=>s+Number(p.amount||0),0);
+    return ein-eout;
+  };
+  // Αν έχει 1 μόνο, μην δείξεις "Όλα"
+  if(allowed.length===1){
+    const l=allowed[0];
+    const avail=calcAvail(l.id);
+    c.innerHTML=`<div class="loccard active" onclick="fCash('${l.id}',this)">
+      <div class="lc-name">📍 ${l.name}</div>
+      <div class="lc-meta">${fmt(avail)} €</div>
+    </div>`;
+    if(window.aCF==='all')window.aCF=l.id;
+    return;
+  }
+  let h=`<div class="loccard ${aCF==='all'?'active':''}" onclick="fCash('all',this)">
+    <div class="lc-name">📍 Όλα</div>
+    <div class="lc-meta">${fmt(calcAvail(null))} €</div>
+  </div>`;
+  allowed.forEach(l=>{
+    const avail=calcAvail(l.id);
+    h+=`<div class="loccard ${aCF===l.id?'active':''}" onclick="fCash('${l.id}',this)">
+      <div class="lc-name">${l.name}</div>
+      <div class="lc-meta">${fmt(avail)} €</div>
+    </div>`;
+  });
+  c.innerHTML=h;
+}
+
 function fOrd(f,el){document.querySelectorAll('#of .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aOF=f;rOrders();}
+// Νέα: location filter για παραγγελίες (από segmented control)
+function fOrdL(locId,el){document.querySelectorAll('#of-locs .seg').forEach(s=>s.classList.remove('active'));el.classList.add('active');aOL=locId;rOrders();}
+function fStkL(locId,el){document.querySelectorAll('#sf-locs .seg').forEach(s=>s.classList.remove('active'));el.classList.add('active');aSF=locId;rStock();}
+function fPayL(locId,el){document.querySelectorAll('#pf-locs .seg').forEach(s=>s.classList.remove('active'));el.classList.add('active');aPF=locId;rPay();}
 
 function rOrders(){
   set('m-tot',ords.length);
   set('m-pnd',ords.filter(o=>o.status==='pending').length);
   set('m-bal',fmt(ords.reduce((s,o)=>s+Number(o.balance||0),0))+' €');
   set('m-dlv',ords.filter(o=>o.status==='delivered').length);
-  const f=aOF,kwm={lm:'Κεντρική',lg:'Γέρακα',lp:'Παγκράτι',lma:'Μαρούσι'};
+  // Render location segmented control
+  renderLocSeg('of-locs',aOL,'fOrdL');
+  const f=aOF;
   let h='';
   if(f!=='recurring'&&f!=='other'){
     let fl=[...ords];
+    // Φίλτρο κατάστημα
+    if(aOL!=='all')fl=fl.filter(o=>o.location_id===aOL);
+    // Φίλτρο κατάσταση
     if(f==='pending')fl=fl.filter(o=>o.status==='pending');
     else if(f==='delivered')fl=fl.filter(o=>o.status==='delivered');
-    else if(kwm[f]){const kw=kwm[f];fl=fl.filter(o=>{const l=locs.find(x=>x.id===o.location_id);return l&&l.name.includes(kw);});}
     const sm={pending:'Εκκρεμής',delivered:'Παραδόθηκε',cancelled:'Ακυρώθηκε'};
     const bc={pending:'bp',delivered:'bd',cancelled:'bc'};
     // Στο "Όλες" κρύβουμε παραδοθείσες + εξοφλημένες
@@ -1126,7 +1195,8 @@ function rOrders(){
   }
   if(f==='all'||f==='recurring'){
     const fm={monthly:'Μηνιαία',biannual:'Εξαμηνιαία',annual:'Ετήσια',once:'Εφάπαξ'};
-    h+=recs.map(r=>{const dl=Math.ceil((new Date(r.next_due_date)-new Date())/86400000);return`<div class="card">
+    let recsFl=aOL==='all'?recs:recs.filter(r=>r.location_id===aOL);
+    h+=recsFl.map(r=>{const dl=Math.ceil((new Date(r.next_due_date)-new Date())/86400000);return`<div class="card">
       <div class="ch">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span class="csup">${r.name}</span>
@@ -1150,7 +1220,9 @@ function rOrders(){
     </div>`;}).join('');
   }
   if(f==='all'||f==='other'){
-    h+=oths.filter(o=>!o.paid).map(o=>`<div class="card">
+    let othsFl=oths.filter(o=>!o.paid);
+    if(aOL!=='all')othsFl=othsFl.filter(o=>o.location_id===aOL);
+    h+=othsFl.map(o=>`<div class="card">
       <div class="ch">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span class="csup">${o.name}</span>
@@ -1327,9 +1399,9 @@ async function delOth(id){if(!confirm('Διαγραφή;'))return;await getDb().
 // ══════════════════════════════════════════════════════
 function fStk(f,el){document.querySelectorAll('#sf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aSF=f;rStock();}
 function rStock(){
+  renderLocSeg('sf-locs',aSF,'fStkL');
   const lm={};stk.forEach(e=>{const k=e.product_id+'_'+e.location_id;if(!lm[k]||new Date(e.entry_date)>new Date(lm[k].entry_date))lm[k]=e;});
-  const kwm={main:'Κεντρική',gerakas:'Γέρακα',pagkrati:'Παγκράτι',maroussi:'Μαρούσι'};const kw=kwm[aSF];
-  const h=prods.map(p=>locs.filter(l=>!kw||l.name.includes(kw)).map(l=>{
+  const h=prods.map(p=>locs.filter(l=>aSF==='all'||l.id===aSF).map(l=>{
     const e=lm[p.id+'_'+l.id];if(!e)return'';
     const qty=Number(e.quantity),cons=Number(p.daily_consumption)||0;
     const days=cons>0?Math.floor(qty/cons):null;
@@ -1435,8 +1507,8 @@ async function savePrice(){
 function swPV(v,el){document.querySelectorAll('.vb').forEach(b=>b.classList.remove('active'));el.classList.add('active');aPV=v;rPay();}
 function fPay(f,el){document.querySelectorAll('#pf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aPF=f;rPay();}
 function rPay(){
+  renderLocSeg('pf-locs',aPF,'fPayL');
   const now=new Date(),iF=aPV==='forecast',items=[];
-  const kwm={lm:'Κεντρική',lg:'Γέρακα',lp:'Παγκράτι',lma:'Μαρούσι'};
   if(!iF){
     ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0).forEach(o=>{const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();const dl=Math.ceil((due-now)/86400000);items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Υπόλοιπο παραγγελίας · '+lN(o.location_id),amount:Number(o.balance),due,dl,lid:o.location_id});});
     recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl<=0)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id});});
@@ -1446,7 +1518,7 @@ function rPay(){
     recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl>0&&dl<=60)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,fc:true});});
   }
   let fl=items;
-  if(aPF!=='all'){const kw=kwm[aPF];if(kw)fl=items.filter(i=>{const l=locs.find(x=>x.id===i.lid);return l&&l.name.includes(kw);});}
+  if(aPF!=='all')fl=items.filter(i=>i.lid===aPF);
   fl.sort((a,b)=>a.dl-b.dl);
   set('pc',fl.length);set('pt',fmt(fl.reduce((s,i)=>s+i.amount,0))+' €');
   set('pov',fl.filter(i=>i.dl<0).length);set('psn',fl.filter(i=>i.dl>=0&&i.dl<=7).length);
@@ -1489,7 +1561,7 @@ async function confOrderPayment(id){
 // ══════════════════════════════════════════════════════
 // CASH
 // ══════════════════════════════════════════════════════
-function fCash(f,el){document.querySelectorAll('#clf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aCF=f;rCash();}
+function fCash(f,el){document.querySelectorAll('#clf .loccard').forEach(p=>p.classList.remove('active'));el.classList.add('active');aCF=f;rCash();}
 function rCash(){
   const now=new Date();
   let en=[...ces],py=[...cps];
