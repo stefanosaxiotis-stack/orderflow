@@ -268,6 +268,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="tab" id="tab-prices" onclick="sw('prices',this)">Παρατηρητήριο Τιμών</div>
   <div class="tab" id="tab-payments" onclick="sw('payments',this)">Πληρωμές</div>
   <div class="tab" id="tab-cash" onclick="sw('cash',this)">Μετρητά Καταστημάτων</div>
+  <div class="tab" id="tab-sacash" onclick="sw('sacash',this)">Μετρητά ΣΑ</div>
   <div class="tab ao" id="tab-excel" onclick="sw('excel',this)">Excel</div>
   <div class="ts"></div>
   <div class="tbr">
@@ -381,6 +382,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="cc"><div class="cl2">Εισπράξεις</div><div class="ca" id="cin" style="color:var(--gn)">—</div></div>
     <div class="cc"><div class="cl2">Πληρωμές</div><div class="ca" id="cout" style="color:var(--rd)">—</div></div>
     <div class="cc av"><div class="cl2">💵 Διαθέσιμα μετρητά</div><div class="ca" id="cavail" style="color:var(--gn)">—</div></div>
+    <div class="cc" id="sacash-info-card" style="display:none;border-color:#90caf9"><div class="cl2">💼 Διαθέσιμα ΣΑ</div><div class="ca" id="sacash-avail-info" style="color:#90caf9">—</div></div>
   </div>
   <div style="margin-bottom:12px">
     <div class="loclbl">📍 Κατάστημα</div>
@@ -401,6 +403,32 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
     <div><div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις</div><div class="clist" id="celist"><div class="ld">Φόρτωση...</div></div></div>
     <div><div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές από ταμείο</div><div class="clist" id="cplist"><div class="ld">Φόρτωση...</div></div></div>
+  </div>
+</div>
+
+<!-- ΜΕΤΡΗΤΑ ΣΑ -->
+<div id="page-sacash" class="page">
+  <div class="cs">
+    <div class="cc"><div class="cl2">Εισπράξεις ΣΑ</div><div class="ca" id="sacin" style="color:var(--gn)">—</div></div>
+    <div class="cc"><div class="cl2">Πληρωμές ΣΑ</div><div class="ca" id="sacout" style="color:var(--rd)">—</div></div>
+    <div class="cc av" style="border-color:#90caf9"><div class="cl2">💼 Διαθέσιμα ΣΑ</div><div class="ca" id="sacavail" style="color:#90caf9">—</div></div>
+  </div>
+  <div class="tlb">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="loclbl" style="margin-bottom:0">🗓️ Περίοδος:</span>
+      <div class="vb" id="saf-week" onclick="fSACashTime('week',this)">Τρέχουσα εβδομάδα</div>
+      <div class="vb" id="saf-month" onclick="fSACashTime('month',this)">Τρέχων μήνας</div>
+      <div class="vb active" id="saf-all" onclick="fSACashTime('all',this)">Όλο το ιστορικό</div>
+    </div>
+    <div class="tbr2">
+      <button class="btn" onclick="om('msap')">− Πληρωμή ΣΑ</button>
+      <button class="btn" onclick="om('mtrf')" style="border-color:#90caf9;color:#90caf9">⇄ Μεταφορά</button>
+      <button class="btn p" onclick="om('msae')">+ Είσπραξη ΣΑ</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div><div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις ΣΑ</div><div class="clist" id="saelist"><div class="ld">Φόρτωση...</div></div></div>
+    <div><div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές ΣΑ</div><div class="clist" id="saplist"><div class="ld">Φόρτωση...</div></div></div>
   </div>
 </div>
 
@@ -572,6 +600,54 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="cpnotes"></div>
     </div>
     <div class="mf"><button class="btn" onclick="cm('mcp')">Ακύρωση</button><button class="btn p" onclick="saveCP()">Αποθήκευση</button></div>
+  </div>
+</div>
+
+<!-- ΣΑ - Είσπραξη -->
+<div class="mbg" id="msae">
+  <div class="modal"><h2>💼 Είσπραξη ΣΑ</h2>
+    <div class="fg2">
+      <div class="f"><label>Ημερομηνία *</label><input type="date" id="saedt"></div>
+      <div class="f s2"><label>Ποσό (€) *</label><input type="number" id="saeamt" step="0.01" placeholder="0.00" style="font-size:20px;font-weight:700"></div>
+      <div class="f s2"><label>Περιγραφή</label><input type="text" id="saedesc" placeholder="π.χ. Είσπραξη μετρητών"></div>
+      <div class="f s2"><label>Σημειώσεις</label><input type="text" id="saenotes"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('msae')">Ακύρωση</button><button class="btn p" onclick="saveSAE()">Αποθήκευση</button></div>
+  </div>
+</div>
+
+<!-- ΣΑ - Πληρωμή -->
+<div class="mbg" id="msap">
+  <div class="modal"><h2>💼 Πληρωμή ΣΑ</h2>
+    <div class="fg2">
+      <div class="f"><label>Ημερομηνία *</label><input type="date" id="sapdt"></div>
+      <div class="f s2"><label>Περιγραφή *</label><input type="text" id="sapdesc" placeholder="π.χ. Πληρωμή λογαριασμού"></div>
+      <div class="f s2"><label>Ποσό (€) *</label><input type="number" id="sapamt" step="0.01" placeholder="0.00" style="font-size:20px;font-weight:700"></div>
+      <div class="f s2"><label>Σημειώσεις</label><input type="text" id="sapnotes"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('msap')">Ακύρωση</button><button class="btn p" onclick="saveSAP()">Αποθήκευση</button></div>
+  </div>
+</div>
+
+<!-- Μεταφορά μεταξύ ταμείων -->
+<div class="mbg" id="mtrf">
+  <div class="modal"><h2>⇄ Μεταφορά μετρητών</h2>
+    <div style="background:rgba(144,202,249,0.08);border:0.5px solid #90caf9;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--t2)">
+      💡 Η μεταφορά καταγράφει αυτόματα <b>2 κινήσεις</b>: μία στο κατάστημα και μία στο ΣΑ.
+    </div>
+    <div class="fg2">
+      <div class="f s2"><label>Κατεύθυνση *</label>
+        <select id="trf-dir">
+          <option value="store_to_sa">📍 Κατάστημα → 💼 ΣΑ (κατάθεση στο ΣΑ)</option>
+          <option value="sa_to_store">💼 ΣΑ → 📍 Κατάστημα (αναπλήρωση καταστήματος)</option>
+        </select>
+      </div>
+      <div class="f"><label>Κατάστημα *</label><select id="trf-loc"></select></div>
+      <div class="f"><label>Ημερομηνία *</label><input type="date" id="trf-dt"></div>
+      <div class="f s2"><label>Ποσό (€) *</label><input type="number" id="trf-amt" step="0.01" placeholder="0.00" style="font-size:20px;font-weight:700"></div>
+      <div class="f s2"><label>Σημειώσεις</label><input type="text" id="trf-notes" placeholder="π.χ. Παραλαβή Δευτέρας"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('mtrf')">Ακύρωση</button><button class="btn p" onclick="saveTransfer()">Καταχώρηση</button></div>
   </div>
 </div>
 
@@ -807,6 +883,9 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
                 <option value="payments">Πληρωμές</option>
                 <option value="cash_entries">Εισπράξεις μετρητών</option>
                 <option value="cash_payments">Πληρωμές μετρητών</option>
+                <option value="sa_cash_entries">Εισπράξεις ΣΑ</option>
+                <option value="sa_cash_payments">Πληρωμές ΣΑ</option>
+                <option value="cash_transfers">Μεταφορές μετρητών</option>
                 <option value="credits">Πιστωτικά</option>
                 <option value="recurring_obligations">Πάγιες υποχρεώσεις</option>
                 <option value="other_obligations">Άλλες υποχρεώσεις</option>
@@ -849,7 +928,7 @@ function getDb(){if(!_db)_db=window.supabase.createClient(SURL,SKEY);return _db;
 // STATE
 // ══════════════════════════════════════════════════════
 let cU=null,cP=null;
-let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[],oitems=[],credits=[];
+let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[],oitems=[],credits=[],saces=[],sacps=[],ctransfers=[];
 let aOF='all',aSF='all',aPF='all',aCF='all',aPV='pending',oeditId=null;
 // Νέα: location filters ανεξάρτητα από τα status filters
 let aOL='all',aSL='all',aPL='all';
@@ -899,7 +978,7 @@ async function init(user){
     applyPermissions(p);
     // Πήγαινε στο πρώτο διαθέσιμο tab (default: cash)
     const tabs=p?.permissions?.tabs||['cash'];
-    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash'};
+    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash'};
     const firstTab=tabs.find(t=>tabMap[t])||'cash';
     const tabEl=document.getElementById(tabMap[firstTab]);
     sw(firstTab==='dashboard'?'dash':firstTab,tabEl);
@@ -945,7 +1024,7 @@ async function load(){
     ]);
     sups=r0.data||[];locs=r1.data||[];prods=r2.data||[];cats=r3.data||[];sps=r4.data||[];
     if(isA){
-      const[a,b,c,d,e,f,g,h,oi,r9]=await Promise.all([
+      const[a,b,c,d,e,f,g,h,oi,r9,sa1,sa2]=await Promise.all([
         getDb().from('orders').select('*').order('order_date',{ascending:false}),
         getDb().from('recurring_obligations').select('*').order('next_due_date'),
         getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
@@ -955,14 +1034,17 @@ async function load(){
         getDb().from('cash_entries').select('*').order('entry_date',{ascending:false}),
         getDb().from('cash_payments').select('*').order('payment_date',{ascending:false}),
         getDb().from('order_items').select('*'),
-        getDb().from('credits').select('*').order('created_at',{ascending:false})
+        getDb().from('credits').select('*').order('created_at',{ascending:false}),
+        getDb().from('sa_cash_entries').select('*').order('entry_date',{ascending:false}),
+        getDb().from('sa_cash_payments').select('*').order('payment_date',{ascending:false})
       ]);
       ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];
+      saces=sa1.data||[];sacps=sa2.data||[];
     }else{
       // Manager/Store φορτώνουν δεδομένα βάσει ρόλου
       if(cP?.role==='manager'){
-        // Manager φορτώνει όλα όπως admin
-        const[a,b,c,d,e,g,h,oi,r9]=await Promise.all([
+        // Manager φορτώνει όλα όπως admin (το RLS φιλτράρει αν δεν έχει tab sa_cash)
+        const[a,b,c,d,e,g,h,oi,r9,sa1,sa2]=await Promise.all([
           getDb().from('orders').select('*').order('order_date',{ascending:false}),
           getDb().from('recurring_obligations').select('*').order('next_due_date'),
           getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
@@ -971,13 +1053,17 @@ async function load(){
           getDb().from('cash_entries').select('*').order('entry_date',{ascending:false}),
           getDb().from('cash_payments').select('*').order('payment_date',{ascending:false}),
           getDb().from('order_items').select('*'),
-          getDb().from('credits').select('*').order('created_at',{ascending:false})
+          getDb().from('credits').select('*').order('created_at',{ascending:false}),
+          getDb().from('sa_cash_entries').select('*').order('entry_date',{ascending:false}),
+          getDb().from('sa_cash_payments').select('*').order('payment_date',{ascending:false})
         ]);
         ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];
         ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];ups=[];
+        // RLS επιτρέπει SA data μόνο αν έχει tab sa_cash, αλλιώς επιστρέφει []
+        saces=sa1.data||[];sacps=sa2.data||[];
       }else{
-        // Store φορτώνει μόνο cash για τα καταστήματά του
-        ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];credits=[];
+        // Store φορτώνει μόνο cash για τα καταστήματά του (όχι ΣΑ)
+        ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];credits=[];saces=[];sacps=[];
         const permLocs=cP?.permissions?.locations||[];
         let ceQ=getDb().from('cash_entries').select('*').order('entry_date',{ascending:false});
         let cpQ=getDb().from('cash_payments').select('*').order('payment_date',{ascending:false});
@@ -1038,6 +1124,7 @@ function sw(n,el){
   if(el)el.classList.add('active');
   if(n==='dash')rDash();
   if(n==='orders')rOrders();if(n==='stock')rStock();if(n==='prices')rPrices();if(n==='payments')rPay();if(n==='cash')rCash();
+  if(n==='sacash')rSACash();
 }
 function om(id){
   if(id==='mord'){oeditId=null;set('mord-title','Νέα παραγγελία');document.getElementById('odt').value=td();['otot','opp','obal'].forEach(i=>document.getElementById(i).value='');['osup','oloc','ocat','onotes','odlv'].forEach(i=>document.getElementById(i).value='');document.getElementById('ibody').innerHTML='';addRow();}
@@ -1047,6 +1134,9 @@ function om(id){
   if(id==='mo')document.getElementById('odue').value=td();
   if(id==='mce'){document.getElementById('cedt').value=td();document.getElementById('ceamt').value='';if(cP?.role==='store'&&cP.location_id){const s=document.getElementById('celoc');if(s)s.value=cP.location_id;}}
   if(id==='mcp'){document.getElementById('cpdt').value=td();document.getElementById('cpamt').value='';if(cP?.role==='store'&&cP.location_id){const s=document.getElementById('cploc');if(s)s.value=cP.location_id;}}
+  if(id==='msae'){document.getElementById('saedt').value=td();['saeamt','saedesc','saenotes'].forEach(i=>document.getElementById(i).value='');}
+  if(id==='msap'){document.getElementById('sapdt').value=td();['sapamt','sapdesc','sapnotes'].forEach(i=>document.getElementById(i).value='');}
+  if(id==='mtrf'){document.getElementById('trf-dt').value=td();['trf-amt','trf-notes'].forEach(i=>document.getElementById(i).value='');document.getElementById('trf-dir').value='store_to_sa';popTransferLocs();}
   document.getElementById(id).classList.add('open');
 }
 function cm(id){document.getElementById(id).classList.remove('open');}
@@ -1566,6 +1656,12 @@ function rCash(){
   const now=new Date();
   let en=[...ces],py=[...cps];
 
+  // Update πληροφοριακό SA card αν υπάρχει πρόσβαση
+  const saCard=document.getElementById('sacash-avail-info');
+  if(saCard&&(cP?.role==='admin'||(cP?.permissions?.tabs||[]).includes('sa_cash'))){
+    saCard.textContent=fmt(calcSAAvail())+' €';
+  }
+
   // Φίλτρο βάσει permissions.locations
   const allowedLocs=cP?.role==='admin'?null:(cP?.permissions?.locations||[]);
   if(allowedLocs&&allowedLocs.length>0){
@@ -1768,6 +1864,7 @@ function copyIban(){
 
 // ══ CASH TIME FILTERS ══
 let aCashTime='all';
+let aSACashTime='all';
 function fCashTime(f,el){
   document.querySelectorAll('#cf-week,#cf-month,#cf-all').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');aCashTime=f;rCash();
@@ -2038,11 +2135,14 @@ function applyPermissions(profile){
   const perms=profile.permissions||{tabs:ALL_TABS.map(t=>t.id),locations:[]};
   const allowedTabs=perms.tabs||ALL_TABS.map(t=>t.id);
   // Κρύψε tabs που δεν επιτρέπονται
-  const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',excel:'tab-excel'};
+  const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',excel:'tab-excel'};
   Object.entries(tabMap).forEach(([key,tabId])=>{
     const el=document.getElementById(tabId);
     if(el)el.style.display=allowedTabs.includes(key)?'':'none';
   });
+  // Κρύψε το πληροφοριακό SA card στο cash tab αν δεν έχει sa_cash
+  const saInfoCard=document.getElementById('sacash-info-card');
+  if(saInfoCard)saInfoCard.style.display=allowedTabs.includes('sa_cash')?'':'none';
   // Κρύψε διαχείριση αν δεν έχει δικαίωμα
   const mgmtBtn=document.querySelector('.mbtn');
   if(mgmtBtn)mgmtBtn.style.display=allowedTabs.includes('mgmt')?'':'none';
@@ -2054,7 +2154,8 @@ const ALL_TABS=[
   {id:'stock',label:'🏭 Αποθήκη'},
   {id:'prices',label:'💹 Τιμές'},
   {id:'payments',label:'💳 Πληρωμές'},
-  {id:'cash',label:'💵 Μετρητά'},
+  {id:'cash',label:'💵 Μετρητά Καταστημάτων'},
+  {id:'sa_cash',label:'💼 Μετρητά ΣΑ'},
   {id:'excel',label:'📊 Excel'},
   {id:'mgmt',label:'⚙ Διαχείριση'}
 ];
@@ -2146,6 +2247,190 @@ async function saveUserEdit(){
 }
 
 // ══════════════════════════════════════════════════════
+// ΜΕΤΡΗΤΑ ΣΑ (Stefanos Axiotis)
+// ══════════════════════════════════════════════════════
+
+// Υπολογίζει συνολικά ΣΑ διαθέσιμα (όχι φιλτραρισμένα από περίοδο)
+function calcSAAvail(){
+  const ein=saces.reduce((s,e)=>s+Number(e.amount||0),0);
+  const eout=sacps.reduce((s,p)=>s+Number(p.amount||0),0);
+  return ein-eout;
+}
+
+function fSACashTime(t,el){
+  document.querySelectorAll('#page-sacash .vb').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  aSACashTime=t;
+  rSACash();
+}
+
+function rSACash(){
+  // Update και το πληροφοριακό card στο cash tab
+  const saCard=document.getElementById('sacash-avail-info');
+  if(saCard)saCard.textContent=fmt(calcSAAvail())+' €';
+
+  const now=new Date();
+  let en=[...saces],py=[...sacps];
+
+  // Χρονικά φίλτρα
+  if(aSACashTime==='week'){
+    const start=new Date(now);
+    const day=now.getDay()||7;
+    start.setDate(now.getDate()-day+1);start.setHours(0,0,0,0);
+    const startStr=start.toISOString().split('T')[0];
+    en=en.filter(e=>(e.entry_date||'').substring(0,10)>=startStr);
+    py=py.filter(p=>(p.payment_date||'').substring(0,10)>=startStr);
+  }else if(aSACashTime==='month'){
+    const startStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+    en=en.filter(e=>(e.entry_date||'').substring(0,10)>=startStr);
+    py=py.filter(p=>(p.payment_date||'').substring(0,10)>=startStr);
+  }
+
+  const totIn=en.reduce((s,e)=>s+Number(e.amount||0),0);
+  const totOut=py.reduce((s,p)=>s+Number(p.amount||0),0);
+  set('sacin',fmt(totIn)+' €');
+  set('sacout',fmt(totOut)+' €');
+  // Διαθέσιμα = συνολικά (όχι φιλτραρισμένα), για να φαίνονται όλα τα μετρητά
+  set('sacavail',fmt(calcSAAvail())+' €');
+
+  // Λίστα εισπράξεων
+  if(en.length===0){set('saelist','<div class="empty"><div class="ic">💼</div><p>Καμία είσπραξη</p></div>');}
+  else{
+    set('saelist',en.map(e=>`<div class="cei">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${e.description||'Είσπραξη'}</div>
+        <div style="font-size:11px;color:var(--td);margin-top:2px">${fd(e.entry_date)}${e.notes?' · '+e.notes:''}</div>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:var(--gn)">+${fmt(e.amount)} €</div>
+      <button class="ib" onclick="delSAE('${e.id}')" style="color:var(--rd);margin-left:6px">✕</button>
+    </div>`).join(''));
+  }
+
+  // Λίστα πληρωμών
+  if(py.length===0){set('saplist','<div class="empty"><div class="ic">💼</div><p>Καμία πληρωμή</p></div>');}
+  else{
+    set('saplist',py.map(p=>`<div class="cei">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${p.description||'Πληρωμή'}</div>
+        <div style="font-size:11px;color:var(--td);margin-top:2px">${fd(p.payment_date)}${p.notes?' · '+p.notes:''}</div>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:var(--rd)">-${fmt(p.amount)} €</div>
+      <button class="ib" onclick="delSAP('${p.id}')" style="color:var(--rd);margin-left:6px">✕</button>
+    </div>`).join(''));
+  }
+}
+
+async function saveSAE(){
+  const amt=parseFloat(document.getElementById('saeamt').value)||0;
+  if(amt<=0){toast('Συμπλήρωσε ποσό','err');return;}
+  const d={
+    entry_date:document.getElementById('saedt').value+'T12:00:00',
+    amount:amt,
+    description:document.getElementById('saedesc').value||null,
+    notes:document.getElementById('saenotes').value||null,
+    created_by:cU.id
+  };
+  try{
+    const{data,error}=await getDb().from('sa_cash_entries').insert(d).select();
+    if(error)throw error;
+    saces.unshift(data[0]);
+    cm('msae');rSACash();
+    toast('Είσπραξη ΣΑ καταχωρήθηκε!');
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
+
+async function saveSAP(){
+  const amt=parseFloat(document.getElementById('sapamt').value)||0;
+  const desc=document.getElementById('sapdesc').value.trim();
+  if(amt<=0){toast('Συμπλήρωσε ποσό','err');return;}
+  if(!desc){toast('Συμπλήρωσε περιγραφή','err');return;}
+  const d={
+    payment_date:document.getElementById('sapdt').value+'T12:00:00',
+    amount:amt,
+    description:desc,
+    notes:document.getElementById('sapnotes').value||null,
+    created_by:cU.id
+  };
+  try{
+    const{data,error}=await getDb().from('sa_cash_payments').insert(d).select();
+    if(error)throw error;
+    sacps.unshift(data[0]);
+    cm('msap');rSACash();
+    toast('Πληρωμή ΣΑ καταχωρήθηκε!');
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
+
+async function delSAE(id){
+  if(!confirm('Διαγραφή εγγραφής;'))return;
+  const{error}=await getDb().from('sa_cash_entries').delete().eq('id',id);
+  if(error){toast('Σφάλμα: '+error.message,'err');return;}
+  saces=saces.filter(x=>x.id!==id);
+  rSACash();toast('Διαγράφηκε');
+}
+
+async function delSAP(id){
+  if(!confirm('Διαγραφή εγγραφής;'))return;
+  const{error}=await getDb().from('sa_cash_payments').delete().eq('id',id);
+  if(error){toast('Σφάλμα: '+error.message,'err');return;}
+  sacps=sacps.filter(x=>x.id!==id);
+  rSACash();toast('Διαγράφηκε');
+}
+
+// Μεταφορά μεταξύ ταμείων
+function popTransferLocs(){
+  const sel=document.getElementById('trf-loc');
+  if(!sel)return;
+  const allowed=getAllowedLocs();
+  sel.innerHTML='<option value="">— Επιλογή —</option>'+allowed.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+}
+
+async function saveTransfer(){
+  const dir=document.getElementById('trf-dir').value;
+  const loc=document.getElementById('trf-loc').value;
+  const dt=document.getElementById('trf-dt').value;
+  const amt=parseFloat(document.getElementById('trf-amt').value)||0;
+  const notes=document.getElementById('trf-notes').value||null;
+  if(!loc){toast('Επίλεξε κατάστημα','err');return;}
+  if(amt<=0){toast('Συμπλήρωσε ποσό','err');return;}
+  // Έλεγχος επάρκειας
+  if(dir==='store_to_sa'){
+    const ein=ces.filter(e=>e.location_id===loc).reduce((s,e)=>s+Number(e.amount||0),0);
+    const eout=cps.filter(p=>p.location_id===loc).reduce((s,p)=>s+Number(p.amount||0),0);
+    const avail=ein-eout;
+    if(amt>avail){if(!confirm(`⚠️ Το κατάστημα έχει διαθέσιμα ${fmt(avail)} €. Συνέχεια;`))return;}
+  }else{
+    const avail=calcSAAvail();
+    if(amt>avail){if(!confirm(`⚠️ Το ΣΑ έχει διαθέσιμα ${fmt(avail)} €. Συνέχεια;`))return;}
+  }
+  const d={
+    direction:dir,
+    location_id:loc,
+    transfer_date:dt+'T12:00:00',
+    amount:amt,
+    notes:notes,
+    created_by:cU.id
+  };
+  try{
+    const{data,error}=await getDb().from('cash_transfers').insert(d).select();
+    if(error)throw error;
+    // Επαναφόρτωση επηρεαζόμενων data (τα triggers δημιούργησαν cash_entries/payments)
+    await reloadCashAfterTransfer();
+    cm('mtrf');rSACash();rCash();
+    toast('Μεταφορά καταχωρήθηκε!');
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
+
+async function reloadCashAfterTransfer(){
+  const[a,b,c,d]=await Promise.all([
+    getDb().from('cash_entries').select('*').order('entry_date',{ascending:false}),
+    getDb().from('cash_payments').select('*').order('payment_date',{ascending:false}),
+    getDb().from('sa_cash_entries').select('*').order('entry_date',{ascending:false}),
+    getDb().from('sa_cash_payments').select('*').order('payment_date',{ascending:false})
+  ]);
+  ces=a.data||[];cps=b.data||[];saces=c.data||[];sacps=d.data||[];
+}
+
+// ══════════════════════════════════════════════════════
 // AUDIT LOG
 // ══════════════════════════════════════════════════════
 const AUDIT_TABLE_NAMES={
@@ -2154,6 +2439,9 @@ const AUDIT_TABLE_NAMES={
   payments:'Πληρωμές',
   cash_entries:'Εισπράξεις μετρητών',
   cash_payments:'Πληρωμές μετρητών',
+  sa_cash_entries:'Εισπράξεις ΣΑ',
+  sa_cash_payments:'Πληρωμές ΣΑ',
+  cash_transfers:'Μεταφορές μετρητών',
   credits:'Πιστωτικά',
   recurring_obligations:'Πάγιες υποχρεώσεις',
   other_obligations:'Άλλες υποχρεώσεις',
