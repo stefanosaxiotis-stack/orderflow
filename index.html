@@ -2116,75 +2116,84 @@ async function loadAudit(){
   const list=document.getElementById('audlist');
   if(!list)return;
   list.innerHTML='<div class="ld" style="padding:24px;text-align:center;color:var(--td)">Φόρτωση...</div>';
-  let q=getDb().from('audit_log').select('*').order('occurred_at',{ascending:false}).limit(200);
-  const f=document.getElementById('aud-from').value;
-  const t=document.getElementById('aud-to').value;
-  const tb=document.getElementById('aud-table').value;
-  const ac=document.getElementById('aud-action').value;
-  if(f)q=q.gte('occurred_at',f+'T00:00:00');
-  if(t)q=q.lte('occurred_at',t+'T23:59:59');
-  if(tb)q=q.eq('table_name',tb);
-  if(ac)q=q.eq('action',ac);
-  const{data,error}=await q;
-  if(error){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--rd)">Σφάλμα: '+error.message+'</div>';return;}
-  if(!data||data.length===0){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--td)">Δεν βρέθηκαν εγγραφές</div>';return;}
-  const actionIcon={INSERT:'➕',UPDATE:'✏️',DELETE:'🗑️'};
-  const actionColor={INSERT:'var(--gn)',UPDATE:'var(--pk)',DELETE:'var(--rd)'};
-  const actionLabel={INSERT:'Δημιουργία',UPDATE:'Ενημέρωση',DELETE:'Διαγραφή'};
-  list.innerHTML=data.map(r=>{
-    const dt=new Date(r.occurred_at).toLocaleString('el-GR');
-    const tName=AUDIT_TABLE_NAMES[r.table_name]||r.table_name;
-    const who=r.user_email||'<em style="color:var(--td)">σύστημα</em>';
-    let body='';
-    if(r.action==='UPDATE'&&r.changed_keys&&r.changed_keys.length){
-      body='<div style="margin-top:8px;padding:8px;background:var(--cb);border-radius:6px;font-size:12px">'+
-        r.changed_keys.map(k=>{
-          const oldV=r.old_data?r.old_data[k]:null;
-          const newV=r.new_data?r.new_data[k]:null;
-          return `<div style="display:grid;grid-template-columns:140px 1fr 20px 1fr;gap:8px;padding:3px 0;align-items:center">
-            <span style="color:var(--td);font-weight:500">${fmtFieldName(k)}</span>
-            <span style="color:var(--rd);text-decoration:line-through;opacity:0.7">${fmtAuditValue(k,oldV)}</span>
-            <span style="color:var(--td);text-align:center">→</span>
-            <span style="color:var(--gn)">${fmtAuditValue(k,newV)}</span>
-          </div>`;
-        }).join('')+'</div>';
-    }else if(r.action==='INSERT'&&r.new_data){
-      const keys=Object.keys(r.new_data).filter(k=>!['id','created_by'].includes(k)&&r.new_data[k]!==null&&r.new_data[k]!==''&&r.new_data[k]!==false);
-      if(keys.length){
-        body='<div style="margin-top:8px;padding:8px;background:var(--cb);border-radius:6px;font-size:12px">'+
-          keys.slice(0,8).map(k=>`<div style="display:grid;grid-template-columns:140px 1fr;gap:8px;padding:2px 0">
-            <span style="color:var(--td)">${fmtFieldName(k)}</span>
-            <span>${fmtAuditValue(k,r.new_data[k])}</span>
-          </div>`).join('')+'</div>';
+  try{
+    let q=getDb().from('audit_log').select('*').order('occurred_at',{ascending:false}).limit(200);
+    const f=document.getElementById('aud-from')?.value;
+    const t=document.getElementById('aud-to')?.value;
+    const tb=document.getElementById('aud-table')?.value;
+    const ac=document.getElementById('aud-action')?.value;
+    if(f)q=q.gte('occurred_at',f+'T00:00:00');
+    if(t)q=q.lte('occurred_at',t+'T23:59:59');
+    if(tb)q=q.eq('table_name',tb);
+    if(ac)q=q.eq('action',ac);
+    const{data,error}=await q;
+    if(error){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--rd)">Σφάλμα: '+error.message+'</div>';return;}
+    if(!data||data.length===0){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--td)">Δεν βρέθηκαν εγγραφές</div>';return;}
+    const actionIcon={INSERT:'➕',UPDATE:'✏️',DELETE:'🗑️'};
+    const actionColor={INSERT:'var(--gn)',UPDATE:'var(--pk)',DELETE:'var(--rd)'};
+    const actionLabel={INSERT:'Δημιουργία',UPDATE:'Ενημέρωση',DELETE:'Διαγραφή'};
+    list.innerHTML=data.map(r=>{
+      try{
+        const dt=new Date(r.occurred_at).toLocaleString('el-GR');
+        const tName=AUDIT_TABLE_NAMES[r.table_name]||r.table_name;
+        const who=r.user_email||'<em style="color:var(--td)">σύστημα</em>';
+        let body='';
+        if(r.action==='UPDATE'&&r.changed_keys&&r.changed_keys.length){
+          body='<div style="margin-top:8px;padding:8px;background:var(--ni);border-radius:6px;font-size:12px">'+
+            r.changed_keys.map(k=>{
+              const oldV=r.old_data?r.old_data[k]:null;
+              const newV=r.new_data?r.new_data[k]:null;
+              return `<div style="display:grid;grid-template-columns:140px 1fr 20px 1fr;gap:8px;padding:3px 0;align-items:center">
+                <span style="color:var(--td);font-weight:500">${fmtFieldName(k)}</span>
+                <span style="color:var(--rd);text-decoration:line-through;opacity:0.7">${fmtAuditValue(k,oldV)}</span>
+                <span style="color:var(--td);text-align:center">→</span>
+                <span style="color:var(--gn)">${fmtAuditValue(k,newV)}</span>
+              </div>`;
+            }).join('')+'</div>';
+        }else if(r.action==='INSERT'&&r.new_data){
+          const keys=Object.keys(r.new_data).filter(k=>!['id','created_by'].includes(k)&&r.new_data[k]!==null&&r.new_data[k]!==''&&r.new_data[k]!==false);
+          if(keys.length){
+            body='<div style="margin-top:8px;padding:8px;background:var(--ni);border-radius:6px;font-size:12px">'+
+              keys.slice(0,8).map(k=>`<div style="display:grid;grid-template-columns:140px 1fr;gap:8px;padding:2px 0">
+                <span style="color:var(--td)">${fmtFieldName(k)}</span>
+                <span>${fmtAuditValue(k,r.new_data[k])}</span>
+              </div>`).join('')+'</div>';
+          }
+        }else if(r.action==='DELETE'&&r.old_data){
+          const keys=Object.keys(r.old_data).filter(k=>!['id','created_by'].includes(k)&&r.old_data[k]!==null&&r.old_data[k]!==''&&r.old_data[k]!==false);
+          if(keys.length){
+            body='<div style="margin-top:8px;padding:8px;background:var(--ni);border-radius:6px;font-size:12px;opacity:0.7">'+
+              keys.slice(0,8).map(k=>`<div style="display:grid;grid-template-columns:140px 1fr;gap:8px;padding:2px 0">
+                <span style="color:var(--td)">${fmtFieldName(k)}</span>
+                <span style="text-decoration:line-through;color:var(--rd)">${fmtAuditValue(k,r.old_data[k])}</span>
+              </div>`).join('')+'</div>';
+          }
+        }
+        return `<div style="padding:12px;border:0.5px solid var(--nb);border-radius:8px;margin-bottom:8px;background:var(--nc)">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-size:18px">${actionIcon[r.action]||'•'}</span>
+              <span style="font-weight:600;color:${actionColor[r.action]}">${actionLabel[r.action]||r.action}</span>
+              <span style="color:var(--td)">·</span>
+              <span style="font-weight:500">${tName}</span>
+            </div>
+            <div style="font-size:11px;color:var(--td);text-align:right">
+              <div>${dt}</div>
+              <div style="margin-top:2px">${who}</div>
+            </div>
+          </div>
+          ${body}
+        </div>`;
+      }catch(e){
+        return `<div style="padding:8px;border:0.5px solid var(--rd);border-radius:6px;margin-bottom:8px;color:var(--rd);font-size:12px">Σφάλμα στην εμφάνιση εγγραφής #${r.id}: ${e.message}</div>`;
       }
-    }else if(r.action==='DELETE'&&r.old_data){
-      const keys=Object.keys(r.old_data).filter(k=>!['id','created_by'].includes(k)&&r.old_data[k]!==null&&r.old_data[k]!==''&&r.old_data[k]!==false);
-      if(keys.length){
-        body='<div style="margin-top:8px;padding:8px;background:var(--cb);border-radius:6px;font-size:12px;opacity:0.7">'+
-          keys.slice(0,8).map(k=>`<div style="display:grid;grid-template-columns:140px 1fr;gap:8px;padding:2px 0">
-            <span style="color:var(--td)">${fmtFieldName(k)}</span>
-            <span style="text-decoration:line-through;color:var(--rd)">${fmtAuditValue(k,r.old_data[k])}</span>
-          </div>`).join('')+'</div>';
-      }
+    }).join('');
+    if(data.length>=200){
+      list.innerHTML+='<div style="text-align:center;padding:12px;color:var(--td);font-size:12px">Εμφανίζονται οι 200 πιο πρόσφατες εγγραφές. Χρησιμοποίησε φίλτρα για να δεις παλιότερες.</div>';
     }
-    return `<div style="padding:12px;border:1px solid var(--nb);border-radius:8px;margin-bottom:8px;background:var(--cb2)">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-        <div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:18px">${actionIcon[r.action]||'•'}</span>
-          <span style="font-weight:600;color:${actionColor[r.action]}">${actionLabel[r.action]||r.action}</span>
-          <span style="color:var(--td)">·</span>
-          <span style="font-weight:500">${tName}</span>
-        </div>
-        <div style="font-size:11px;color:var(--td);text-align:right">
-          <div>${dt}</div>
-          <div style="margin-top:2px">${who}</div>
-        </div>
-      </div>
-      ${body}
-    </div>`;
-  }).join('');
-  if(data.length>=200){
-    list.innerHTML+='<div style="text-align:center;padding:12px;color:var(--td);font-size:12px">Εμφανίζονται οι 200 πιο πρόσφατες εγγραφές. Χρησιμοποίησε φίλτρα για να δεις παλιότερες.</div>';
+  }catch(e){
+    list.innerHTML='<div style="padding:24px;text-align:center;color:var(--rd)">Σφάλμα: '+e.message+'</div>';
+    console.error('loadAudit error:',e);
   }
 }
 </script>
