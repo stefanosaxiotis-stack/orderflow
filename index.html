@@ -651,6 +651,22 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Πιστωτικό σε παραγγελία -->
+<div class="mbg" id="mcredit">
+  <div class="modal"><h2>− Πιστωτικό παραγγελίας</h2>
+    <div style="background:rgba(255,183,77,0.08);border:0.5px solid var(--am);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--t2)">
+      💡 Το πιστωτικό μειώνει το ποσό προς πληρωμή στο tab Πληρωμές, χωρίς να αλλάζει το αρχικό σύνολο της παραγγελίας.
+    </div>
+    <div id="credit-order-info" style="padding:12px;background:var(--ni);border-radius:8px;margin-bottom:12px"></div>
+    <div id="credit-existing" style="margin-bottom:12px"></div>
+    <div class="fg2">
+      <div class="f s2"><label>Ποσό πιστωτικού (€) *</label><input type="number" id="cramt" step="0.01" placeholder="0.00" style="font-size:20px;font-weight:700;color:var(--am)"></div>
+      <div class="f s2"><label>Αιτία / Σημείωση</label><input type="text" id="crreason" placeholder="π.χ. έκπτωση τιμολογίου"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('mcredit')">Κλείσιμο</button><button class="btn p" onclick="saveCredit()">Καταχώρηση</button></div>
+  </div>
+</div>
+
 <!-- Επεξεργασία άλλης υποχρέωσης -->
 <div class="mbg" id="meditoth">
   <div class="modal"><h2>✎ Επεξεργασία υποχρέωσης</h2>
@@ -1596,15 +1612,35 @@ async function savePrice(){
 // ══════════════════════════════════════════════════════
 function swPV(v,el){document.querySelectorAll('.vb').forEach(b=>b.classList.remove('active'));el.classList.add('active');aPV=v;rPay();}
 function fPay(f,el){document.querySelectorAll('#pf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aPF=f;rPay();}
+// ══════════════════════════════════════════════════════
+// CREDITS HELPERS (πιστωτικά παραγγελίας)
+// ══════════════════════════════════════════════════════
+const orderCreditTotal=oid=>credits.filter(c=>c.order_id===oid&&c.applied!==false).reduce((s,c)=>s+Number(c.amount||0),0);
+const orderNetBalance=o=>{const cr=orderCreditTotal(o.id);return Math.max(0,Number(o.balance||0)-cr);};
+
 function rPay(){
   renderLocSeg('pf-locs',aPF,'fPayL');
   const now=new Date(),iF=aPV==='forecast',items=[];
   if(!iF){
-    ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0).forEach(o=>{const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();const dl=Math.ceil((due-now)/86400000);items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Υπόλοιπο παραγγελίας · '+lN(o.location_id),amount:Number(o.balance),due,dl,lid:o.location_id});});
+    ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0).forEach(o=>{
+      const net=orderNetBalance(o);
+      if(net<=0)return; // πλήρως καλυμμένη από πιστωτικά
+      const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
+      const dl=Math.ceil((due-now)/86400000);
+      const cr=orderCreditTotal(o.id);
+      items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Υπόλοιπο παραγγελίας · '+lN(o.location_id),amount:net,gross:Number(o.balance),credit:cr,due,dl,lid:o.location_id});
+    });
     recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl<=0)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id});});
     oths.filter(o=>!o.paid).forEach(o=>{const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:Number(o.amount),due,dl,lid:o.location_id});});
   }else{
-    ords.filter(o=>o.status==='pending'&&Number(o.balance)>0).forEach(o=>{const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();const dl=Math.ceil((due-now)/86400000);if(dl>0&&dl<=60)items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Εκκρ. παράδοση · '+lN(o.location_id),amount:Number(o.balance),due,dl,lid:o.location_id,fc:true});});
+    ords.filter(o=>o.status==='pending'&&Number(o.balance)>0).forEach(o=>{
+      const net=orderNetBalance(o);
+      if(net<=0)return;
+      const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
+      const dl=Math.ceil((due-now)/86400000);
+      const cr=orderCreditTotal(o.id);
+      if(dl>0&&dl<=60)items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Εκκρ. παράδοση · '+lN(o.location_id),amount:net,gross:Number(o.balance),credit:cr,due,dl,lid:o.location_id,fc:true});
+    });
     recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl>0&&dl<=60)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,fc:true});});
   }
   let fl=items;
@@ -1613,6 +1649,7 @@ function rPay(){
   set('pc',fl.length);set('pt',fmt(fl.reduce((s,i)=>s+i.amount,0))+' €');
   set('pov',fl.filter(i=>i.dl<0).length);set('psn',fl.filter(i=>i.dl>=0&&i.dl<=7).length);
   if(!fl.length){set('plist',`<div class="empty"><div class="ic">📅</div><p>${iF?'Δεν υπάρχουν προγραμματισμένες':'Δεν υπάρχουν εκκρεμείς'} πληρωμές</p></div>`);return;}
+  const isAdm=cP?.role==='admin';
   set('plist',fl.map(i=>{
     const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';
     const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';
@@ -1621,14 +1658,24 @@ function rPay(){
     const eyeBtn=`<button class="ib" onclick="showDetail('${i.type}','${i.id}')" title="Λεπτομέρειες">👁</button>`;
     const ibBtn=hasIban?`<button class="ib" onclick="showIban('${i.id}','${i.type}',${i.amount})" title="Στοιχεία πληρωμής" style="color:var(--gn);border-color:var(--gn)">🏦</button>`:'';
     const cb=i.fc?'':`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="💳 Πληρώθηκε">💳</button>`;
+    // Κουμπί πιστωτικού μόνο για παραγγελίες και μόνο σε admin
+    const credBtn=(i.type==='order'&&isAdm)?`<button class="ib" onclick="omCredit('${i.id}')" title="Πιστωτικό" style="color:var(--am);border-color:var(--am)">−</button>`:'';
+    // Εμφάνιση gross/credit/net αν υπάρχει πιστωτικό
+    const amtHtml=(i.credit&&i.credit>0)
+      ? `<div class="pam" style="text-align:right">
+           <div style="font-size:11px;color:var(--td);text-decoration:line-through">${fmt(i.gross)} €</div>
+           <div style="font-size:11px;color:var(--am)">−${fmt(i.credit)} € πιστ.</div>
+           <div>${fmt(i.amount)} €</div>
+         </div>`
+      : `<div class="pam">${fmt(i.amount)} €</div>`;
     return`<div class="pi">
       <div class="pd2 ${cl}">${lb}</div>
       <div class="pinf">
         <div class="pnm">${i.name}</div>
         <div class="psb">${i.sub} · Λήξη: ${fd(i.due)}</div>
       </div>
-      <div class="pam">${fmt(i.amount)} €</div>
-      <div class="pact">${eyeBtn}${ibBtn}${cb}</div>
+      ${amtHtml}
+      <div class="pact">${eyeBtn}${ibBtn}${credBtn}${cb}</div>
     </div>`;
   }).join(''));
 }
@@ -1638,14 +1685,87 @@ async function confPI(t,id){
   else if(t==='order')await confOrderPayment(id);
 }
 async function confOrderPayment(id){
-  if(!confirm('Επιβεβαίωση πληρωμής υπολοίπου;'))return;
   const o=ords.find(x=>x.id===id);if(!o)return;
+  const net=orderNetBalance(o);
+  const cr=orderCreditTotal(id);
+  const msg=cr>0
+    ? `Πληρωμή ${fmt(net)} € (μετά από πιστωτικό ${fmt(cr)} €). Συνέχεια;`
+    : `Επιβεβαίωση πληρωμής ${fmt(net)} €;`;
+  if(!confirm(msg))return;
+  // Πληρωμή του καθαρού (όχι του gross). Το prepayment φτάνει total - 0 = total
+  // δηλαδή θεωρούμε ότι το πιστωτικό "καλύπτει" μέρος του total.
+  // Άρα prepayment = total_amount (πλήρως εξοφλημένη με μετρητά + πιστωτικά)
   const{error}=await getDb().from('orders').update({prepayment:o.total_amount}).eq('id',id);
   if(error){toast('Σφάλμα: '+error.message,'err');return;}
-  await getDb().from('payments').insert({order_id:id,amount:Number(o.balance),payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString()});
+  await getDb().from('payments').insert({order_id:id,amount:net,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString()});
   const{data:updated}=await getDb().from('orders').select('*').eq('id',id).single();
   if(updated){const idx=ords.findIndex(x=>x.id===id);if(idx>=0)ords[idx]=updated;}
   rOrders();rPay();toast('Πληρωμή επιβεβαιώθηκε! ✓');
+}
+
+// ══════════════════════════════════════════════════════
+// CREDITS — modal καταχώρησης πιστωτικού σε παραγγελία
+// ══════════════════════════════════════════════════════
+let creditOrderId=null;
+function omCredit(orderId){
+  if(cP?.role!=='admin'){toast('Μόνο admin μπορεί να καταχωρεί πιστωτικά','err');return;}
+  const o=ords.find(x=>x.id===orderId);if(!o)return;
+  creditOrderId=orderId;
+  set('credit-order-info',`<div style="font-size:13px;color:var(--td);margin-bottom:4px">Παραγγελία:</div>
+    <div style="font-weight:600">${sN(o.supplier_id)} · ${lN(o.location_id)}</div>
+    <div style="font-size:12px;color:var(--td);margin-top:4px">Σύνολο: ${fmt(o.total_amount)} € · Προκαταβολή: ${fmt(o.prepayment)} €</div>
+    <div style="font-size:13px;margin-top:6px">Τρέχον υπόλοιπο: <b>${fmt(o.balance)} €</b></div>`);
+  // Λίστα υπαρχόντων πιστωτικών
+  const exist=credits.filter(c=>c.order_id===orderId);
+  if(exist.length){
+    set('credit-existing','<div style="font-size:12px;color:var(--td);margin-bottom:6px">Υπάρχοντα πιστωτικά:</div>'+exist.map(c=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--ni);border-radius:6px;margin-bottom:4px">
+        <div style="font-size:12px"><b style="color:var(--am)">−${fmt(c.amount)} €</b>${c.reason?' · '+c.reason:''}</div>
+        <button class="ib" onclick="delCredit('${c.id}')" style="color:var(--rd)">✕</button>
+      </div>`).join(''));
+  }else{
+    set('credit-existing','');
+  }
+  document.getElementById('cramt').value='';
+  document.getElementById('crreason').value='';
+  document.getElementById('mcredit').classList.add('open');
+}
+async function saveCredit(){
+  const amt=parseFloat(document.getElementById('cramt').value)||0;
+  const reason=document.getElementById('crreason').value.trim()||null;
+  if(amt<=0){toast('Συμπλήρωσε ποσό','err');return;}
+  const o=ords.find(x=>x.id===creditOrderId);
+  if(!o){toast('Σφάλμα: παραγγελία δεν βρέθηκε','err');return;}
+  const existing=orderCreditTotal(creditOrderId);
+  if(existing+amt>Number(o.balance)){
+    if(!confirm(`Το συνολικό πιστωτικό (${fmt(existing+amt)} €) ξεπερνά το υπόλοιπο (${fmt(o.balance)} €). Συνέχεια;`))return;
+  }
+  try{
+    const{data,error}=await getDb().from('credits').insert({
+      order_id:creditOrderId,
+      supplier_id:o.supplier_id,
+      amount:amt,
+      reason:reason,
+      credit_type:'order',
+      applied:true
+    }).select();
+    if(error)throw error;
+    credits.unshift(data[0]);
+    cm('mcredit');rPay();rOrders();
+    toast('Πιστωτικό καταχωρήθηκε!');
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
+async function delCredit(id){
+  if(!confirm('Διαγραφή πιστωτικού;'))return;
+  const{error}=await getDb().from('credits').delete().eq('id',id);
+  if(error){toast('Σφάλμα: '+error.message,'err');return;}
+  credits=credits.filter(c=>c.id!==id);
+  // Refresh modal αν είναι ακόμα ανοιχτό
+  if(creditOrderId&&document.getElementById('mcredit').classList.contains('open')){
+    omCredit(creditOrderId);
+  }
+  rPay();rOrders();
+  toast('Διαγράφηκε');
 }
 
 // ══════════════════════════════════════════════════════
@@ -1896,6 +2016,9 @@ function showDetail(type,id){
   if(type==='order'){
     const o=ords.find(x=>x.id===id);if(!o)return;
     const items=oitems.filter(i=>i.order_id===id);
+    const orderCreds=credits.filter(c=>c.order_id===id);
+    const credTotal=orderCreditTotal(id);
+    const netBal=orderNetBalance(o);
     title='📦 Παραγγελία — '+sN(o.supplier_id);
     rows=[
       {l:'Προμηθευτής',v:sN(o.supplier_id)},
@@ -1905,9 +2028,17 @@ function showDetail(type,id){
       {l:'Κατάσταση',v:o.status==='pending'?'Εκκρεμής':'Παραδόθηκε'},
       {l:'Σύνολο',v:fmt(o.total_amount)+' €',c:'var(--tm)'},
       {l:'Προκαταβολή',v:fmt(o.prepayment)+' €',c:'var(--gn)'},
-      {l:'Υπόλοιπο',v:fmt(o.balance)+' €',c:'var(--am)'},
+      {l:'Υπόλοιπο (μικτό)',v:fmt(o.balance)+' €',c:'var(--am)'},
     ];
+    if(credTotal>0){
+      rows.push({l:'Πιστωτικά',v:'−'+fmt(credTotal)+' €',c:'var(--am)'});
+      rows.push({l:'Καθαρό προς πληρωμή',v:fmt(netBal)+' €',c:'var(--gn)'});
+    }
     if(o.notes)rows.push({l:'Σημειώσεις',v:o.notes,c:'var(--t1)'});
+    if(orderCreds.length){
+      rows.push({l:'──── Πιστωτικά ────',v:'',sep:true});
+      orderCreds.forEach(c=>rows.push({l:c.reason||'Πιστωτικό',v:'−'+fmt(c.amount)+' €',c:'var(--am)'}));
+    }
     if(items.length){
       rows.push({l:'──── Είδη ────',v:'',sep:true});
       items.forEach(i=>rows.push({l:pN(i.product_id),v:`${i.quantity} συσκ × ${fmt(i.package_price)}€ = ${fmt(i.quantity*i.package_price)}€`,c:'var(--am)'}));
