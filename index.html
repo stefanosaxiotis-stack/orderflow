@@ -39,6 +39,12 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .ts{flex:1}
 .tbr{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px}
 .ub{font-size:12px;color:var(--tm);white-space:nowrap}
+.urgent-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(229,115,115,0.15);border:1px solid var(--rd);color:var(--rd);padding:4px 10px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.urgent-badge:hover{background:rgba(229,115,115,0.25);transform:scale(1.03)}
+.urgent-badge .ub-num{background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+.urgent-banner{background:rgba(229,115,115,0.08);border:1px solid var(--rd);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.urgent-banner .ub-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--rd)}
+.urgent-banner .ub-meta{font-size:11px;color:var(--td)}
 .mbtn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--pk);background:var(--pd);color:var(--pk);cursor:pointer;white-space:nowrap;font-weight:500;transition:background .15s}
 .mbtn:hover{background:#3a1530}
 .lout{padding:7px 12px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
@@ -272,6 +278,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="tab ao" id="tab-excel" onclick="sw('excel',this)">Excel</div>
   <div class="ts"></div>
   <div class="tbr">
+    <span class="urgent-badge" id="urgent-badge" onclick="goToUrgent()" style="display:none"></span>
     <span class="ub" id="ubadge"></span>
     <button class="mbtn ao" onclick="openMgmt()">⚙ Διαχείριση</button>
     <button class="lout" onclick="load().then(()=>toast('Ανανεώθηκε!'))" title="Ανανέωση δεδομένων">🔄</button>
@@ -282,6 +289,13 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <!-- DASHBOARD -->
 <div id="page-dash" class="page active ao">
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px" id="dash-metrics"></div>
+  <div class="card" style="margin-bottom:24px;border-color:#90caf9" id="dash-cash-card">
+    <div style="font-size:13px;font-weight:600;color:#90caf9;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <span>💵 Συνολικά διαθέσιμα μετρητά</span>
+      <span id="dash-cash-total" style="font-size:18px"></span>
+    </div>
+    <div id="dash-cash-breakdown" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px"></div>
+  </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
     <div class="card"><div style="font-size:13px;font-weight:600;color:var(--pk);margin-bottom:14px">📊 Έξοδα ανά μήνα (€)</div><canvas id="chart-monthly" height="180"></canvas></div>
     <div class="card"><div style="font-size:13px;font-weight:600;color:var(--pk);margin-bottom:14px">🥧 Κατανομή ανά προμηθευτή</div><canvas id="chart-supplier" height="180"></canvas></div>
@@ -365,11 +379,13 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="met"><label>Ληγμένες</label><div class="mv rd" id="pov">—</div></div>
     <div class="met"><label>Εντός 7 ημ.</label><div class="mv am" id="psn">—</div></div>
   </div>
+  <div id="urgent-banner-pay" style="display:none"></div>
   <div class="loclbl">📍 Κατάστημα</div>
   <div class="locseg" id="pf-locs"></div>
   <div class="tlb" style="flex-wrap:wrap;gap:12px">
     <div class="vt">
       <button class="vb active" onclick="swPV('pending',this)">● Εκκρεμείς</button>
+      <button class="vb" onclick="swPV('pipeline',this)">⏸ Pipeline</button>
       <button class="vb" onclick="swPV('forecast',this)">▶ Forecast</button>
     </div>
   </div>
@@ -664,6 +680,25 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <div class="f s2"><label>Αιτία / Σημείωση</label><input type="text" id="crreason" placeholder="π.χ. έκπτωση τιμολογίου"></div>
     </div>
     <div class="mf"><button class="btn" onclick="cm('mcredit')">Κλείσιμο</button><button class="btn p" onclick="saveCredit()">Καταχώρηση</button></div>
+  </div>
+</div>
+
+<!-- Επιβεβαίωση πληρωμής με τρόπο πληρωμής -->
+<div class="mbg" id="mpayconf">
+  <div class="modal"><h2>💳 Επιβεβαίωση πληρωμής</h2>
+    <div id="payconf-info" style="padding:14px;background:var(--ni);border-radius:8px;margin-bottom:14px;text-align:center"></div>
+    <div class="fg2">
+      <div class="f s2"><label>Τρόπος πληρωμής *</label>
+        <select id="payconf-method">
+          <option value="transfer">🏦 Τραπεζική κατάθεση</option>
+          <option value="cash">💵 Μετρητά</option>
+          <option value="card">💳 Κάρτα</option>
+          <option value="other">Άλλο</option>
+        </select>
+      </div>
+      <div class="f s2"><label>Σημείωση (αρ. απόδειξης κλπ)</label><input type="text" id="payconf-notes" placeholder="π.χ. αρ. απόδειξης 1234"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('mpayconf')">Ακύρωση</button><button class="btn p" onclick="doConfirmPayment()">✓ Επιβεβαίωση</button></div>
   </div>
 </div>
 
@@ -1098,6 +1133,8 @@ async function load(){
     else if(ap?.id==='page-prices')rPrices();
     else if(ap?.id==='page-payments')rPay();
     else if(ap?.id==='page-cash')rCash();
+    else if(ap?.id==='page-sacash')rSACash();
+    refreshUrgentBadge();
   }catch(e){toast('Σφάλμα φόρτωσης: '+e.message,'err');}
 }
 
@@ -1610,50 +1647,190 @@ async function savePrice(){
 // ══════════════════════════════════════════════════════
 // PAYMENTS
 // ══════════════════════════════════════════════════════
-function swPV(v,el){document.querySelectorAll('.vb').forEach(b=>b.classList.remove('active'));el.classList.add('active');aPV=v;rPay();}
+function swPV(v,el){document.querySelectorAll('#page-payments .vt .vb').forEach(b=>b.classList.remove('active'));el.classList.add('active');aPV=v;rPay();}
 function fPay(f,el){document.querySelectorAll('#pf .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');aPF=f;rPay();}
 // ══════════════════════════════════════════════════════
-// CREDITS HELPERS (πιστωτικά παραγγελίας)
+// CASH BREAKDOWN (Πρόταση #4) — συνολικά μετρητά ανά κατάστημα + ΣΑ
 // ══════════════════════════════════════════════════════
+function renderCashBreakdown(){
+  const container=document.getElementById('dash-cash-breakdown');
+  const totalEl=document.getElementById('dash-cash-total');
+  const card=document.getElementById('dash-cash-card');
+  if(!container||!card)return;
+  const allowed=getAllowedLocs();
+  const calcLoc=(locId)=>{
+    const ein=ces.filter(e=>e.location_id===locId).reduce((s,e)=>s+Number(e.amount||0),0);
+    const eout=cps.filter(p=>p.location_id===locId).reduce((s,p)=>s+Number(p.amount||0),0);
+    return ein-eout;
+  };
+  const hasSA=cP?.role==='admin'||(cP?.permissions?.tabs||[]).includes('sa_cash');
+  const saAvail=hasSA?calcSAAvail():0;
+  let total=saAvail;
+  let cards='';
+  allowed.forEach(l=>{
+    const v=calcLoc(l.id);
+    total+=v;
+    cards+=`<div style="padding:10px 12px;background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;cursor:pointer" onclick="goToCashLoc('${l.id}')">
+      <div style="font-size:11px;color:var(--td);margin-bottom:2px">📍 ${l.name}</div>
+      <div style="font-size:15px;font-weight:700;color:${v>=0?'var(--gn)':'var(--rd)'}">${fmt(v)} €</div>
+    </div>`;
+  });
+  if(hasSA){
+    cards+=`<div style="padding:10px 12px;background:rgba(144,202,249,0.08);border:0.5px solid #90caf9;border-radius:8px;cursor:pointer" onclick="goToSACash()">
+      <div style="font-size:11px;color:var(--td);margin-bottom:2px">💼 ΣΑ</div>
+      <div style="font-size:15px;font-weight:700;color:#90caf9">${fmt(saAvail)} €</div>
+    </div>`;
+  }
+  container.innerHTML=cards||'<div style="color:var(--td);font-size:12px;padding:10px 0">Δεν υπάρχει πρόσβαση σε καταστήματα</div>';
+  if(totalEl)totalEl.innerHTML=`<b style="color:var(--gn)">${fmt(total)} €</b>`;
+}
+function goToCashLoc(locId){
+  const tab=document.getElementById('tab-cash');
+  if(tab&&tab.style.display!=='none'){
+    sw('cash',tab);
+    setTimeout(()=>{
+      // Set active filter στο συγκεκριμένο location
+      aCF=locId;
+      const card=document.querySelector(`#clf .loccard[onclick*="${locId}"]`);
+      document.querySelectorAll('#clf .loccard').forEach(c=>c.classList.remove('active'));
+      if(card)card.classList.add('active');
+      rCash();
+    },50);
+  }
+}
+function goToSACash(){
+  const tab=document.getElementById('tab-sacash');
+  if(tab&&tab.style.display!=='none')sw('sacash',tab);
+}
+
+// ══════════════════════════════════════════════════════
+// URGENT PAYMENTS BADGE (Πρόταση #1)
+// ══════════════════════════════════════════════════════
+// Μετράει επείγουσες εκκρεμότητες (μόνο όσες είναι ready_to_pay=true):
+//   - ληγμένες (overdue)
+//   - λήγουν εντός 7 ημερών
+function calcUrgentItems(){
+  const now=new Date();
+  const list=[];
+  ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0&&!!o.ready_to_pay).forEach(o=>{
+    const net=orderNetBalance(o);if(net<=0)return;
+    const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
+    const dl=Math.ceil((due-now)/86400000);
+    if(dl<=7)list.push({type:'order',id:o.id,name:sN(o.supplier_id),amount:net,dl,due});
+  });
+  recs.filter(r=>r.active!==false&&!!r.ready_to_pay).forEach(r=>{
+    const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);
+    if(dl<=7)list.push({type:'rec',id:r.id,name:r.name,amount:Number(r.amount),dl,due});
+  });
+  oths.filter(o=>!o.paid&&!!o.ready_to_pay).forEach(o=>{
+    const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);
+    if(dl<=7)list.push({type:'other',id:o.id,name:o.name,amount:Number(o.amount),dl,due});
+  });
+  return list;
+}
+function refreshUrgentBadge(){
+  const urg=calcUrgentItems();
+  const overdue=urg.filter(x=>x.dl<0).length;
+  const soon=urg.filter(x=>x.dl>=0&&x.dl<=7).length;
+  const total=urg.length;
+  const badge=document.getElementById('urgent-badge');
+  if(badge){
+    if(total===0){badge.style.display='none';}
+    else{
+      badge.style.display='inline-flex';
+      badge.innerHTML=`<span>⚡ Επείγοντα</span><span class="ub-num">${total}</span>`;
+      const tip=overdue>0?`${overdue} ληγμένα · ${soon} εντός 7 ημερών`:`${soon} εντός 7 ημερών`;
+      badge.title=tip;
+    }
+  }
+  // Banner στη σελίδα Πληρωμών (μόνο σε pending mode)
+  const banner=document.getElementById('urgent-banner-pay');
+  if(banner){
+    if(total>0&&aPV==='pending'){
+      const totalAmt=urg.reduce((s,i)=>s+i.amount,0);
+      banner.style.display='';
+      banner.className='urgent-banner';
+      banner.innerHTML=`
+        <div class="ub-title">⚡ Επείγουσες πληρωμές<span class="ub-num" style="background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px">${total}</span></div>
+        <div class="ub-meta">Σύνολο: <b style="color:var(--rd)">${fmt(totalAmt)} €</b>${overdue>0?` · <b style="color:var(--rd)">${overdue} ληγμένα</b>`:''}${soon>0?` · ${soon} εντός 7 ημερών`:''}</div>
+      `;
+    }else{
+      banner.style.display='none';
+    }
+  }
+}
+function goToUrgent(){
+  const tab=document.getElementById('tab-payments');
+  if(tab&&tab.style.display!=='none'){
+    sw('payments',tab);
+    // Μετά αλλάζει σε pending mode (αν είναι σε άλλο)
+    aPV='pending';
+    document.querySelectorAll('#page-payments .vt .vb').forEach(b=>b.classList.remove('active'));
+    const pendBtn=document.querySelector('#page-payments .vt .vb');
+    if(pendBtn)pendBtn.classList.add('active');
+    rPay();
+  }
+}
+
+
 const orderCreditTotal=oid=>credits.filter(c=>c.order_id===oid&&c.applied!==false).reduce((s,c)=>s+Number(c.amount||0),0);
 const orderNetBalance=o=>{const cr=orderCreditTotal(o.id);return Math.max(0,Number(o.balance||0)-cr);};
 
 function rPay(){
   renderLocSeg('pf-locs',aPF,'fPayL');
-  const now=new Date(),iF=aPV==='forecast',items=[];
-  if(!iF){
-    ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0).forEach(o=>{
+  const now=new Date(),mode=aPV,items=[];
+  // mode: 'pending' = ready_to_pay=true και ληγμένα/τρέχοντα
+  //       'pipeline' = ready_to_pay=false αλλά ληγμένα/τρέχοντα (περιμένουν approval)
+  //       'forecast' = μελλοντικά (όλα, ready ή όχι, εντός 60 ημερών)
+  if(mode==='pending'||mode==='pipeline'){
+    const wantReady=(mode==='pending');
+    ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0&&!!o.ready_to_pay===wantReady).forEach(o=>{
       const net=orderNetBalance(o);
-      if(net<=0)return; // πλήρως καλυμμένη από πιστωτικά
+      if(net<=0)return;
       const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
       const dl=Math.ceil((due-now)/86400000);
       const cr=orderCreditTotal(o.id);
-      items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Υπόλοιπο παραγγελίας · '+lN(o.location_id),amount:net,gross:Number(o.balance),credit:cr,due,dl,lid:o.location_id});
+      items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Υπόλοιπο παραγγελίας · '+lN(o.location_id),amount:net,gross:Number(o.balance),credit:cr,due,dl,lid:o.location_id,ready:!!o.ready_to_pay});
     });
-    recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl<=0)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id});});
-    oths.filter(o=>!o.paid).forEach(o=>{const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:Number(o.amount),due,dl,lid:o.location_id});});
+    recs.filter(r=>r.active!==false&&!!r.ready_to_pay===wantReady).forEach(r=>{
+      const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);
+      if(dl<=0)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,ready:!!r.ready_to_pay});
+    });
+    oths.filter(o=>!o.paid&&!!o.ready_to_pay===wantReady).forEach(o=>{
+      const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);
+      items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:Number(o.amount),due,dl,lid:o.location_id,ready:!!o.ready_to_pay});
+    });
   }else{
+    // forecast: όλα μελλοντικά εντός 60 ημερών (ανεξάρτητα από ready_to_pay)
     ords.filter(o=>o.status==='pending'&&Number(o.balance)>0).forEach(o=>{
       const net=orderNetBalance(o);
       if(net<=0)return;
       const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
       const dl=Math.ceil((due-now)/86400000);
       const cr=orderCreditTotal(o.id);
-      if(dl>0&&dl<=60)items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Εκκρ. παράδοση · '+lN(o.location_id),amount:net,gross:Number(o.balance),credit:cr,due,dl,lid:o.location_id,fc:true});
+      if(dl>0&&dl<=60)items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Εκκρ. παράδοση · '+lN(o.location_id),amount:net,gross:Number(o.balance),credit:cr,due,dl,lid:o.location_id,fc:true,ready:!!o.ready_to_pay});
     });
-    recs.filter(r=>r.active!==false).forEach(r=>{const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);if(dl>0&&dl<=60)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,fc:true});});
+    recs.filter(r=>r.active!==false).forEach(r=>{
+      const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);
+      if(dl>0&&dl<=60)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,fc:true,ready:!!r.ready_to_pay});
+    });
   }
   let fl=items;
   if(aPF!=='all')fl=items.filter(i=>i.lid===aPF);
   fl.sort((a,b)=>a.dl-b.dl);
   set('pc',fl.length);set('pt',fmt(fl.reduce((s,i)=>s+i.amount,0))+' €');
   set('pov',fl.filter(i=>i.dl<0).length);set('psn',fl.filter(i=>i.dl>=0&&i.dl<=7).length);
-  if(!fl.length){set('plist',`<div class="empty"><div class="ic">📅</div><p>${iF?'Δεν υπάρχουν προγραμματισμένες':'Δεν υπάρχουν εκκρεμείς'} πληρωμές</p></div>`);return;}
+  // Refresh badge στο top bar
+  refreshUrgentBadge();
+  if(!fl.length){
+    const emptyMsg={pending:'Δεν υπάρχουν εκκρεμείς πληρωμές',pipeline:'Δεν υπάρχουν υποχρεώσεις σε pipeline',forecast:'Δεν υπάρχουν προγραμματισμένες πληρωμές'}[mode];
+    set('plist',`<div class="empty"><div class="ic">📅</div><p>${emptyMsg}</p></div>`);return;
+  }
   const isAdm=cP?.role==='admin';
+  const isMgr=cP?.role==='manager';
   set('plist',fl.map(i=>{
     const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';
     const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';
-    // Βρες supplier ανάλογα με τον τύπο
     let s=null;
     if(i.type==='order'){const o=ords.find(x=>x.id===i.id);s=o?sups.find(x=>x.id===o.supplier_id):null;}
     else if(i.type==='rec'){const r=recs.find(x=>x.id===i.id);s=r?sups.find(x=>x.id===r.supplier_id):null;}
@@ -1661,10 +1838,17 @@ function rPay(){
     const hasIban=s?.iban;
     const eyeBtn=`<button class="ib" onclick="showDetail('${i.type}','${i.id}')" title="Λεπτομέρειες">👁</button>`;
     const ibBtn=hasIban?`<button class="ib" onclick="showIban('${i.id}','${i.type}',${i.amount})" title="Στοιχεία πληρωμής" style="color:var(--gn);border-color:var(--gn)">🏦</button>`:'';
-    const cb=i.fc?'':`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="💳 Πληρώθηκε">💳</button>`;
-    // Κουμπί πιστωτικού μόνο για παραγγελίες και μόνο σε admin
-    const credBtn=(i.type==='order'&&isAdm)?`<button class="ib" onclick="omCredit('${i.id}')" title="Πιστωτικό" style="color:var(--am);border-color:var(--am)">−</button>`:'';
-    // Εμφάνιση gross/credit/net αν υπάρχει πιστωτικό
+    // Κουμπί 💳 Πληρώθηκε ΜΟΝΟ σε pending mode (όχι σε pipeline που δεν είναι έτοιμα, ούτε σε forecast)
+    const cb=(mode==='pending')?`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="💳 Πληρώθηκε">💳</button>`:'';
+    // Toggle ready_to_pay (admin/manager): εμφανίζεται σε pipeline (✓ έγκριση) ή σε pending (⏸ pause)
+    const canToggle=(isAdm||isMgr);
+    const readyBtn=canToggle?(
+      mode==='pipeline'?`<button class="ib" onclick="toggleReady('${i.type}','${i.id}',true)" title="Σημείωση ως έτοιμο για πληρωμή" style="color:var(--gn);border-color:var(--gn)">✓</button>`
+      :mode==='pending'?`<button class="ib" onclick="toggleReady('${i.type}','${i.id}',false)" title="Επαναφορά σε pipeline" style="color:var(--td);border-color:var(--td)">⏸</button>`
+      :''
+    ):'';
+    // Κουμπί πιστωτικού (μόνο σε admin, μόνο για παραγγελίες, και ΟΧΙ σε forecast)
+    const credBtn=(i.type==='order'&&isAdm&&mode!=='forecast')?`<button class="ib" onclick="omCredit('${i.id}')" title="Πιστωτικό" style="color:var(--am);border-color:var(--am)">−</button>`:'';
     const amtHtml=(i.credit&&i.credit>0)
       ? `<div class="pam" style="text-align:right">
            <div style="font-size:11px;color:var(--td);text-decoration:line-through">${fmt(i.gross)} €</div>
@@ -1672,39 +1856,97 @@ function rPay(){
            <div>${fmt(i.amount)} €</div>
          </div>`
       : `<div class="pam">${fmt(i.amount)} €</div>`;
-    return`<div class="pi">
+    return`<div class="pi"${mode==='pipeline'?' style="opacity:0.7"':''}>
       <div class="pd2 ${cl}">${lb}</div>
       <div class="pinf">
-        <div class="pnm">${i.name}</div>
+        <div class="pnm">${i.name}${mode==='pipeline'?' <span style="font-size:10px;color:var(--td);font-weight:400">⏸ pipeline</span>':''}</div>
         <div class="psb">${i.sub} · Λήξη: ${fd(i.due)}</div>
       </div>
       ${amtHtml}
-      <div class="pact">${eyeBtn}${ibBtn}${credBtn}${cb}</div>
+      <div class="pact">${eyeBtn}${ibBtn}${credBtn}${readyBtn}${cb}</div>
     </div>`;
   }).join(''));
 }
-async function confPI(t,id){
-  if(t==='rec')await confRec(id);
-  else if(t==='other')await confOth(id);
-  else if(t==='order')await confOrderPayment(id);
-}
-async function confOrderPayment(id){
-  const o=ords.find(x=>x.id===id);if(!o)return;
-  const net=orderNetBalance(o);
-  const cr=orderCreditTotal(id);
-  const msg=cr>0
-    ? `Πληρωμή ${fmt(net)} € (μετά από πιστωτικό ${fmt(cr)} €). Συνέχεια;`
-    : `Επιβεβαίωση πληρωμής ${fmt(net)} €;`;
-  if(!confirm(msg))return;
-  // Πληρωμή του καθαρού (όχι του gross). Το prepayment φτάνει total - 0 = total
-  // δηλαδή θεωρούμε ότι το πιστωτικό "καλύπτει" μέρος του total.
-  // Άρα prepayment = total_amount (πλήρως εξοφλημένη με μετρητά + πιστωτικά)
-  const{error}=await getDb().from('orders').update({prepayment:o.total_amount}).eq('id',id);
+
+// Toggle ready_to_pay flag
+async function toggleReady(type,id,ready){
+  const tableMap={order:'orders',rec:'recurring_obligations',other:'other_obligations'};
+  const table=tableMap[type];if(!table)return;
+  const{error}=await getDb().from(table).update({ready_to_pay:ready}).eq('id',id);
   if(error){toast('Σφάλμα: '+error.message,'err');return;}
-  await getDb().from('payments').insert({order_id:id,amount:net,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString()});
-  const{data:updated}=await getDb().from('orders').select('*').eq('id',id).single();
-  if(updated){const idx=ords.findIndex(x=>x.id===id);if(idx>=0)ords[idx]=updated;}
-  rOrders();rPay();toast('Πληρωμή επιβεβαιώθηκε! ✓');
+  // Update local
+  if(type==='order'){const o=ords.find(x=>x.id===id);if(o)o.ready_to_pay=ready;}
+  else if(type==='rec'){const r=recs.find(x=>x.id===id);if(r)r.ready_to_pay=ready;}
+  else if(type==='other'){const o=oths.find(x=>x.id===id);if(o)o.ready_to_pay=ready;}
+  rPay();
+  toast(ready?'Σημειώθηκε ως έτοιμο για πληρωμή ✓':'Επαναφέρθηκε σε pipeline ⏸');
+}
+// Δεδομένα της τρέχουσας πληρωμής που πρόκειται να επιβεβαιωθεί
+let pendingPayment=null;
+function confPI(t,id){
+  // Συγκέντρωσε στοιχεία
+  let info={type:t,id,name:'',amount:0,sub:''};
+  if(t==='order'){
+    const o=ords.find(x=>x.id===id);if(!o)return;
+    info.name=sN(o.supplier_id);
+    info.amount=orderNetBalance(o);
+    info.sub='Παραγγελία · '+lN(o.location_id);
+  }else if(t==='rec'){
+    const r=recs.find(x=>x.id===id);if(!r)return;
+    info.name=r.name;
+    info.amount=Number(r.amount);
+    info.sub='Πάγια · '+lN(r.location_id);
+  }else if(t==='other'){
+    const o=oths.find(x=>x.id===id);if(!o)return;
+    info.name=o.name;
+    info.amount=Number(o.amount);
+    info.sub='Άλλη υποχρέωση · '+lN(o.location_id);
+  }
+  pendingPayment=info;
+  set('payconf-info',`
+    <div style="font-size:13px;color:var(--td);margin-bottom:4px">${info.sub}</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px">${info.name}</div>
+    <div style="font-size:22px;font-weight:700;color:var(--gn)">${fmt(info.amount)} €</div>
+  `);
+  document.getElementById('payconf-method').value='transfer';
+  document.getElementById('payconf-notes').value='';
+  document.getElementById('mpayconf').classList.add('open');
+}
+async function doConfirmPayment(){
+  if(!pendingPayment)return;
+  const method=document.getElementById('payconf-method').value;
+  const notes=document.getElementById('payconf-notes').value||null;
+  const t=pendingPayment.type,id=pendingPayment.id,amt=pendingPayment.amount;
+  try{
+    if(t==='order'){
+      const o=ords.find(x=>x.id===id);if(!o)return;
+      await getDb().from('orders').update({prepayment:o.total_amount}).eq('id',id);
+      await getDb().from('payments').insert({order_id:id,amount:amt,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString(),payment_method:method,paid_by:cU.id,payment_notes:notes});
+      const{data:updated}=await getDb().from('orders').select('*').eq('id',id).single();
+      if(updated){const idx=ords.findIndex(x=>x.id===id);if(idx>=0)ords[idx]=updated;}
+    }else if(t==='rec'){
+      const r=recs.find(x=>x.id===id);if(!r)return;
+      await getDb().from('payments').insert({recurring_id:id,amount:amt,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString(),payment_method:method,paid_by:cU.id,payment_notes:notes});
+      const update={last_payment_method:method,last_paid_by:cU.id,last_paid_at:new Date().toISOString(),last_payment_notes:notes};
+      if(r.auto_repeat){
+        const d=new Date(r.next_due_date);
+        if(r.frequency==='monthly')d.setMonth(d.getMonth()+1);
+        else if(r.frequency==='biannual')d.setMonth(d.getMonth()+6);
+        else if(r.frequency==='annual')d.setFullYear(d.getFullYear()+1);
+        update.next_due_date=d.toISOString().split('T')[0];
+        r.next_due_date=update.next_due_date;
+      }
+      await getDb().from('recurring_obligations').update(update).eq('id',id);
+      Object.assign(r,update);
+    }else if(t==='other'){
+      const update={paid:true,paid_at:new Date().toISOString(),payment_method:method,paid_by:cU.id,payment_notes:notes};
+      await getDb().from('other_obligations').update(update).eq('id',id);
+      const o=oths.find(x=>x.id===id);if(o)Object.assign(o,update);
+    }
+    cm('mpayconf');rOrders();rPay();
+    toast('Πληρωμή επιβεβαιώθηκε! ✓');
+    pendingPayment=null;
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 
 // ══════════════════════════════════════════════════════
@@ -1868,6 +2110,9 @@ function rDash(){
     <div class="met" style="border-color:var(--rd)"><label>⚠️ Ληγμένες πληρωμές</label><div class="mv rd">${overdue}</div></div>
     <div class="met" style="border-color:var(--gn)"><label>💵 Διαθέσιμα μετρητά</label><div class="mv gn">${fmt(cashAvail)} €</div></div>
   `);
+
+  // Συνολικά μετρητά ανά κατάστημα + ΣΑ (Πρόταση #4)
+  renderCashBreakdown();
 
   // Επείγουσες πληρωμές
   const urgent=[];
@@ -2068,6 +2313,13 @@ function showDetail(type,id){
       {l:'Επόμενη λήξη',v:fd(r.next_due_date)},
       {l:'Ποσό',v:fmt(r.amount)+' €',c:'var(--am)'},
     ];
+    if(r.last_paid_at){
+      rows.push({l:'──── Τελευταία πληρωμή ────',v:'',sep:true});
+      const methodMap={cash:'💵 Μετρητά',transfer:'🏦 Κατάθεση',card:'💳 Κάρτα',other:'Άλλο'};
+      rows.push({l:'Ημ/νία',v:fd(r.last_paid_at)});
+      if(r.last_payment_method)rows.push({l:'Τρόπος',v:methodMap[r.last_payment_method]||r.last_payment_method});
+      if(r.last_payment_notes)rows.push({l:'Σημείωση',v:r.last_payment_notes,c:'var(--t1)'});
+    }
     if(sup?.iban){
       rows.push({l:'──── Στοιχεία πληρωμής ────',v:'',sep:true});
       if(sup.beneficiary)rows.push({l:'Δικαιούχος',v:sup.beneficiary});
@@ -2087,6 +2339,14 @@ function showDetail(type,id){
       {l:'Λήξη',v:fd(o.due_date)},
       {l:'Ποσό',v:fmt(o.amount)+' €',c:'var(--am)'},
     ];
+    if(o.paid){
+      rows.push({l:'──── Πληρωμή ────',v:'',sep:true});
+      const methodMap={cash:'💵 Μετρητά',transfer:'🏦 Κατάθεση',card:'💳 Κάρτα',other:'Άλλο'};
+      rows.push({l:'Κατάσταση',v:'✓ Πληρωμένο',c:'var(--gn)'});
+      if(o.paid_at)rows.push({l:'Ημ/νία πληρωμής',v:fd(o.paid_at)});
+      if(o.payment_method)rows.push({l:'Τρόπος',v:methodMap[o.payment_method]||o.payment_method});
+      if(o.payment_notes)rows.push({l:'Σημείωση πληρωμής',v:o.payment_notes,c:'var(--t1)'});
+    }
     if(sup?.iban){
       rows.push({l:'──── Στοιχεία πληρωμής ────',v:'',sep:true});
       if(sup.beneficiary)rows.push({l:'Δικαιούχος',v:sup.beneficiary});
@@ -2616,7 +2876,12 @@ const AUDIT_FIELD_NAMES={
   supplier_id:'Προμηθευτής',location_id:'Κατάστημα',product_id:'Είδος',order_id:'Παραγγελία',
   recurring_id:'Πάγια υποχρέωση',quantity:'Ποσότητα',unit_price:'Τιμή μονάδας',
   paid:'Πληρωμένο',frequency:'Συχνότητα',auto_repeat:'Αυτόματη επανάληψη',
-  fc:'Εξοφλήθηκε',iban:'IBAN',bank:'Τράπεζα',beneficiary:'Δικαιούχος'
+  fc:'Εξοφλήθηκε',iban:'IBAN',bank:'Τράπεζα',beneficiary:'Δικαιούχος',
+  ready_to_pay:'Έτοιμο για πληρωμή',payment_method:'Τρόπος πληρωμής',
+  payment_notes:'Σημείωση πληρωμής',paid_by:'Πληρώθηκε από',paid_at:'Ημ/νία πληρωμής',
+  last_payment_method:'Τρόπος τελ. πληρωμής',last_paid_by:'Τελ. πληρωμή από',
+  last_paid_at:'Ημ/νία τελ. πληρωμής',last_payment_notes:'Σημείωση τελ. πληρωμής',
+  applied:'Εφαρμοσμένο',reason:'Αιτία'
 };
 function fmtAuditValue(key,val){
   if(val===null||val===undefined)return '<em style="color:var(--td)">κενό</em>';
