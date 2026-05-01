@@ -9,17 +9,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --nd:#0d0d12;--nm:#111118;--nc:#161b32;--ni:#1a2040;--nb:#252d58;--nh:#2d3668;
-  --pk:#e8a0c0;--pb:#c8507a;--pd:#2a1020;
-  --t1:#e8eaf6;--t2:#9aa4d0;--tm:#5a6898;--td:#3a4268;
-  --gn:#30b878;--gd:#0a1f18;--am:#d4a020;--ad:#241e08;--rd:#e86080;--rdd:#2a1020
+  /* LIGHT THEME — "Fresh Mail Close" */
+  /* Backgrounds: από σκούρο μπλε σε ανοιχτό γκρι/λευκό */
+  --nd:#1e2761;     /* navy headings (αντί για deep dark) */
+  --nm:#f5f5f7;     /* main app background (light grey) */
+  --nc:#ffffff;     /* card background (καθαρό λευκό) */
+  --ni:#f9fafb;     /* input/inset background (very light grey) */
+  --nb:#e5e7eb;     /* borders (light grey) */
+  --nh:#f3f4f6;     /* hover state (slightly darker than ni) */
+  /* Pink accents (κρατάει το brand) */
+  --pk:#c8507a;     /* primary pink (πιο σκούρο για contrast σε light bg) */
+  --pb:#a8395e;    /* darker pink για buttons */
+  --pd:#fff0f3;    /* pink δι-light tint background */
+  /* Text colors */
+  --t1:#1e2761;    /* primary text (navy) */
+  --t2:#374151;    /* secondary text (dark grey) */
+  --tm:#6b7280;    /* muted text */
+  --td:#9ca3af;    /* very muted / labels */
+  /* Status colors */
+  --gn:#059669;    /* green (πιο σκούρο για readability) */
+  --gd:#ecfdf5;    /* green tint background */
+  --am:#d97706;    /* amber/orange */
+  --ad:#fffbeb;    /* amber tint background */
+  --rd:#dc2626;    /* red */
+  --rdd:#fef2f2   /* red tint background */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
 
 /* LOGIN */
-#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#1a1f3a 0%,var(--nm) 70%)}
-.lb{background:var(--nc);border:0.5px solid var(--nb);border-radius:20px;padding:44px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#fce7f0 0%,#f5f5f7 70%)}
+.lb{background:var(--nc);border:0.5px solid var(--nb);border-radius:20px;padding:44px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(30,39,97,.12)}
 .ll{font-size:26px;font-weight:700;color:var(--pk);text-align:center;letter-spacing:2px;margin-bottom:6px}
 .ls2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:32px}
 .lf{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
@@ -27,7 +47,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;color:var(--t1);padding:11px 14px;font-size:14px;outline:none;font-family:inherit;width:100%;transition:border-color .15s}
 .lf input:focus{border-color:var(--pk)}
 .lbtn{width:100%;padding:12px;background:var(--pb);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:background .15s}
-.lbtn:hover{background:#b8406a}
+.lbtn:hover{background:#8a2c4d}
 .lerr{font-size:12px;color:var(--rd);text-align:center;margin-top:10px;min-height:18px}
 
 /* APP */
@@ -39,14 +59,14 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .ts{flex:1}
 .tbr{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px}
 .ub{font-size:12px;color:var(--tm);white-space:nowrap}
-.urgent-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(229,115,115,0.15);border:1px solid var(--rd);color:var(--rd);padding:4px 10px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
-.urgent-badge:hover{background:rgba(229,115,115,0.25);transform:scale(1.03)}
+.urgent-badge{display:inline-flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;color:var(--rd);padding:4px 10px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.urgent-badge:hover{background:#fee2e2;transform:scale(1.03)}
 .urgent-badge .ub-num{background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
-.urgent-banner{background:rgba(229,115,115,0.08);border:1px solid var(--rd);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.urgent-banner{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .urgent-banner .ub-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--rd)}
 .urgent-banner .ub-meta{font-size:11px;color:var(--td)}
 .mbtn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--pk);background:var(--pd);color:var(--pk);cursor:pointer;white-space:nowrap;font-weight:500;transition:background .15s}
-.mbtn:hover{background:#3a1530}
+.mbtn:hover{background:var(--pd);border-color:var(--pk)}
 .lout{padding:7px 12px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
 .lout:hover{color:var(--rd);border-color:var(--rd)}
 
@@ -99,14 +119,14 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 /* BADGES */
 .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
 .bp{background:var(--ad);color:var(--am)}.bd{background:var(--gd);color:var(--gn)}.bc{background:var(--rdd);color:var(--rd)}
-.br{background:#101840;color:#7080e0}.bo{background:#101a10;color:#50a860}
+.br{background:#eef2ff;color:#4f46e5}.bo{background:#ecfdf5;color:#059669}
 
 /* LOCATION BADGES */
 .loc{padding:3px 9px;border-radius:6px;font-size:11px;white-space:nowrap}
-.lm{background:#0d1a30;color:#5080c0;border:0.5px solid #1a3050}
-.lg{background:#0d1a10;color:#40a060;border:0.5px solid #1a3020}
-.lp{background:#1a0d30;color:#9060c8;border:0.5px solid #2a1a40}
-.lma{background:#2a0d0d;color:#e06050;border:0.5px solid #401a1a}
+.lm{background:#eff6ff;color:#2563eb;border:0.5px solid #bfdbfe}
+.lg{background:#ecfdf5;color:#059669;border:0.5px solid #a7f3d0}
+.lp{background:#f5f3ff;color:#7c3aed;border:0.5px solid #ddd6fe}
+.lma{background:#fef2f2;color:#dc2626;border:0.5px solid #fecaca}
 
 /* ITEMS IN ORDER CARD */
 .order-items-preview{background:var(--ni);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:12px}
@@ -114,7 +134,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .order-item-row:last-child{border-bottom:none}
 
 /* MODAL */
-.mbg{display:none;position:fixed;inset:0;background:rgba(5,5,15,.88);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.mbg{display:none;position:fixed;inset:0;background:rgba(30,39,97,.35);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .mbg.open{display:flex}
 .modal{background:var(--nc);border:0.5px solid var(--nb);border-radius:18px;padding:26px;width:100%;max-width:680px;margin:auto}
 .modal h2{font-size:16px;font-weight:600;color:var(--pk);margin-bottom:20px}
@@ -176,7 +196,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .cra{font-size:15px;font-weight:600;white-space:nowrap}
 
 /* SIDE PANEL */
-.spbg{display:none;position:fixed;inset:0;background:rgba(5,5,15,.7);z-index:300}
+.spbg{display:none;position:fixed;inset:0;background:rgba(30,39,97,.3);z-index:300}
 .spbg.open{display:block}
 .sp{position:fixed;top:0;right:0;bottom:0;width:min(600px,100vw);background:var(--nc);border-left:0.5px solid var(--nb);z-index:301;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
 .spbg.open .sp{transform:translateX(0)}
@@ -222,17 +242,17 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 /* SEGMENTED CONTROL για καταστήματα (μπλε χρώμα για διαχωρισμό από φίλτρα) */
 .locseg{display:inline-flex;background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;padding:3px;flex-wrap:wrap;gap:2px;margin-bottom:14px;max-width:100%}
 .locseg .seg{padding:7px 14px;color:var(--tm);cursor:pointer;font-size:12px;font-weight:500;border-radius:7px;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border:none;background:transparent}
-.locseg .seg:hover{color:var(--t1);background:rgba(144,202,249,.06)}
-.locseg .seg.active{background:rgba(144,202,249,.18);color:#90caf9;font-weight:600}
+.locseg .seg:hover{color:var(--t1);background:rgba(30,39,97,.06)}
+.locseg .seg.active{background:#1e2761;color:#fff;font-weight:600}
 .loclbl{font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--td);margin-bottom:6px;font-weight:600;display:flex;align-items:center;gap:5px}
 
 /* CARDS με stats για cash tab */
 .loccards{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .loccard{padding:9px 14px;border-radius:10px;background:var(--ni);border:0.5px solid var(--nb);cursor:pointer;min-width:110px;transition:all .15s}
-.loccard:hover{border-color:#90caf9;transform:translateY(-1px)}
-.loccard.active{background:rgba(144,202,249,.10);border-color:#90caf9}
+.loccard:hover{border-color:#3b82f6;transform:translateY(-1px)}
+.loccard.active{background:#eff6ff;border-color:#3b82f6}
 .loccard .lc-name{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:2px}
-.loccard.active .lc-name{color:#90caf9}
+.loccard.active .lc-name{color:#1e40af}
 .loccard .lc-meta{font-size:11px;color:var(--td);font-weight:500}
 .loccard.active .lc-meta{color:var(--gn)}
 .icc{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;padding:14px;margin-top:12px}
@@ -242,7 +262,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 
 .chk-btn{padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s;user-select:none}
 .chk-btn.on{background:var(--pd);border-color:var(--pk);color:var(--pk);font-weight:500}
-.chk-btn.on-loc{background:#0d1a30;border-color:#5080c0;color:#7090d0;font-weight:500}
+.chk-btn.on-loc{background:#eff6ff;border-color:#3b82f6;color:#1e40af;font-weight:500}
 @media(max-width:600px){
   .fg2{grid-template-columns:1fr}.fg2 .f.s2{grid-column:span 1}
   .spg{grid-template-columns:1fr}.fg.full{grid-column:span 1}
@@ -289,8 +309,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <!-- DASHBOARD -->
 <div id="page-dash" class="page active ao">
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px" id="dash-metrics"></div>
-  <div class="card" style="margin-bottom:24px;border-color:#90caf9" id="dash-cash-card">
-    <div style="font-size:13px;font-weight:600;color:#90caf9;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+  <div class="card" style="margin-bottom:24px;border-color:#3b82f6" id="dash-cash-card">
+    <div style="font-size:13px;font-weight:600;color:#3b82f6;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
       <span>💵 Συνολικά διαθέσιμα μετρητά</span>
       <span id="dash-cash-total" style="font-size:18px"></span>
     </div>
@@ -398,7 +418,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="cc"><div class="cl2">Εισπράξεις</div><div class="ca" id="cin" style="color:var(--gn)">—</div></div>
     <div class="cc"><div class="cl2">Πληρωμές</div><div class="ca" id="cout" style="color:var(--rd)">—</div></div>
     <div class="cc av"><div class="cl2">💵 Διαθέσιμα μετρητά</div><div class="ca" id="cavail" style="color:var(--gn)">—</div></div>
-    <div class="cc" id="sacash-info-card" style="display:none;border-color:#90caf9"><div class="cl2">💼 Διαθέσιμα ΣΑ</div><div class="ca" id="sacash-avail-info" style="color:#90caf9">—</div></div>
+    <div class="cc" id="sacash-info-card" style="display:none;border-color:#3b82f6"><div class="cl2">💼 Διαθέσιμα ΣΑ</div><div class="ca" id="sacash-avail-info" style="color:#3b82f6">—</div></div>
   </div>
   <div style="margin-bottom:12px">
     <div class="loclbl">📍 Κατάστημα</div>
@@ -427,7 +447,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="cs">
     <div class="cc"><div class="cl2">Εισπράξεις ΣΑ</div><div class="ca" id="sacin" style="color:var(--gn)">—</div></div>
     <div class="cc"><div class="cl2">Πληρωμές ΣΑ</div><div class="ca" id="sacout" style="color:var(--rd)">—</div></div>
-    <div class="cc av" style="border-color:#90caf9"><div class="cl2">💼 Διαθέσιμα ΣΑ</div><div class="ca" id="sacavail" style="color:#90caf9">—</div></div>
+    <div class="cc av" style="border-color:#3b82f6"><div class="cl2">💼 Διαθέσιμα ΣΑ</div><div class="ca" id="sacavail" style="color:#3b82f6">—</div></div>
   </div>
   <div class="tlb">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -438,7 +458,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     </div>
     <div class="tbr2">
       <button class="btn" onclick="om('msap')">− Πληρωμή ΣΑ</button>
-      <button class="btn" onclick="om('mtrf')" style="border-color:#90caf9;color:#90caf9">⇄ Μεταφορά</button>
+      <button class="btn" onclick="om('mtrf')" style="border-color:#3b82f6;color:#3b82f6">⇄ Μεταφορά</button>
       <button class="btn p" onclick="om('msae')">+ Είσπραξη ΣΑ</button>
     </div>
   </div>
@@ -648,7 +668,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <!-- Μεταφορά μεταξύ ταμείων -->
 <div class="mbg" id="mtrf">
   <div class="modal"><h2>⇄ Μεταφορά μετρητών</h2>
-    <div style="background:rgba(144,202,249,0.08);border:0.5px solid #90caf9;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--t2)">
+    <div style="background:#eff6ff;border:0.5px solid #3b82f6;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--t2)">
       💡 Η μεταφορά καταγράφει αυτόματα <b>2 κινήσεις</b>: μία στο κατάστημα και μία στο ΣΑ.
     </div>
     <div class="fg2">
@@ -1676,9 +1696,9 @@ function renderCashBreakdown(){
     </div>`;
   });
   if(hasSA){
-    cards+=`<div style="padding:10px 12px;background:rgba(144,202,249,0.08);border:0.5px solid #90caf9;border-radius:8px;cursor:pointer" onclick="goToSACash()">
+    cards+=`<div style="padding:10px 12px;background:#eff6ff;border:0.5px solid #3b82f6;border-radius:8px;cursor:pointer" onclick="goToSACash()">
       <div style="font-size:11px;color:var(--td);margin-bottom:2px">💼 ΣΑ</div>
-      <div style="font-size:15px;font-weight:700;color:#90caf9">${fmt(saAvail)} €</div>
+      <div style="font-size:15px;font-weight:700;color:#3b82f6">${fmt(saAvail)} €</div>
     </div>`;
   }
   container.innerHTML=cards||'<div style="color:var(--td);font-size:12px;padding:10px 0">Δεν υπάρχει πρόσβαση σε καταστήματα</div>';
@@ -2154,7 +2174,7 @@ function rDashCharts(){
   const ctxM=document.getElementById('chart-monthly');
   if(ctxM){
     if(chartMonthly)chartMonthly.destroy();
-    chartMonthly=new Chart(ctxM,{type:'bar',data:{labels:mLabelsFmt,datasets:[{label:'Έξοδα (€)',data:mData,backgroundColor:'rgba(200,80,122,0.6)',borderColor:'rgb(200,80,122)',borderWidth:1,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5a6898'},grid:{color:'#252d58'}},y:{ticks:{color:'#5a6898',callback:v=>fmt(v)+'€'},grid:{color:'#252d58'}}}}});
+    chartMonthly=new Chart(ctxM,{type:'bar',data:{labels:mLabelsFmt,datasets:[{label:'Έξοδα (€)',data:mData,backgroundColor:'rgba(200,80,122,0.6)',borderColor:'rgb(200,80,122)',borderWidth:1,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b7280'},grid:{color:'#e5e7eb'}},y:{ticks:{color:'#6b7280',callback:v=>fmt(v)+'€'},grid:{color:'#e5e7eb'}}}}});
   }
 
   // Supplier pie chart
@@ -2168,7 +2188,7 @@ function rDashCharts(){
   if(ctxS){
     if(chartSupplier)chartSupplier.destroy();
     if(sLabels.length){
-      chartSupplier=new Chart(ctxS,{type:'doughnut',data:{labels:sLabels,datasets:[{data:sData,backgroundColor:colors,borderColor:'#161b32',borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{color:'#9aa4d0',font:{size:11},boxWidth:12}}}}});
+      chartSupplier=new Chart(ctxS,{type:'doughnut',data:{labels:sLabels,datasets:[{data:sData,backgroundColor:colors,borderColor:'#ffffff',borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{color:'#374151',font:{size:11},boxWidth:12}}}}});
     }
   }
 }
@@ -2596,22 +2616,22 @@ function buildLocChecks(selLocs){
   const cont=document.getElementById('eu-locs-checks');
   cont.innerHTML=locs.map(l=>{
     const on=selLocs.includes(l.id);
-    const st=on?'background:#0d1a30;border-color:#5080c0;color:#7090d0;font-weight:500':'background:var(--ni);border-color:var(--nb);color:var(--tm)';
-    return`<div class="chk-btn" onclick="toggleChk(this,'locs')" data-val="${l.id}" style="${st};padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid ${on?'#5080c0':'var(--nb)'};cursor:pointer;transition:all .15s">${l.name}</div>`;
+    const st=on?'background:#eff6ff;border-color:#3b82f6;color:#1e40af;font-weight:500':'background:var(--ni);border-color:var(--nb);color:var(--tm)';
+    return`<div class="chk-btn" onclick="toggleChk(this,'locs')" data-val="${l.id}" style="${st};padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid ${on?'#3b82f6':'var(--nb)'};cursor:pointer;transition:all .15s">${l.name}</div>`;
   }).join('');
 }
 
 function toggleChk(el,type){
   if(type==='tabs'){el.classList.toggle('on');}
   else{
-    const isOn=el.style.borderColor==='rgb(80, 128, 192)';
+    const isOn=el.style.borderColor==='rgb(59, 130, 246)';
     if(isOn){el.style.cssText='background:var(--ni);border-color:var(--nb);color:var(--tm);padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);cursor:pointer;transition:all .15s';}
-    else{el.style.cssText='background:#0d1a30;border-color:#5080c0;color:#7090d0;font-weight:500;padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid #5080c0;cursor:pointer;transition:all .15s';}
+    else{el.style.cssText='background:#eff6ff;border-color:#3b82f6;color:#1e40af;font-weight:500;padding:6px 14px;font-size:12px;border-radius:20px;border:0.5px solid #3b82f6;cursor:pointer;transition:all .15s';}
   }
 }
 
 function getSelTabs(){return Array.from(document.querySelectorAll('#eu-tabs-checks .chk-btn.on')).map(el=>el.dataset.val);}
-function getSelLocs(){return Array.from(document.querySelectorAll('#eu-locs-checks .chk-btn')).filter(el=>el.style.borderColor==='rgb(80, 128, 192)').map(el=>el.dataset.val);}
+function getSelLocs(){return Array.from(document.querySelectorAll('#eu-locs-checks .chk-btn')).filter(el=>el.style.borderColor==='rgb(59, 130, 246)').map(el=>el.dataset.val);}
 
 function editUser(id){
   const u=ups.find(x=>x.id===id);if(!u)return;
