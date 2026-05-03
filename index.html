@@ -394,7 +394,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     </div>
   </div>
   <div class="sec">
-    <table class="dt"><thead><tr><th>Είδος</th><th>Προμηθευτής</th><th>Κωδικός</th><th>Ονομ. Προμ.</th><th>Συσκευασία</th><th>Τιμή/Συσκ</th><th>Τιμή/τμχ</th><th>Ημερομηνία</th></tr></thead>
+    <table class="dt"><thead><tr><th>Είδος</th><th>Προμηθευτής</th><th>Κωδικός</th><th>Ονομ. Προμ.</th><th>Συσκευασία</th><th title="Καθαρή τιμή/συσκευασία (χωρίς ΦΠΑ)">Καθαρή/Συσκ</th><th title="Καθαρή τιμή ανά τεμάχιο (χωρίς ΦΠΑ)">Καθαρή/τμχ</th><th>Ημερομηνία</th></tr></thead>
     <tbody id="pbody"><tr><td colspan="8" class="ld">Φόρτωση...</td></tr></tbody></table>
   </div>
 </div>
@@ -512,7 +512,9 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <div class="f"><label>Εκτ. παράδοση</label><input type="date" id="odlv"></div>
       <div class="f"><label>Κατηγορία</label><select id="ocat"></select></div>
       <div class="f"><label>Προκαταβολή (€)</label><input type="number" id="opp" step="0.01" placeholder="0.00" oninput="calcB()"></div>
-      <div class="f"><label>Σύνολο γραμμών (€)</label><input type="number" id="otot" step="0.01" readonly style="opacity:.7;background:var(--nh)"></div>
+      <div class="f"><label title="Σύνολο καθαρής αξίας (χωρίς ΦΠΑ)">Καθαρό σύνολο (€)</label><input type="number" id="onet" step="0.01" readonly style="opacity:.7;background:var(--nh)"></div>
+      <div class="f"><label title="Σύνολο ΦΠΑ">ΦΠΑ (€)</label><input type="number" id="ovat" step="0.01" readonly style="opacity:.7;background:var(--nh)"></div>
+      <div class="f"><label title="Σύνολο γραμμών με ΦΠΑ — αυτό πληρώνεται">Σύνολο γραμμών (€)</label><input type="number" id="otot" step="0.01" readonly style="opacity:.7;background:var(--nh);font-weight:700"></div>
       <div class="f"><label>Υπόλοιπο (€)</label><input type="number" id="obal" readonly style="opacity:.6"></div>
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="onotes"></div>
     </div>
@@ -530,8 +532,10 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <th style="min-width:70px">Συσκ.</th>
             <th style="min-width:60px" title="Τεμάχια ανά συσκευασία">Τεμ/Συσκ</th>
             <th style="min-width:60px" title="Αριθμός συσκευασιών">Ποσ.Συσκ</th>
-            <th style="min-width:80px">Τιμή/Συσκ(€)</th>
-            <th style="min-width:80px">Σύνολο(€)</th>
+            <th style="min-width:90px" title="Καθαρή τιμή ανά συσκευασία (χωρίς ΦΠΑ)">Καθαρή/Συσκ(€)</th>
+            <th style="min-width:55px" title="Ποσοστό ΦΠΑ (24, 13, 6 κλπ)">ΦΠΑ%</th>
+            <th style="min-width:90px" title="Τιμή/συσκ με ΦΠΑ (αυτόματο)">Με ΦΠΑ(€)</th>
+            <th style="min-width:80px" title="Σύνολο γραμμής με ΦΠΑ">Σύνολο(€)</th>
             <th></th>
           </tr></thead>
           <tbody id="ibody"></tbody>
@@ -589,7 +593,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <div class="f"><label>Ονομασία προμηθευτή</label><input type="text" id="pdesc"></div>
       <div class="f"><label>Συσκευασία</label><input type="text" id="ppkg" placeholder="π.χ. Κιβώτιο"></div>
       <div class="f"><label>Τεμ./Συσκ.</label><input type="number" id="ppqty" value="1" step="0.001"></div>
-      <div class="f"><label>Τιμή/Συσκ (€)</label><input type="number" id="ppprice" step="0.01" placeholder="0.00"></div>
+      <div class="f"><label>Καθαρή Τιμή/Συσκ (€)</label><input type="number" id="ppprice" step="0.01" placeholder="0.00" title="Τιμή χωρίς ΦΠΑ"></div>
       <div class="f"><label>Ημερομηνία</label><input type="date" id="pdt"></div>
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="pnotes"></div>
     </div>
@@ -1048,8 +1052,37 @@ const i2b=i=>{if(!i)return'—';const c=i.replace(/\s/g,'').substring(4,7);const
 const toast=(m,t='ok')=>{const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+t;setTimeout(()=>e.className='toast',3000);};
 const set=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h;};
 const calcB=()=>{const t=parseFloat(document.getElementById('otot').value)||0;const p=parseFloat(document.getElementById('opp').value)||0;document.getElementById('obal').value=(t-p).toFixed(2);};
-function calcRowTot(inp){const row=inp.closest('tr');const pos=parseFloat(row.querySelector('.iq')?.value)||0;const pr=parseFloat(row.querySelector('.ipr')?.value)||0;const tot=row.querySelector('.itot');if(tot)tot.value=(pos*pr).toFixed(2);calcTotFromRows();}
-function calcTotFromRows(){let sum=0;document.querySelectorAll('#ibody tr').forEach(row=>{sum+=(parseFloat(row.querySelector('.iq')?.value)||0)*(parseFloat(row.querySelector('.ipr')?.value)||0);});const el=document.getElementById('otot');if(el){el.value=sum.toFixed(2);calcB();}}
+// Υπολογίζει: net price → +ΦΠΑ → gross price → × ποσότητα = σύνολο γραμμής
+function calcRowTot(inp){
+  const row=inp.closest('tr');
+  const pos=parseFloat(row.querySelector('.iq')?.value)||0;
+  const net=parseFloat(row.querySelector('.iprn')?.value)||0;
+  const vat=parseFloat(row.querySelector('.ivat')?.value)||0;
+  // Τιμή με ΦΠΑ
+  const gross=net*(1+vat/100);
+  const grossEl=row.querySelector('.ipr');
+  if(grossEl)grossEl.value=gross.toFixed(4);
+  // Σύνολο γραμμής (με ΦΠΑ)
+  const tot=row.querySelector('.itot');
+  if(tot)tot.value=(pos*gross).toFixed(2);
+  calcTotFromRows();
+}
+// Υπολογίζει: net total + vat total + gross total
+function calcTotFromRows(){
+  let netSum=0,grossSum=0;
+  document.querySelectorAll('#ibody tr').forEach(row=>{
+    const pos=parseFloat(row.querySelector('.iq')?.value)||0;
+    const net=parseFloat(row.querySelector('.iprn')?.value)||0;
+    const vat=parseFloat(row.querySelector('.ivat')?.value)||0;
+    const gross=net*(1+vat/100);
+    netSum+=pos*net;
+    grossSum+=pos*gross;
+  });
+  const vatSum=grossSum-netSum;
+  const elNet=document.getElementById('onet');if(elNet)elNet.value=netSum.toFixed(2);
+  const elVat=document.getElementById('ovat');if(elVat)elVat.value=vatSum.toFixed(2);
+  const el=document.getElementById('otot');if(el){el.value=grossSum.toFixed(2);calcB();}
+}
 
 // ══════════════════════════════════════════════════════
 // AUTH
@@ -1228,7 +1261,7 @@ function sw(n,el){
   if(n==='sacash')rSACash();
 }
 function om(id){
-  if(id==='mord'){oeditId=null;set('mord-title','Νέα παραγγελία');document.getElementById('odt').value=td();['otot','opp','obal'].forEach(i=>document.getElementById(i).value='');['osup','oloc','ocat','onotes','odlv'].forEach(i=>document.getElementById(i).value='');document.getElementById('ibody').innerHTML='';addRow();}
+  if(id==='mord'){oeditId=null;set('mord-title','Νέα παραγγελία');document.getElementById('odt').value=td();['otot','opp','obal','onet','ovat'].forEach(i=>document.getElementById(i).value='');['osup','oloc','ocat','onotes','odlv'].forEach(i=>document.getElementById(i).value='');document.getElementById('ibody').innerHTML='';addRow();}
   if(id==='mpr')document.getElementById('pdt').value=td();
   if(id==='minv'){document.getElementById('idt').value=td();['iboxes','iqty'].forEach(i=>document.getElementById(i).value='');document.getElementById('iper').value=1;}
   if(id==='mr')document.getElementById('rdue').value=td();
@@ -1461,7 +1494,9 @@ function addRow(selProdId){
     <td><input type="text" class="ipkg" style="width:70px" placeholder="Κιβ."></td>
     <td><input type="number" class="iqp" value="1" step="0.001" style="width:55px" title="Τεμάχια/συσκευασία" oninput="calcRowTot(this)"></td>
     <td><input type="number" class="iq" value="1" step="1" style="width:55px" title="Αριθμός συσκευασιών" oninput="calcRowTot(this)"></td>
-    <td><input type="number" class="ipr" step="0.01" placeholder="0.00" style="width:80px" title="Τιμή ανά συσκευασία" oninput="calcRowTot(this)"></td>
+    <td><input type="number" class="iprn" step="0.01" placeholder="0.00" style="width:90px" title="Καθαρή τιμή/συσκευασία (χωρίς ΦΠΑ)" oninput="calcRowTot(this)"></td>
+    <td><input type="number" class="ivat" value="24" step="1" min="0" max="100" style="width:50px" title="Ποσοστό ΦΠΑ" oninput="calcRowTot(this)"></td>
+    <td><input type="number" class="ipr" readonly step="0.01" placeholder="0.00" style="width:90px;opacity:.7;background:var(--nh)" title="Τιμή/συσκ με ΦΠΑ (αυτόματο)"></td>
     <td><input type="number" class="itot" readonly step="0.01" placeholder="0.00" style="width:80px;opacity:.7;background:var(--nh)"></td>
     <td><button class="ib" onclick="this.closest('tr').remove();calcTotFromRows()" style="flex-shrink:0">✕</button></td>`;
   document.getElementById('ibody').appendChild(tr);
@@ -1476,8 +1511,9 @@ function fillR(sel){
   if(o.dataset.p)row.querySelector('.ipkg').value=o.dataset.p;
   if(o.dataset.q)row.querySelector('.iqp').value=o.dataset.q;
   const spId=o.dataset.sp;
-  if(spId){const lp=prs.filter(p=>p.supplier_product_id===spId).sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];if(lp)row.querySelector('.ipr').value=lp.package_price;}
-  calcRowTot(row.querySelector('.ipr'));
+  // Το prices.package_price είναι πλέον η καθαρή τιμή — γεμίζει το .iprn
+  if(spId){const lp=prs.filter(p=>p.supplier_product_id===spId).sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];if(lp)row.querySelector('.iprn').value=lp.package_price;}
+  calcRowTot(row.querySelector('.iprn'));
 }
 
 async function saveOrder(){
@@ -1488,7 +1524,20 @@ async function saveOrder(){
   const itemRows=[];
   document.querySelectorAll('#ibody tr').forEach(row=>{
     const pid=row.querySelector('.ip')?.value;if(!pid)return;
-    itemRows.push({product_id:pid,supplier_code:row.querySelector('.isc')?.value||'',supplier_description:row.querySelector('.isd')?.value||'',package_unit:row.querySelector('.ipkg')?.value||'',package_qty:parseFloat(row.querySelector('.iqp')?.value)||1,quantity:parseFloat(row.querySelector('.iq')?.value)||1,package_price:parseFloat(row.querySelector('.ipr')?.value)||0});
+    const net=parseFloat(row.querySelector('.iprn')?.value)||0;
+    const vat=parseFloat(row.querySelector('.ivat')?.value)||0;
+    const gross=net*(1+vat/100);
+    itemRows.push({
+      product_id:pid,
+      supplier_code:row.querySelector('.isc')?.value||'',
+      supplier_description:row.querySelector('.isd')?.value||'',
+      package_unit:row.querySelector('.ipkg')?.value||'',
+      package_qty:parseFloat(row.querySelector('.iqp')?.value)||1,
+      quantity:parseFloat(row.querySelector('.iq')?.value)||1,
+      package_price_net:net,
+      vat_rate:vat,
+      package_price:gross
+    });
   });
   cm('mord');
   try{
@@ -1507,7 +1556,7 @@ async function saveOrder(){
       ords.unshift(r[0]);ordId=r[0].id;
     }
     if(itemRows.length>0){
-      const ins=itemRows.map(i=>({order_id:ordId,product_id:i.product_id,supplier_code:i.supplier_code,supplier_description:i.supplier_description,package_unit:i.package_unit,package_qty:i.package_qty,quantity:i.quantity,unit_price:i.package_qty>0?i.package_price/i.package_qty:0,package_price:i.package_price}));
+      const ins=itemRows.map(i=>({order_id:ordId,product_id:i.product_id,supplier_code:i.supplier_code,supplier_description:i.supplier_description,package_unit:i.package_unit,package_qty:i.package_qty,quantity:i.quantity,unit_price:i.package_qty>0?i.package_price/i.package_qty:0,package_price:i.package_price,package_price_net:i.package_price_net,vat_rate:i.vat_rate}));
       const{data:ni,error:ie}=await getDb().from('order_items').insert(ins).select();
       if(ie)toast('Σφάλμα ειδών: '+ie.message,'err');
       else if(ni)ni.forEach(x=>oitems.push(x));
@@ -1555,8 +1604,14 @@ async function editOrd(id){
         tr.querySelector('.ipkg').value=i.package_unit||'';
         tr.querySelector('.iqp').value=i.package_qty||1;
         tr.querySelector('.iq').value=i.quantity||1;
-        tr.querySelector('.ipr').value=i.package_price||0;
-        const tot=tr.querySelector('.itot');if(tot)tot.value=((i.quantity||1)*(i.package_price||0)).toFixed(2);
+        // Νέα πεδία: καθαρή τιμή + ΦΠΑ
+        // Αν είναι παλιά εγγραφή χωρίς net, υπολογίζω από gross/1.24
+        const vat=(i.vat_rate!=null)?i.vat_rate:24;
+        const net=(i.package_price_net!=null)?i.package_price_net:((i.package_price||0)/(1+vat/100));
+        tr.querySelector('.iprn').value=Number(net).toFixed(4);
+        tr.querySelector('.ivat').value=vat;
+        // Recalculate gross + total
+        calcRowTot(tr.querySelector('.iprn'));
       }
     });
     calcTotFromRows();
@@ -2955,7 +3010,8 @@ const AUDIT_FIELD_NAMES={
   payment_notes:'Σημείωση πληρωμής',paid_by:'Πληρώθηκε από',paid_at:'Ημ/νία πληρωμής',
   last_payment_method:'Τρόπος τελ. πληρωμής',last_paid_by:'Τελ. πληρωμή από',
   last_paid_at:'Ημ/νία τελ. πληρωμής',last_payment_notes:'Σημείωση τελ. πληρωμής',
-  applied:'Εφαρμοσμένο',reason:'Αιτία'
+  applied:'Εφαρμοσμένο',reason:'Αιτία',
+  package_price_net:'Καθαρή τιμή/συσκ',vat_rate:'ΦΠΑ %',package_price:'Τιμή/συσκ (με ΦΠΑ)'
 };
 function fmtAuditValue(key,val){
   if(val===null||val===undefined)return '<em style="color:var(--td)">κενό</em>';
