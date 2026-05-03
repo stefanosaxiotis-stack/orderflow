@@ -52,7 +52,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 
 /* APP */
 #app{display:none}
-.topbar{background:var(--nd);border-bottom:1px solid var(--nb);display:flex;align-items:center;padding:0 18px;position:sticky;top:0;z-index:100;overflow-x:auto}
+.topbar{background:var(--nc);border-bottom:1px solid var(--nb);display:flex;align-items:center;padding:0 18px;position:sticky;top:0;z-index:100;overflow-x:auto}
 .logo{font-size:15px;font-weight:700;color:var(--pk);padding:14px 0;margin-right:20px;white-space:nowrap;letter-spacing:1px;flex-shrink:0}
 .tab{padding:14px 12px;font-size:13px;color:var(--tm);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s;flex-shrink:0}
 .tab:hover{color:var(--t2)}.tab.active{color:var(--pk);border-bottom-color:var(--pk)}
@@ -144,14 +144,14 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .fg2 .f label{font-size:12px;color:var(--td)}
 .fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
 .fg2 .f input:focus,.fg2 .f select:focus{border-color:var(--pk)}
-.fg2 .f select option{background:var(--nd)}
+.fg2 .f select option{background:var(--nc);color:var(--t1)}
 .mf{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:0.5px solid var(--nb)}
 
 /* ITEMS TABLE */
 .itb{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
 .itb th{text-align:left;color:var(--td);padding:6px 4px;border-bottom:0.5px solid var(--nb);white-space:nowrap}
 .itb td{padding:4px 3px;border-bottom:0.5px solid var(--ni)}
-.itb td input,.itb td select{background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:4px 5px;font-size:12px;width:100%;font-family:inherit}
+.itb td input,.itb td select{background:var(--ni);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:4px 5px;font-size:12px;width:100%;font-family:inherit}
 .itb td input:focus,.itb td select:focus{border-color:var(--pk);outline:none}
 
 /* STOCK */
@@ -177,7 +177,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .pl{display:flex;flex-direction:column;gap:8px}
 .pi{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .pd2{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;text-align:center;line-height:1.2}
-.dov{background:#2a0a10;color:var(--rd)}.dsn{background:var(--ad);color:var(--am)}.dok{background:var(--gd);color:var(--gn)}
+.dov{background:var(--rdd);color:var(--rd)}.dsn{background:var(--ad);color:var(--am)}.dok{background:var(--gd);color:var(--gn)}
 .pinf{flex:1;min-width:0}
 .pnm{font-size:14px;font-weight:600}
 .psb{font-size:12px;color:var(--tm);margin-top:2px}
@@ -213,8 +213,16 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .fg{display:flex;flex-direction:column;gap:4px}
 .fg.full{grid-column:span 2}
 .fg label{font-size:11px;color:var(--td)}
-.fg input,.fg select{background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
+.fg input,.fg select{background:var(--ni);border:0.5px solid var(--nb);border-radius:6px;color:var(--t1);padding:6px 8px;font-size:12px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
 .fg input:focus,.fg select:focus{border-color:var(--pk)}
+
+/* Search bar για mgmt panels */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--nc);border:1px solid var(--nb);border-radius:10px;padding:8px 12px;margin:14px 0 8px;transition:border-color .15s}
+.search-bar:focus-within{border-color:var(--pk)}
+.search-bar .search-icon{font-size:14px;opacity:.6}
+.search-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--t1);font-size:13px;font-family:inherit;padding:2px 0}
+.search-bar input::placeholder{color:var(--td)}
+.search-bar .search-count{font-size:11px;color:var(--tm);font-weight:500;white-space:nowrap}
 .spff{display:flex;justify-content:flex-end;margin-top:12px;gap:8px}
 .sptbl{width:100%;border-collapse:collapse;font-size:12px}
 .sptbl th{text-align:left;color:var(--td);padding:8px;border-bottom:0.5px solid var(--nb);font-weight:500;font-size:11px}
@@ -504,7 +512,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <div class="f"><label>Εκτ. παράδοση</label><input type="date" id="odlv"></div>
       <div class="f"><label>Κατηγορία</label><select id="ocat"></select></div>
       <div class="f"><label>Προκαταβολή (€)</label><input type="number" id="opp" step="0.01" placeholder="0.00" oninput="calcB()"></div>
-      <div class="f"><label>Σύνολο γραμμών (€)</label><input type="number" id="otot" step="0.01" readonly style="opacity:.7;background:var(--nd)"></div>
+      <div class="f"><label>Σύνολο γραμμών (€)</label><input type="number" id="otot" step="0.01" readonly style="opacity:.7;background:var(--nh)"></div>
       <div class="f"><label>Υπόλοιπο (€)</label><input type="number" id="obal" readonly style="opacity:.6"></div>
       <div class="f s2"><label>Σημειώσεις</label><input type="text" id="onotes"></div>
     </div>
@@ -870,6 +878,11 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <button class="btn p" id="sup-save-btn" onclick="saveSup()">Αποθήκευση</button>
           </div>
         </div>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-sup" placeholder="Αναζήτηση προμηθευτή (επωνυμία, IBAN, τράπεζα...)" oninput="rMgmt()">
+          <span class="search-count" id="count-sup"></span>
+        </div>
         <table class="sptbl"><thead><tr><th>Επωνυμία</th><th>Φιλική</th><th>Δικαιούχος</th><th>Τράπεζα</th><th>IBAN</th><th></th></tr></thead><tbody id="stbl"></tbody></table>
       </div>
 
@@ -888,6 +901,11 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <button class="btn p" onclick="saveProd()">Αποθήκευση</button>
           </div>
         </div>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-prod" placeholder="Αναζήτηση είδους (φιλική ονομασία, κατηγορία...)" oninput="rMgmt()">
+          <span class="search-count" id="count-prod"></span>
+        </div>
         <table class="sptbl"><thead><tr><th>Φιλική ονομασία</th><th>Κατηγορία</th><th>Μον.</th><th>Κατ/ημ</th><th></th></tr></thead><tbody id="ptbl"></tbody></table>
       </div>
 
@@ -905,8 +923,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
           <div class="spff"><button class="btn p" onclick="saveCat2()">Αποθήκευση</button></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-          <select id="cat2-filter-sup" onchange="rCat2()" style="background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t2);padding:5px 8px;font-size:12px;flex:1"><option value="">Όλοι οι προμηθευτές</option></select>
-          <select id="cat2-filter-prod" onchange="rCat2()" style="background:var(--nd);border:0.5px solid var(--nb);border-radius:6px;color:var(--t2);padding:5px 8px;font-size:12px;flex:1"><option value="">Όλα τα είδη</option></select>
+          <select id="cat2-filter-sup" onchange="rCat2()" style="background:var(--ni);border:0.5px solid var(--nb);border-radius:6px;color:var(--t2);padding:5px 8px;font-size:12px;flex:1"><option value="">Όλοι οι προμηθευτές</option></select>
+          <select id="cat2-filter-prod" onchange="rCat2()" style="background:var(--ni);border:0.5px solid var(--nb);border-radius:6px;color:var(--t2);padding:5px 8px;font-size:12px;flex:1"><option value="">Όλα τα είδη</option></select>
         </div>
         <table class="sptbl"><thead><tr><th>Προμηθευτής</th><th>Είδος</th><th>Ονομ. Προμ.</th><th>Κωδ.</th><th>Συσκ.</th><th>Τεμ/Σ</th><th></th></tr></thead><tbody id="cat2tbl"></tbody></table>
       </div>
@@ -923,6 +941,11 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
           </div>
           <div class="spff"><button class="btn p" onclick="saveUser()">Δημιουργία</button></div>
         </div>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-user" placeholder="Αναζήτηση χρήστη (όνομα, email, ρόλος...)" oninput="rMgmt()">
+          <span class="search-count" id="count-user"></span>
+        </div>
         <table class="sptbl"><thead><tr><th>Όνομα</th><th>Email</th><th>Ρόλος</th><th>Τοποθεσία</th><th>Ενεργός</th><th></th></tr></thead><tbody id="utbl"></tbody></table>
       </div>
 
@@ -934,6 +957,11 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
             <div class="fg"><label>Τύπος</label><select id="cattype"><option value="product">Προϊόν</option><option value="order">Παραγγελία</option><option value="operational">Λειτουργικά έξοδα</option></select></div>
           </div>
           <div class="spff"><button class="btn p" onclick="saveCat()">Αποθήκευση</button></div>
+        </div>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-cat" placeholder="Αναζήτηση κατηγορίας..." oninput="rMgmt()">
+          <span class="search-count" id="count-cat"></span>
         </div>
         <div id="catlist" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
       </div>
@@ -1434,7 +1462,7 @@ function addRow(selProdId){
     <td><input type="number" class="iqp" value="1" step="0.001" style="width:55px" title="Τεμάχια/συσκευασία" oninput="calcRowTot(this)"></td>
     <td><input type="number" class="iq" value="1" step="1" style="width:55px" title="Αριθμός συσκευασιών" oninput="calcRowTot(this)"></td>
     <td><input type="number" class="ipr" step="0.01" placeholder="0.00" style="width:80px" title="Τιμή ανά συσκευασία" oninput="calcRowTot(this)"></td>
-    <td><input type="number" class="itot" readonly step="0.01" placeholder="0.00" style="width:80px;opacity:.7;background:var(--nd)"></td>
+    <td><input type="number" class="itot" readonly step="0.01" placeholder="0.00" style="width:80px;opacity:.7;background:var(--nh)"></td>
     <td><button class="ib" onclick="this.closest('tr').remove();calcTotFromRows()" style="flex-shrink:0">✕</button></td>`;
   document.getElementById('ibody').appendChild(tr);
   if(!selProdId)fillR(tr.querySelector('.ip'));
@@ -2415,7 +2443,12 @@ function swMT(t,el){
 }
 
 function rMgmt(){
-  set('stbl',sups.length?sups.map(s=>`<tr>
+  // SEARCH ΠΡΟΜΗΘΕΥΤΩΝ
+  const qSup=(document.getElementById('search-sup')?.value||'').toLowerCase().trim();
+  let supFil=sups;
+  if(qSup){supFil=sups.filter(s=>(s.name||'').toLowerCase().includes(qSup)||(s.friendly_name||'').toLowerCase().includes(qSup)||(s.iban||'').toLowerCase().includes(qSup)||(s.bank||'').toLowerCase().includes(qSup)||(s.beneficiary||'').toLowerCase().includes(qSup)||(s.email||'').toLowerCase().includes(qSup));}
+  set('count-sup',qSup?`${supFil.length} από ${sups.length}`:`${sups.length} συνολικά`);
+  set('stbl',supFil.length?supFil.map(s=>`<tr>
     <td style="font-weight:500">${s.name}</td>
     <td style="color:var(--pk)">${s.friendly_name||'—'}</td>
     <td style="color:var(--t2);font-size:11px">${s.beneficiary||'—'}</td>
@@ -2424,9 +2457,14 @@ function rMgmt(){
     <td style="display:flex;gap:4px">
       <button class="ib" onclick="editSup('${s.id}')" title="Επεξεργασία">✎</button>
       <button class="ib" onclick="delSup('${s.id}')" style="color:var(--rd)">✕</button>
-    </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν προμηθευτές</td></tr>');
+    </td></tr>`).join(''):`<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">${qSup?'Δεν βρέθηκαν αποτελέσματα':'Δεν υπάρχουν προμηθευτές'}</td></tr>`);
 
-  set('ptbl',prods.length?prods.map(p=>`<tr>
+  // SEARCH ΕΙΔΩΝ
+  const qProd=(document.getElementById('search-prod')?.value||'').toLowerCase().trim();
+  let prodFil=prods;
+  if(qProd){prodFil=prods.filter(p=>(p.friendly_name||'').toLowerCase().includes(qProd)||(p.name||'').toLowerCase().includes(qProd)||(p.category||'').toLowerCase().includes(qProd));}
+  set('count-prod',qProd?`${prodFil.length} από ${prods.length}`:`${prods.length} συνολικά`);
+  set('ptbl',prodFil.length?prodFil.map(p=>`<tr>
     <td style="font-weight:500">${p.friendly_name||p.name}</td>
     <td>${p.category||'—'}</td>
     <td>${p.base_unit}</td>
@@ -2434,9 +2472,14 @@ function rMgmt(){
     <td style="display:flex;gap:4px">
       <button class="ib" onclick="editProd('${p.id}')" title="Επεξεργασία">✎</button>
       <button class="ib" onclick="delProd('${p.id}')" style="color:var(--rd)">✕</button>
-    </td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν είδη</td></tr>');
+    </td></tr>`).join(''):`<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--td)">${qProd?'Δεν βρέθηκαν αποτελέσματα':'Δεν υπάρχουν είδη'}</td></tr>`);
 
-  set('utbl',ups.length?ups.map(u=>`<tr>
+  // SEARCH ΧΡΗΣΤΩΝ
+  const qUser=(document.getElementById('search-user')?.value||'').toLowerCase().trim();
+  let userFil=ups;
+  if(qUser){userFil=ups.filter(u=>(u.full_name||'').toLowerCase().includes(qUser)||(u.email||'').toLowerCase().includes(qUser)||(u.role||'').toLowerCase().includes(qUser));}
+  set('count-user',qUser?`${userFil.length} από ${ups.length}`:`${ups.length} συνολικά`);
+  set('utbl',userFil.length?userFil.map(u=>`<tr>
     <td>${u.full_name||'—'}</td>
     <td style="font-size:11px">${u.email}</td>
     <td><span class="badge ${u.role==='admin'?'bd':u.role==='manager'?'bp':'br'}">${u.role}</span></td>
@@ -2445,9 +2488,14 @@ function rMgmt(){
     <td style="display:flex;gap:4px">
       <button class="ib" onclick="editUser('${u.id}')" title="Επεξεργασία">✎</button>
       ${u.id!==cU?.id?`<button class="ib" onclick="deleteUser('${u.id}')" style="color:var(--rd)" title="Διαγραφή">✕</button>`:''}
-    </td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">Δεν υπάρχουν χρήστες</td></tr>');
+    </td></tr>`).join(''):`<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--td)">${qUser?'Δεν βρέθηκαν αποτελέσματα':'Δεν υπάρχουν χρήστες'}</td></tr>`);
 
-  set('catlist',cats.map(c=>{const tl={product:'Προϊόν',order:'Παραγγελία',operational:'Λειτουργικά'};return`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${tl[c.type]||c.type})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">✕</button></div>`}).join(''));
+  // SEARCH ΚΑΤΗΓΟΡΙΩΝ
+  const qCat=(document.getElementById('search-cat')?.value||'').toLowerCase().trim();
+  let catFil=cats;
+  if(qCat){catFil=cats.filter(c=>(c.name||'').toLowerCase().includes(qCat));}
+  set('count-cat',qCat?`${catFil.length} από ${cats.length}`:`${cats.length} συνολικά`);
+  set('catlist',catFil.length?catFil.map(c=>{const tl={product:'Προϊόν',order:'Παραγγελία',operational:'Λειτουργικά'};return`<div style="display:flex;align-items:center;gap:6px;background:var(--ni);border:0.5px solid var(--nb);border-radius:20px;padding:4px 12px"><span style="font-size:12px;color:var(--t2)">${c.name}</span><span style="font-size:10px;color:var(--td)">(${tl[c.type]||c.type})</span><button style="background:none;border:none;color:var(--td);cursor:pointer;font-size:14px;padding:0" onclick="delCat('${c.id}')">✕</button></div>`}).join(''):`<div style="color:var(--td);font-size:12px;padding:10px">${qCat?'Δεν βρέθηκαν αποτελέσματα':'Δεν υπάρχουν κατηγορίες'}</div>`);
 }
 
 // CATALOG TAB
