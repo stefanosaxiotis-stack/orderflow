@@ -2687,7 +2687,6 @@ function showDetail(type,id){
       rows.push({l:'──── Έναντι πληρωμές ────',v:'',sep:true});
       recParts.forEach(p=>rows.push({l:fd(p.paid_at),v:`${fmt(p.amount)} €${p.bank_name?' · '+p.bank_name:''}${p.payment_method?' · '+(methodMap2[p.payment_method]||p.payment_method):''}`,c:'var(--gn)'}));
     }
-    }
     if(sup?.iban){
       rows.push({l:'──── Στοιχεία πληρωμής ────',v:'',sep:true});
       if(sup.beneficiary)rows.push({l:'Δικαιούχος',v:sup.beneficiary});
@@ -2721,7 +2720,6 @@ function showDetail(type,id){
       const methodMap2={cash:'💵 Μετρητά',transfer:'🏦 Κατάθεση',card:'💳 Κάρτα',other:'Άλλο'};
       rows.push({l:'──── Έναντι πληρωμές ────',v:'',sep:true});
       othParts.forEach(p=>rows.push({l:fd(p.paid_at),v:`${fmt(p.amount)} €${p.bank_name?' · '+p.bank_name:''}${p.payment_method?' · '+(methodMap2[p.payment_method]||p.payment_method):''}`,c:'var(--gn)'}));
-    }
     }
     if(sup?.iban){
       rows.push({l:'──── Στοιχεία πληρωμής ────',v:'',sep:true});
