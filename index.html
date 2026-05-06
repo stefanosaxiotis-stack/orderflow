@@ -2254,8 +2254,15 @@ async function doConfirmPayment(){
     // Πλήρης πληρωμή
     if(t==='order'){
       const o=ords.find(x=>x.id===id);if(!o)return;
-      await getDb().from('orders').update({prepayment:o.total_amount}).eq('id',id);
-      await getDb().from('payments').insert({order_id:id,amount:amt,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString(),payment_method:method,bank_name:bank,paid_by:cU.id,payment_notes:notes});
+      // Έλεγχος για διπλό payment (idempotency check)
+      const todayStr=td();
+      const{data:existing}=await getDb().from('payments').select('id').eq('order_id',id).eq('amount',amt).eq('payment_date',todayStr);
+      if(existing&&existing.length>0){
+        if(!confirm('Υπάρχει ήδη πληρωμή ίδιου ποσού για σήμερα. Συνέχιση;')){return;}
+      }
+      // Καταχώρηση payment — το trigger sync_order_prepayment ενημερώνει αυτόματα το orders.prepayment
+      const{error:pe}=await getDb().from('payments').insert({order_id:id,amount:amt,payment_date:td(),confirmed:true,confirmed_at:new Date().toISOString(),payment_method:method,bank_name:bank,paid_by:cU.id,payment_notes:notes});
+      if(pe)throw pe;
       const{data:updated}=await getDb().from('orders').select('*').eq('id',id).single();
       if(updated){const idx=ords.findIndex(x=>x.id===id);if(idx>=0)ords[idx]=updated;}
     }else if(t==='rec'){
