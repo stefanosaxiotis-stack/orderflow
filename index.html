@@ -2348,7 +2348,9 @@ function confPI(t,id){
   document.getElementById('payconf-remaining').innerHTML='';
   document.getElementById('mpayconf').classList.add('open');
 }
+let _payConfBusy=false;
 async function doConfirmPayment(){
+  if(_payConfBusy)return;
   if(!pendingPayment)return;
   const method=document.getElementById('payconf-method').value;
   const bank=document.getElementById('payconf-bank').value||null;
@@ -2358,6 +2360,10 @@ async function doConfirmPayment(){
   const t=pendingPayment.type,id=pendingPayment.id,amt=pendingPayment.remaining;
   if(isPartial&&(!partAmt||partAmt<=0)){toast('Συμπλήρωσε ποσό έναντι','err');return;}
   if(isPartial&&partAmt>=amt){toast('Το έναντι ποσό πρέπει να είναι μικρότερο του υπολοίπου','err');return;}
+  _payConfBusy=true;
+  const btn=document.querySelector('#mpayconf .btn.p');
+  const origLabel=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.style.opacity='0.5';btn.textContent='Καταχώρηση...';}
   try{
     if(isPartial){
       // Καταχώρηση έναντι πληρωμής
@@ -2406,6 +2412,10 @@ async function doConfirmPayment(){
     toast('Πληρωμή επιβεβαιώθηκε! ✓');
     pendingPayment=null;
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
+  finally{
+    _payConfBusy=false;
+    if(btn){btn.disabled=false;btn.style.opacity='';btn.textContent=origLabel;}
+  }
 }
 
 // ══════════════════════════════════════════════════════
@@ -3433,7 +3443,9 @@ function popTransferLocs(){
   sel.innerHTML='<option value="">— Επιλογή —</option>'+allowed.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
 }
 
+let _transferBusy=false;
 async function saveTransfer(){
+  if(_transferBusy)return; // Guard κατά διπλού κλικ
   const dir=document.getElementById('trf-dir').value;
   const loc=document.getElementById('trf-loc').value;
   const dt=document.getElementById('trf-dt').value;
@@ -3459,6 +3471,11 @@ async function saveTransfer(){
     notes:notes,
     created_by:cU.id
   };
+  // Lock κουμπί + flag
+  _transferBusy=true;
+  const btn=document.querySelector('#mtrf .btn.p');
+  const origLabel=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.style.opacity='0.5';btn.textContent='Καταχώρηση...';}
   try{
     const{data,error}=await getDb().from('cash_transfers').insert(d).select();
     if(error)throw error;
@@ -3467,6 +3484,10 @@ async function saveTransfer(){
     cm('mtrf');rSACash();rCash();
     toast('Μεταφορά καταχωρήθηκε!');
   }catch(e){toast('Σφάλμα: '+e.message,'err');}
+  finally{
+    _transferBusy=false;
+    if(btn){btn.disabled=false;btn.style.opacity='';btn.textContent=origLabel;}
+  }
 }
 
 async function reloadCashAfterTransfer(){
