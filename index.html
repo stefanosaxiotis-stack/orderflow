@@ -408,6 +408,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div class="met"><label>Εκκρεμείς</label><div class="mv rd" id="pc">—</div></div>
     <div class="met"><label>Σύνολο εκκρεμών</label><div class="mv am" id="pt">—</div></div>
     <div class="met"><label>Ληγμένες</label><div class="mv rd" id="pov">—</div></div>
+    <div class="met"><label>Σήμερα</label><div class="mv am" id="ptoday">—</div></div>
     <div class="met"><label>Εντός 7 ημ.</label><div class="mv am" id="psn">—</div></div>
   </div>
   <div id="urgent-banner-pay" style="display:none"></div>
@@ -1967,24 +1968,35 @@ function calcUrgentItems(){
   const list=[];
   ords.filter(o=>o.status!=='cancelled'&&Number(o.balance)>0&&!!o.ready_to_pay).forEach(o=>{
     const net=orderNetBalance(o);if(net<=0)return;
+    // Αφαιρούμε τα έναντι
+    const partTotal=pparts.filter(p=>p.entity_type==='order'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
+    const remaining=Math.max(0,net-partTotal);
+    if(remaining<=0)return;
     const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
     const dl=Math.ceil((due-now)/86400000);
-    if(dl<=7)list.push({type:'order',id:o.id,name:sN(o.supplier_id),amount:net,dl,due});
+    if(dl<=7)list.push({type:'order',id:o.id,name:sN(o.supplier_id),amount:remaining,dl,due});
   });
   recs.filter(r=>r.active!==false&&!!r.ready_to_pay).forEach(r=>{
+    const partTotal=pparts.filter(p=>p.entity_type==='recurring'&&p.entity_id===r.id).reduce((s,p)=>s+Number(p.amount),0);
+    const remaining=Math.max(0,Number(r.amount)-partTotal);
+    if(remaining<=0)return;
     const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);
-    if(dl<=7)list.push({type:'rec',id:r.id,name:r.name,amount:Number(r.amount),dl,due});
+    if(dl<=7)list.push({type:'rec',id:r.id,name:r.name,amount:remaining,dl,due});
   });
   oths.filter(o=>!o.paid&&!!o.ready_to_pay).forEach(o=>{
+    const partTotal=pparts.filter(p=>p.entity_type==='other'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
+    const remaining=Math.max(0,Number(o.amount)-partTotal);
+    if(remaining<=0)return;
     const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);
-    if(dl<=7)list.push({type:'other',id:o.id,name:o.name,amount:Number(o.amount),dl,due});
+    if(dl<=7)list.push({type:'other',id:o.id,name:o.name,amount:remaining,dl,due});
   });
   return list;
 }
 function refreshUrgentBadge(){
   const urg=calcUrgentItems();
   const overdue=urg.filter(x=>x.dl<0).length;
-  const soon=urg.filter(x=>x.dl>=0&&x.dl<=7).length;
+  const today=urg.filter(x=>x.dl===0).length;
+  const soon=urg.filter(x=>x.dl>0&&x.dl<=7).length;
   const total=urg.length;
   const badge=document.getElementById('urgent-badge');
   if(badge){
@@ -1992,8 +2004,11 @@ function refreshUrgentBadge(){
     else{
       badge.style.display='inline-flex';
       badge.innerHTML=`<span>⚡ Επείγοντα</span><span class="ub-num">${total}</span>`;
-      const tip=overdue>0?`${overdue} ληγμένα · ${soon} εντός 7 ημερών`:`${soon} εντός 7 ημερών`;
-      badge.title=tip;
+      const parts=[];
+      if(overdue>0)parts.push(`${overdue} ληγμένα`);
+      if(today>0)parts.push(`${today} σήμερα`);
+      if(soon>0)parts.push(`${soon} εντός 7 ημ.`);
+      badge.title=parts.join(' · ');
     }
   }
   // Banner στη σελίδα Πληρωμών (μόνο σε pending mode)
@@ -2003,9 +2018,13 @@ function refreshUrgentBadge(){
       const totalAmt=urg.reduce((s,i)=>s+i.amount,0);
       banner.style.display='';
       banner.className='urgent-banner';
+      const parts=[];
+      if(overdue>0)parts.push(`<b style="color:var(--rd)">${overdue} ληγμένα</b>`);
+      if(today>0)parts.push(`<b style="color:var(--am)">${today} σήμερα</b>`);
+      if(soon>0)parts.push(`${soon} εντός 7 ημ.`);
       banner.innerHTML=`
         <div class="ub-title">⚡ Επείγουσες πληρωμές<span class="ub-num" style="background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px">${total}</span></div>
-        <div class="ub-meta">Σύνολο: <b style="color:var(--rd)">${fmt(totalAmt)} €</b>${overdue>0?` · <b style="color:var(--rd)">${overdue} ληγμένα</b>`:''}${soon>0?` · ${soon} εντός 7 ημερών`:''}</div>
+        <div class="ub-meta">Σύνολο: <b style="color:var(--rd)">${fmt(totalAmt)} €</b> · ${parts.join(' · ')}</div>
       `;
     }else{
       banner.style.display='none';
@@ -2112,13 +2131,54 @@ function rPay(){
     return;
   }
 
-  // mode: 'pending' = ready_to_pay=true (έτοιμα προς πληρωμή)
-  //       'pipeline' = ready_to_pay=false (αναμένουν έγκριση)
-  //       'forecast' = μελλοντικές πληρωμές 60 ημ. (πληροφοριακά)
-  if(mode==='pending'||mode==='pipeline'){
-    const wantReady=(mode==='pending');
-    // Παραγγελίες: ΟΛΕΣ οι μη ακυρωμένες με υπόλοιπο (pending ή delivered)
-    ords.filter(o=>o.status!=='cancelled'&&Number(o.balance)>0&&!!o.ready_to_pay===wantReady).forEach(o=>{
+  // Νέα mutually-exclusive λογική:
+  //   pending  = ready_to_pay=true ΚΑΙ dl<=0 (ληγμένα + σήμερα = "πληρωτέα τώρα")
+  //   forecast = ready_to_pay=true ΚΑΙ dl>0 ΚΑΙ dl<=60 (μελλοντικά εντός 60 ημ.)
+  //   pipeline = ready_to_pay=false (αναμένουν έγκριση)
+  //   paid    = πληρωμένα (handled πιο πάνω)
+  if(mode==='pending'||mode==='forecast'){
+    // Παραγγελίες
+    ords.filter(o=>o.status!=='cancelled'&&Number(o.balance)>0&&!!o.ready_to_pay).forEach(o=>{
+      const net=orderNetBalance(o);
+      const partTotal=pparts.filter(p=>p.entity_type==='order'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
+      const remaining=Math.max(0,net-partTotal);
+      if(remaining<=0)return;
+      const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
+      const dl=Math.ceil((due-now)/86400000);
+      // pending: dl<=0 ληγμένα ή σήμερα
+      // forecast: dl>0 ΚΑΙ dl<=60 μελλοντικά κοντινά
+      const inPending=(dl<=0);
+      const inForecast=(dl>0&&dl<=60);
+      if((mode==='pending'&&!inPending)||(mode==='forecast'&&!inForecast))return;
+      const cr=orderCreditTotal(o.id);
+      const subPrefix=o.status==='delivered'?'Υπόλοιπο παραγγελίας':'Εκκρ. παράδοση';
+      items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:subPrefix+' · '+lN(o.location_id),amount:remaining,gross:Number(o.balance),credit:cr,partTotal,due,dl,lid:o.location_id,ready:true,fc:mode==='forecast'});
+    });
+    // Πάγια
+    recs.filter(r=>r.active!==false&&!!r.ready_to_pay).forEach(r=>{
+      const partTotal=pparts.filter(p=>p.entity_type==='recurring'&&p.entity_id===r.id).reduce((s,p)=>s+Number(p.amount),0);
+      const remaining=Math.max(0,Number(r.amount)-partTotal);
+      if(remaining<=0)return;
+      const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);
+      const inPending=(dl<=0);
+      const inForecast=(dl>0&&dl<=60);
+      if((mode==='pending'&&!inPending)||(mode==='forecast'&&!inForecast))return;
+      items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:remaining,gross:Number(r.amount),partTotal,due,dl,lid:r.location_id,ready:true,fc:mode==='forecast'});
+    });
+    // Άλλες υποχρεώσεις
+    oths.filter(o=>!o.paid&&!!o.ready_to_pay).forEach(o=>{
+      const partTotal=pparts.filter(p=>p.entity_type==='other'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
+      const remaining=Math.max(0,Number(o.amount)-partTotal);
+      if(remaining<=0)return;
+      const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);
+      const inPending=(dl<=0);
+      const inForecast=(dl>0&&dl<=60);
+      if((mode==='pending'&&!inPending)||(mode==='forecast'&&!inForecast))return;
+      items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:remaining,gross:Number(o.amount),partTotal,due,dl,lid:o.location_id,ready:true,fc:mode==='forecast'});
+    });
+  }else if(mode==='pipeline'){
+    // Pipeline: ready_to_pay=false (αναμένουν έγκριση)
+    ords.filter(o=>o.status!=='cancelled'&&Number(o.balance)>0&&!o.ready_to_pay).forEach(o=>{
       const net=orderNetBalance(o);
       const partTotal=pparts.filter(p=>p.entity_type==='order'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
       const remaining=Math.max(0,net-partTotal);
@@ -2127,46 +2187,30 @@ function rPay(){
       const dl=Math.ceil((due-now)/86400000);
       const cr=orderCreditTotal(o.id);
       const subPrefix=o.status==='delivered'?'Υπόλοιπο παραγγελίας':'Εκκρ. παράδοση';
-      items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:subPrefix+' · '+lN(o.location_id),amount:remaining,gross:Number(o.balance),credit:cr,partTotal,due,dl,lid:o.location_id,ready:!!o.ready_to_pay});
+      items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:subPrefix+' · '+lN(o.location_id),amount:remaining,gross:Number(o.balance),credit:cr,partTotal,due,dl,lid:o.location_id,ready:false});
     });
-    recs.filter(r=>r.active!==false&&!!r.ready_to_pay===wantReady).forEach(r=>{
+    recs.filter(r=>r.active!==false&&!r.ready_to_pay).forEach(r=>{
       const partTotal=pparts.filter(p=>p.entity_type==='recurring'&&p.entity_id===r.id).reduce((s,p)=>s+Number(p.amount),0);
       const remaining=Math.max(0,Number(r.amount)-partTotal);
       if(remaining<=0)return;
       const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);
-      items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:remaining,gross:Number(r.amount),partTotal,due,dl,lid:r.location_id,ready:!!r.ready_to_pay});
+      items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:remaining,gross:Number(r.amount),partTotal,due,dl,lid:r.location_id,ready:false});
     });
-    oths.filter(o=>!o.paid&&!!o.ready_to_pay===wantReady).forEach(o=>{
+    oths.filter(o=>!o.paid&&!o.ready_to_pay).forEach(o=>{
       const partTotal=pparts.filter(p=>p.entity_type==='other'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
       const remaining=Math.max(0,Number(o.amount)-partTotal);
       if(remaining<=0)return;
       const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);
-      items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:remaining,gross:Number(o.amount),partTotal,due,dl,lid:o.location_id,ready:!!o.ready_to_pay});
-    });
-  }else{
-    // forecast: μελλοντικές πληρωμές εντός 60 ημερών (ανεξάρτητα από ready_to_pay) — πληροφοριακό
-    ords.filter(o=>o.status!=='cancelled'&&Number(o.balance)>0).forEach(o=>{
-      const net=orderNetBalance(o);
-      if(net<=0)return;
-      const due=o.estimated_delivery?new Date(o.estimated_delivery):new Date();
-      const dl=Math.ceil((due-now)/86400000);
-      const cr=orderCreditTotal(o.id);
-      if(dl>0&&dl<=60)items.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:(o.status==='delivered'?'Υπόλοιπο':'Εκκρ. παράδοση')+' · '+lN(o.location_id),amount:net,gross:Number(o.balance),credit:cr,due,dl,lid:o.location_id,fc:true,ready:!!o.ready_to_pay});
-    });
-    recs.filter(r=>r.active!==false).forEach(r=>{
-      const due=new Date(r.next_due_date);const dl=Math.ceil((due-now)/86400000);
-      if(dl>0&&dl<=60)items.push({type:'rec',id:r.id,name:r.name,sub:lN(r.location_id),amount:Number(r.amount),due,dl,lid:r.location_id,fc:true,ready:!!r.ready_to_pay});
-    });
-    oths.filter(o=>!o.paid).forEach(o=>{
-      const due=o.due_date?new Date(o.due_date):new Date();const dl=Math.ceil((due-now)/86400000);
-      if(dl>0&&dl<=60)items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:Number(o.amount),due,dl,lid:o.location_id,fc:true,ready:!!o.ready_to_pay});
+      items.push({type:'other',id:o.id,name:o.name,sub:lN(o.location_id),amount:remaining,gross:Number(o.amount),partTotal,due,dl,lid:o.location_id,ready:false});
     });
   }
   let fl=items;
   if(aPF!=='all')fl=items.filter(i=>i.lid===aPF);
   fl.sort((a,b)=>a.dl-b.dl);
   set('pc',fl.length);set('pt',fmt(fl.reduce((s,i)=>s+i.amount,0))+' €');
-  set('pov',fl.filter(i=>i.dl<0).length);set('psn',fl.filter(i=>i.dl>=0&&i.dl<=7).length);
+  set('pov',fl.filter(i=>i.dl<0).length);
+  set('ptoday',fl.filter(i=>i.dl===0).length);
+  set('psn',fl.filter(i=>i.dl>0&&i.dl<=7).length);
   // Refresh badge στο top bar
   refreshUrgentBadge();
   if(!fl.length){
@@ -2176,8 +2220,8 @@ function rPay(){
   const isAdm=cP?.role==='admin';
   const isMgr=cP?.role==='manager';
   set('plist',fl.map(i=>{
-    const cl=i.dl<0?'dov':i.dl<=7?'dsn':'dok';
-    const lb=i.dl<0?'ΛΗΞΗ':i.dl+'ημ.';
+    const cl=i.dl<0?'dov':i.dl===0?'dov':i.dl<=7?'dsn':'dok';
+    const lb=i.dl<0?'ΛΗΞΗ':i.dl===0?'ΣΗΜΕΡΑ':i.dl+'ημ.';
     let s=null;
     if(i.type==='order'){const o=ords.find(x=>x.id===i.id);s=o?sups.find(x=>x.id===o.supplier_id):null;}
     else if(i.type==='rec'){const r=recs.find(x=>x.id===i.id);s=r?sups.find(x=>x.id===r.supplier_id):null;}
@@ -2523,12 +2567,28 @@ function exportXL(){
 // ══════════════════════════════════════════════════════
 function rDash(){
   const now=new Date();
-  // Metrics
-  const totalBal=ords.reduce((s,o)=>s+Number(o.balance||0),0);
+  // Metrics — ίδια λογική με Πληρωμές για consistency
+  // Συνολικό υπόλοιπο προς πληρωμή = ΟΛΑ τα εκκρεμή με υπόλοιπο (όχι μόνο ready_to_pay)
+  let totalBal=0;
+  ords.filter(o=>o.status!=='cancelled'&&Number(o.balance)>0).forEach(o=>{
+    const net=orderNetBalance(o);
+    const partTotal=pparts.filter(p=>p.entity_type==='order'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
+    totalBal+=Math.max(0,net-partTotal);
+  });
+  recs.filter(r=>r.active!==false).forEach(r=>{
+    const partTotal=pparts.filter(p=>p.entity_type==='recurring'&&p.entity_id===r.id).reduce((s,p)=>s+Number(p.amount),0);
+    totalBal+=Math.max(0,Number(r.amount)-partTotal);
+  });
+  oths.filter(o=>!o.paid).forEach(o=>{
+    const partTotal=pparts.filter(p=>p.entity_type==='other'&&p.entity_id===o.id).reduce((s,p)=>s+Number(p.amount),0);
+    totalBal+=Math.max(0,Number(o.amount)-partTotal);
+  });
   const pendingOrd=ords.filter(o=>o.status==='pending').length;
-  const overdue=ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0&&o.estimated_delivery&&new Date(o.estimated_delivery)<now).length
-    +recs.filter(r=>new Date(r.next_due_date)<now).length
-    +oths.filter(o=>!o.paid&&o.due_date&&new Date(o.due_date)<now).length;
+  // Ληγμένες/Σήμερα/Εντός 7 ημ — μόνο σε ready_to_pay (επείγοντα)
+  const urg=calcUrgentItems();
+  const overdue=urg.filter(x=>x.dl<0).length;
+  const todayCount=urg.filter(x=>x.dl===0).length;
+  const soonCount=urg.filter(x=>x.dl>0&&x.dl<=7).length;
   const cashIn=ces.reduce((s,e)=>s+Number(e.amount),0);
   const cashOut=cps.reduce((s,p)=>s+Number(p.amount),0);
   const cashAvail=cashIn-cashOut;
@@ -2537,24 +2597,21 @@ function rDash(){
     <div class="met" style="border-color:var(--rd)"><label>💰 Υπόλοιπο προς πληρωμή</label><div class="mv rd">${fmt(totalBal)} €</div></div>
     <div class="met" style="border-color:var(--am)"><label>📦 Εκκρεμείς παραγγελίες</label><div class="mv am">${pendingOrd}</div></div>
     <div class="met" style="border-color:var(--rd)"><label>⚠️ Ληγμένες πληρωμές</label><div class="mv rd">${overdue}</div></div>
+    <div class="met" style="border-color:var(--am)"><label>📅 Σήμερα</label><div class="mv am">${todayCount}</div></div>
+    <div class="met" style="border-color:var(--am)"><label>🔜 Εντός 7 ημ.</label><div class="mv am">${soonCount}</div></div>
     <div class="met" style="border-color:var(--gn)"><label>💵 Διαθέσιμα μετρητά</label><div class="mv gn">${fmt(cashAvail)} €</div></div>
   `);
 
-  // Συνολικά μετρητά ανά κατάστημα + ΣΑ (Πρόταση #4)
+  // Συνολικά μετρητά ανά κατάστημα + ΣΑ
   renderCashBreakdown();
 
-  // Επείγουσες πληρωμές
-  const urgent=[];
-  ords.filter(o=>o.status==='delivered'&&Number(o.balance)>0).forEach(o=>{
-    const dl=Math.ceil((new Date(o.estimated_delivery||now)-now)/86400000);
-    if(dl<=7)urgent.push({name:sN(o.supplier_id),amount:Number(o.balance),dl,color:dl<0?'var(--rd)':'var(--am)'});
-  });
-  recs.filter(r=>{const dl=Math.ceil((new Date(r.next_due_date)-now)/86400000);return dl<=7;}).forEach(r=>{
-    const dl=Math.ceil((new Date(r.next_due_date)-now)/86400000);
-    urgent.push({name:r.name,amount:Number(r.amount),dl,color:dl<0?'var(--rd)':'var(--am)'});
-  });
-  urgent.sort((a,b)=>a.dl-b.dl);
-  set('dash-urgent',urgent.length?urgent.map(u=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--nb);font-size:12px"><span style="color:var(--t2)">${u.name}</span><span style="color:${u.color};font-weight:600">${u.dl<0?'ΛΗΞΗ':u.dl+'ημ'} · ${fmt(u.amount)}€</span></div>`).join(''):'<div style="color:var(--td);font-size:12px;padding:10px 0">✓ Δεν υπάρχουν επείγουσες</div>');
+  // Επείγουσες πληρωμές (από calcUrgentItems για συνέπεια)
+  const urgentSorted=[...urg].sort((a,b)=>a.dl-b.dl);
+  set('dash-urgent',urgentSorted.length?urgentSorted.map(u=>{
+    const lbl=u.dl<0?'ΛΗΞΗ':u.dl===0?'ΣΗΜΕΡΑ':u.dl+'ημ';
+    const col=u.dl<0?'var(--rd)':u.dl===0?'var(--am)':'var(--am)';
+    return`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--nb);font-size:12px"><span style="color:var(--t2)">${u.name}</span><span style="color:${col};font-weight:600">${lbl} · ${fmt(u.amount)}€</span></div>`;
+  }).join(''):'<div style="color:var(--td);font-size:12px;padding:10px 0">✓ Δεν υπάρχουν επείγουσες</div>');
 
   // Τελευταίες παραγγελίες
   const recent=[...ords].slice(0,5);
