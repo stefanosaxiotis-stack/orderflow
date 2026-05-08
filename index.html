@@ -858,6 +858,23 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- Ταμείο - Επεξεργασία πληρωμής (admin only) -->
+<div class="mbg" id="meditcp">
+  <div class="modal"><h2>✎ Επεξεργασία πληρωμής μετρητών</h2>
+    <input type="hidden" id="ecp-id">
+    <div class="fg2">
+      <div class="f"><label>Τοποθεσία *</label><select id="ecp-loc"></select></div>
+      <div class="f"><label>Ημερομηνία *</label><input type="date" id="ecp-dt"></div>
+      <div class="f"><label>Κατηγορία *</label><select id="ecp-cat" onchange="onCatChange('ecp-cat','ecp-sub')"></select></div>
+      <div class="f"><label>Υποκατηγορία *</label><select id="ecp-sub"></select></div>
+      <div class="f s2"><label>Περιγραφή *</label><input type="text" id="ecp-desc"></div>
+      <div class="f s2"><label>Ποσό (€) *</label><input type="number" id="ecp-amt" step="0.01" style="font-size:20px;font-weight:700"></div>
+      <div class="f s2"><label>Σημειώσεις</label><input type="text" id="ecp-notes"></div>
+    </div>
+    <div class="mf"><button class="btn" onclick="cm('meditcp')">Ακύρωση</button><button class="btn p" onclick="saveCPEdit()">Αποθήκευση</button></div>
+  </div>
+</div>
+
 <!-- ΣΑ - Είσπραξη -->
 <div class="mbg" id="msae">
   <div class="modal"><h2>💼 Είσπραξη ΣΑ</h2>
@@ -1415,6 +1432,7 @@ async function load(){
       ]);
       ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];
       saces=sa1.data||[];sacps=sa2.data||[];pparts=pp.data||[];pays=py2.data||[];ctransfers=ctr.data||[];
+      if(typeof refreshTransferIds==='function')refreshTransferIds();
     }else{
       // Manager/Store φορτώνουν δεδομένα βάσει ρόλου
       if(cP?.role==='manager'){
@@ -1439,6 +1457,7 @@ async function load(){
         ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];ups=[];pparts=pp.data||[];pays=py2.data||[];ctransfers=ctr.data||[];
         // RLS επιτρέπει SA data μόνο αν έχει tab sa_cash, αλλιώς επιστρέφει []
         saces=sa1.data||[];sacps=sa2.data||[];
+        if(typeof refreshTransferIds==='function')refreshTransferIds();
       }else{
         // Store φορτώνει μόνο cash για τα καταστήματά του (όχι ΣΑ)
         ords=[];recs=[];prs=[];stk=[];oths=[];ups=[];oitems=[];credits=[];saces=[];sacps=[];
@@ -2708,7 +2727,13 @@ function rCash(){
   set('cin',fmt(ti)+' €');set('cout',fmt(to2)+' €');
   const ae=document.getElementById('cavail');if(ae){ae.textContent=fmt(av)+' €';ae.style.color=av>=0?'var(--gn)':'var(--rd)';}
   set('celist',en.length?en.map(e=>`<div class="crow"><div class="cri"><div class="crd">${fd(e.entry_date)} · ${lN(e.location_id)}</div><div class="crds">${e.notes||'Ημερήσιο σύνολο'}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span><button class="ib" onclick="delCE('${e.id}')" style="color:var(--rd)">✕</button></div></div>`).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν εισπράξεις</p></div>');
-  set('cplist',py.length?py.map(p=>`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span><button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">✕</button></div></div>`).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν πληρωμές</p></div>');
+  set('cplist',py.length?py.map(p=>{
+    const isAdm=cP?.role==='admin';
+    const editBtn=isAdm?`<button class="ib" onclick="editCP('${p.id}')" title="Επεξεργασία">✎</button>`:'';
+    const sc=subcats.find(s=>s.id===p.subcategory_id);
+    const subLbl=sc?` · <span style="color:var(--td);font-size:11px">${sc.name}</span>`:'';
+    return`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}${subLbl}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span>${editBtn}<button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">✕</button></div></div>`;
+  }).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν πληρωμές</p></div>');
 }
 async function saveCE(){
   const d={location_id:document.getElementById('celoc').value,entry_date:document.getElementById('cedt').value,amount:parseFloat(document.getElementById('ceamt').value)||0,notes:document.getElementById('cenotes').value,created_by:cU.id};
@@ -2723,6 +2748,61 @@ async function saveCP(){
 }
 async function delCE(id){if(!confirm('Διαγραφή;'))return;await getDb().from('cash_entries').delete().eq('id',id);ces=ces.filter(e=>e.id!==id);rCash();toast('Διαγράφηκε.');}
 async function delCP(id){if(!confirm('Διαγραφή;'))return;await getDb().from('cash_payments').delete().eq('id',id);cps=cps.filter(p=>p.id!==id);rCash();toast('Διαγράφηκε.');}
+
+function editCP(id){
+  if(cP?.role!=='admin'){toast('Μόνο ο admin μπορεί να επεξεργαστεί','err');return;}
+  const p=cps.find(x=>x.id===id);if(!p)return;
+  // Έλεγχος αν είναι μεταφορά (αν ναι, μπλοκάρουμε)
+  if(_transferIds&&_transferIds.cps&&_transferIds.cps.has(id)){
+    toast('Αυτή η εγγραφή είναι μεταφορά μετρητών — δεν μπορεί να επεξεργαστεί','err');return;
+  }
+  document.getElementById('ecp-id').value=id;
+  document.getElementById('ecp-dt').value=p.payment_date||'';
+  document.getElementById('ecp-desc').value=p.description||'';
+  document.getElementById('ecp-amt').value=p.amount||0;
+  document.getElementById('ecp-notes').value=p.notes||'';
+  // Locations dropdown
+  document.getElementById('ecp-loc').innerHTML=locs.map(l=>`<option value="${l.id}" ${l.id===p.location_id?'selected':''}>${l.name}</option>`).join('');
+  // Κατηγορίες (expense)
+  const expCats=cats.filter(c=>c.type==='expense').sort((a,b)=>a.name.localeCompare(b.name,'el'));
+  // Βρες parent category από subcategory_id (αν υπάρχει)
+  const sc=subcats.find(s=>s.id===p.subcategory_id);
+  const matchedCat=sc?expCats.find(c=>c.id===sc.parent_category_id):null;
+  document.getElementById('ecp-cat').innerHTML='<option value="">— Επιλογή —</option>'+expCats.map(c=>`<option value="${c.id}" ${c.id===matchedCat?.id?'selected':''}>${c.name}</option>`).join('');
+  // Υποκατηγορίες
+  if(matchedCat){
+    const subs=subcats.filter(s=>s.parent_category_id===matchedCat.id);
+    document.getElementById('ecp-sub').innerHTML='<option value="">— Επιλογή —</option>'+subs.map(s=>`<option value="${s.id}" ${s.id===p.subcategory_id?'selected':''}>${s.name}</option>`).join('');
+  }else{
+    document.getElementById('ecp-sub').innerHTML='<option value="">— Επιλογή —</option>';
+  }
+  document.getElementById('meditcp').classList.add('open');
+}
+
+async function saveCPEdit(){
+  if(cP?.role!=='admin'){toast('Μόνο ο admin','err');return;}
+  const id=document.getElementById('ecp-id').value;
+  const subId=document.getElementById('ecp-sub')?.value||null;
+  const d={
+    location_id:document.getElementById('ecp-loc').value,
+    payment_date:document.getElementById('ecp-dt').value,
+    description:document.getElementById('ecp-desc').value,
+    amount:parseFloat(document.getElementById('ecp-amt').value)||0,
+    notes:document.getElementById('ecp-notes').value||null,
+    subcategory_id:subId
+  };
+  if(!d.location_id||!d.payment_date||!d.description||d.amount<=0||!subId){
+    toast('Συμπλήρωσε όλα τα υποχρεωτικά πεδία (συμπεριλαμβανομένης υποκατηγορίας)','err');return;
+  }
+  try{
+    const{error}=await getDb().from('cash_payments').update(d).eq('id',id);
+    if(error)throw error;
+    const idx=cps.findIndex(x=>x.id===id);
+    if(idx>=0)cps[idx]={...cps[idx],...d};
+    cm('meditcp');rCash();
+    toast('Πληρωμή ενημερώθηκε!');
+  }catch(e){toast('Σφάλμα: '+e.message,'err');}
+}
 
 // ══════════════════════════════════════════════════════
 // EXCEL
