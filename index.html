@@ -1396,7 +1396,7 @@ async function load(){
     ]);
     sups=r0.data||[];locs=r1.data||[];prods=r2.data||[];cats=r3.data||[];sps=r4.data||[];subcats=r5.data||[];
     if(isA){
-      const[a,b,c,d,e,f,g,h,oi,r9,sa1,sa2,pp,py2]=await Promise.all([
+      const[a,b,c,d,e,f,g,h,oi,r9,sa1,sa2,pp,py2,ctr]=await Promise.all([
         getDb().from('orders').select('*').order('order_date',{ascending:false}),
         getDb().from('recurring_obligations').select('*').order('next_due_date'),
         getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
@@ -1410,15 +1410,16 @@ async function load(){
         getDb().from('sa_cash_entries').select('*').order('entry_date',{ascending:false}),
         getDb().from('sa_cash_payments').select('*').order('payment_date',{ascending:false}),
         getDb().from('partial_payments').select('*').order('paid_at',{ascending:false}),
-        getDb().from('payments').select('*').order('payment_date',{ascending:false})
+        getDb().from('payments').select('*').order('payment_date',{ascending:false}),
+        getDb().from('cash_transfers').select('*').order('transfer_date',{ascending:false})
       ]);
       ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];ups=f.data||[];ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];
-      saces=sa1.data||[];sacps=sa2.data||[];pparts=pp.data||[];pays=py2.data||[];
+      saces=sa1.data||[];sacps=sa2.data||[];pparts=pp.data||[];pays=py2.data||[];ctransfers=ctr.data||[];
     }else{
       // Manager/Store φορτώνουν δεδομένα βάσει ρόλου
       if(cP?.role==='manager'){
         // Manager φορτώνει όλα όπως admin (το RLS φιλτράρει αν δεν έχει tab sa_cash)
-        const[a,b,c,d,e,g,h,oi,r9,sa1,sa2,pp,py2]=await Promise.all([
+        const[a,b,c,d,e,g,h,oi,r9,sa1,sa2,pp,py2,ctr]=await Promise.all([
           getDb().from('orders').select('*').order('order_date',{ascending:false}),
           getDb().from('recurring_obligations').select('*').order('next_due_date'),
           getDb().from('prices').select('*').order('recorded_at',{ascending:false}),
@@ -1431,10 +1432,11 @@ async function load(){
           getDb().from('sa_cash_entries').select('*').order('entry_date',{ascending:false}),
           getDb().from('sa_cash_payments').select('*').order('payment_date',{ascending:false}),
           getDb().from('partial_payments').select('*').order('paid_at',{ascending:false}),
-          getDb().from('payments').select('*').order('payment_date',{ascending:false})
+          getDb().from('payments').select('*').order('payment_date',{ascending:false}),
+          getDb().from('cash_transfers').select('*').order('transfer_date',{ascending:false})
         ]);
         ords=a.data||[];recs=b.data||[];prs=c.data||[];stk=d.data||[];oths=e.data||[];
-        ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];ups=[];pparts=pp.data||[];pays=py2.data||[];
+        ces=g.data||[];cps=h.data||[];oitems=oi.data||[];credits=r9.data||[];ups=[];pparts=pp.data||[];pays=py2.data||[];ctransfers=ctr.data||[];
         // RLS επιτρέπει SA data μόνο αν έχει tab sa_cash, αλλιώς επιστρέφει []
         saces=sa1.data||[];sacps=sa2.data||[];
       }else{
@@ -2744,6 +2746,20 @@ function exportXL(){
 // 📊 REPORTS — 3 views: Σύνοψη Εξόδων / Αναλυτικές Πληρωμές / Ανά Τράπεζα
 // ══════════════════════════════════════════════════════
 
+// Helpers: εντοπισμός εγγραφών που είναι μεταφορές μετρητών (ΟΧΙ έξοδα)
+const _transferIds={cps:new Set(),ces:new Set(),sacps:new Set(),saces:new Set()};
+function refreshTransferIds(){
+  _transferIds.cps.clear();_transferIds.ces.clear();_transferIds.sacps.clear();_transferIds.saces.clear();
+  ctransfers.forEach(t=>{
+    if(t.store_payment_id)_transferIds.cps.add(t.store_payment_id);
+    if(t.store_entry_id)_transferIds.ces.add(t.store_entry_id);
+    if(t.sa_payment_id)_transferIds.sacps.add(t.sa_payment_id);
+    if(t.sa_entry_id)_transferIds.saces.add(t.sa_entry_id);
+  });
+}
+function isTransferCashPayment(p){return _transferIds.cps.has(p.id);}
+function isTransferSACashPayment(p){return _transferIds.sacps.has(p.id);}
+
 // Helper: επιστρέφει [from, to] dates βάσει του aRepTime
 function getRepDateRange(){
   const now=new Date();
@@ -2820,6 +2836,7 @@ function renderRepLocSegs(){
 // MAIN: Render Reports
 function rReports(){
   if(document.querySelector('.page.active')?.id!=='page-reports')return;
+  refreshTransferIds();
   renderRepLocSegs();
   if(aRepView==='summary')rReportsSummary();
   else if(aRepView==='details')rReportsDetails();
@@ -2859,20 +2876,24 @@ function calcSummaryData(){
     items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:o.location_id,amount:Number(o.amount||0),source:'other'});
   });
   // Cash payments καταστημάτων (έξοδα μετρητών — ως δαπάνες)
+  // Εξαίρεση μεταφορών προς ΣΑ (linked στο cash_transfers)
   cps.forEach(p=>{
+    if(_transferIds.cps.has(p.id))return; // skip transfers
     const dt=new Date(p.payment_date);
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===p.subcategory_id);
-    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'(χωρίς)'):'(χωρίς)';
-    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:p.location_id,amount:Number(p.amount||0),source:'cash'});
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'❓ Χωρίς κατηγοριοποίηση'):'❓ Χωρίς κατηγοριοποίηση';
+    items.push({category:cat,subcategory:sc?sc.name:'—',location_id:p.location_id,amount:Number(p.amount||0),source:'cash'});
   });
   // SA cash payments (έξοδα ΣΑ)
+  // Εξαίρεση μεταφορών προς κατάστημα
   sacps.forEach(p=>{
+    if(_transferIds.sacps.has(p.id))return; // skip transfers
     const dt=new Date(p.payment_date);
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===p.subcategory_id);
-    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'(χωρίς)'):'(χωρίς)';
-    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:null,amount:Number(p.amount||0),source:'sa'});
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'❓ Χωρίς κατηγοριοποίηση'):'❓ Χωρίς κατηγοριοποίηση';
+    items.push({category:cat,subcategory:sc?sc.name:'—',location_id:null,amount:Number(p.amount||0),source:'sa'});
   });
   // Manager filter
   if(cP?.role==='manager'){
@@ -3091,6 +3112,7 @@ function calcDetailsData(){
   });
   // Cash payments
   cps.forEach(p=>{
+    if(_transferIds.cps.has(p.id))return; // skip transfers
     const dt=new Date(p.payment_date);
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===p.subcategory_id);
@@ -3099,6 +3121,7 @@ function calcDetailsData(){
   });
   // SA cash payments
   sacps.forEach(p=>{
+    if(_transferIds.sacps.has(p.id))return; // skip transfers
     const dt=new Date(p.payment_date);
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===p.subcategory_id);
