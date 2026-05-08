@@ -306,6 +306,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="tab" id="tab-payments" onclick="sw('payments',this)">Πληρωμές</div>
   <div class="tab" id="tab-cash" onclick="sw('cash',this)">Μετρητά Καταστημάτων</div>
   <div class="tab" id="tab-sacash" onclick="sw('sacash',this)">Μετρητά ΣΑ</div>
+  <div class="tab ao" id="tab-reports" onclick="sw('reports',this)">📊 Αναφορές</div>
   <div class="tab ao" id="tab-excel" onclick="sw('excel',this)">Excel</div>
   <div class="ts"></div>
   <div class="tbr">
@@ -517,6 +518,117 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   </div>
 </div>
 
+<!-- REPORTS -->
+<div id="page-reports" class="page ao">
+  <div class="tlb"><span class="tlt">📊 Αναφορές</span></div>
+  <div style="color:var(--td);font-size:12px;margin-bottom:16px">Ολοκληρωμένη εικόνα εξόδων, πληρωμών και τραπεζικών κινήσεων</div>
+
+  <!-- Sub-tabs -->
+  <div class="vt" style="margin-bottom:16px">
+    <button class="vb active" onclick="swRep('summary',this)">📈 Σύνοψη Εξόδων</button>
+    <button class="vb" onclick="swRep('details',this)">💳 Αναλυτικές Πληρωμές</button>
+    <button class="vb" onclick="swRep('banks',this)">🏦 Ανά Τράπεζα</button>
+  </div>
+
+  <!-- Common filters -->
+  <div class="card" style="margin-bottom:16px;padding:14px">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px">
+      <span class="loclbl" style="margin:0">🗓️ Περίοδος:</span>
+      <div class="vb" id="rep-week" onclick="fRepTime('week',this)">Εβδομάδα</div>
+      <div class="vb active" id="rep-month" onclick="fRepTime('month',this)">Τρέχων μήνας</div>
+      <div class="vb" id="rep-prevmonth" onclick="fRepTime('prevmonth',this)">Προηγ. μήνας</div>
+      <div class="vb" id="rep-year" onclick="fRepTime('year',this)">Φέτος</div>
+      <div class="vb" id="rep-custom" onclick="fRepTime('custom',this)">📅 Από/Έως</div>
+    </div>
+    <div id="rep-daterange" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <input type="date" id="rep-from" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px" onchange="rReports()">
+      <span style="color:var(--td)">—</span>
+      <input type="date" id="rep-to" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px" onchange="rReports()">
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <span class="loclbl" style="margin:0">📍 Κατάστημα:</span>
+      <div id="rep-locs" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+  </div>
+
+  <!-- VIEW: Σύνοψη Εξόδων -->
+  <div id="rep-view-summary">
+    <div style="background:#dbeafe;border-left:4px solid #2563eb;padding:8px 12px;border-radius:6px;font-size:11px;color:#1e40af;margin-bottom:14px">
+      ℹ️ <b>Λογική:</b> Έξοδα βάσει <b>ημερομηνίας δημιουργίας</b> (παραγγελία/υποχρέωση). Λογιστική προσέγγιση.
+    </div>
+    <div id="rep-summary-metrics" class="mts" style="margin-bottom:16px"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="overflow-x:auto" id="rep-summary-pivot"></div>
+    </div>
+    <div class="card" id="rep-summary-top5" style="margin-top:16px;padding:14px"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn p" onclick="exportSummary()">📥 Εξαγωγή σε Excel</button>
+    </div>
+  </div>
+
+  <!-- VIEW: Αναλυτικές Πληρωμές -->
+  <div id="rep-view-details" style="display:none">
+    <div style="background:#dcfce7;border-left:4px solid #16a34a;padding:8px 12px;border-radius:6px;font-size:11px;color:#15803d;margin-bottom:14px">
+      ℹ️ <b>Λογική:</b> Όλες οι πληρωμές βάσει <b>ημερομηνίας πληρωμής</b>. Cash flow view.
+    </div>
+    <div class="card" style="margin-bottom:14px;padding:14px">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px">
+        <span class="loclbl" style="margin:0">📂 Τύπος:</span>
+        <div class="pill active" onclick="fRepType('all',this)">Όλα</div>
+        <div class="pill" onclick="fRepType('order',this)">📦 Παραγγελίες</div>
+        <div class="pill" onclick="fRepType('rec',this)">🔄 Πάγια</div>
+        <div class="pill" onclick="fRepType('other',this)">📌 Έκτακτα</div>
+        <div class="pill" onclick="fRepType('cash',this)">💵 Μετρητά κατ.</div>
+        <div class="pill" onclick="fRepType('sa',this)">💼 ΣΑ</div>
+        <div class="pill" onclick="fRepType('partial',this)">⬤ Έναντι</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px">
+        <span class="loclbl" style="margin:0">🏷 Κατηγορία:</span>
+        <select id="rep-cat-filter" onchange="rReportsDetails()" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px;min-width:200px"><option value="">— Όλες —</option></select>
+        <span class="loclbl" style="margin:0 0 0 12px">💳 Τρόπος:</span>
+        <div class="vb active" onclick="fRepMethod('all',this)">Όλοι</div>
+        <div class="vb" onclick="fRepMethod('transfer',this)">🏦 Κατάθεση</div>
+        <div class="vb" onclick="fRepMethod('cash',this)">💵 Μετρητά</div>
+        <div class="vb" onclick="fRepMethod('card',this)">💳 Κάρτα</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <span class="loclbl" style="margin:0">🏛 Τράπεζα:</span>
+        <div class="pill active" onclick="fRepBank('all',this)">Όλες</div>
+        <div class="pill" onclick="fRepBank('Εθνική',this)">Εθνική</div>
+        <div class="pill" onclick="fRepBank('Πειραιώς',this)">Πειραιώς</div>
+        <span class="loclbl" style="margin:0 0 0 12px">🔍 Αναζήτηση:</span>
+        <input type="text" id="rep-search" placeholder="όνομα, σημείωση..." oninput="rReportsDetails()" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px;min-width:180px">
+      </div>
+    </div>
+    <div id="rep-details-metrics" class="mts" style="margin-bottom:16px"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:0.5px solid var(--nb);display:flex;justify-content:space-between;align-items:center;background:var(--ni)">
+        <h3 style="margin:0;font-size:14px;color:var(--t1)">Λίστα πληρωμών</h3>
+        <span style="font-size:11px;color:var(--td)" id="rep-details-count"></span>
+      </div>
+      <div style="overflow-x:auto" id="rep-details-table"></div>
+    </div>
+    <div class="card" style="margin-top:14px;padding:14px;display:flex;flex-wrap:wrap;gap:24px;align-items:center" id="rep-details-banks"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn p" onclick="exportDetails()">📥 Εξαγωγή σε Excel</button>
+    </div>
+  </div>
+
+  <!-- VIEW: Ανά Τράπεζα -->
+  <div id="rep-view-banks" style="display:none">
+    <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:8px 12px;border-radius:6px;font-size:11px;color:#92400e;margin-bottom:14px">
+      ℹ️ <b>Λογική:</b> Πληρωμές ανά τράπεζα/τρόπο και μήνα. Χρήσιμο για reconciliation με τα bank statements.
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="overflow-x:auto" id="rep-banks-table"></div>
+    </div>
+    <div class="card" id="rep-banks-bars" style="margin-top:16px;padding:14px"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn p" onclick="exportBanks()">📥 Εξαγωγή σε Excel</button>
+    </div>
+  </div>
+</div>
+
 <!-- EXCEL -->
 <div id="page-excel" class="page ao">
   <div class="tlb"><span class="tlt">Εξαγωγή για λογιστήριο</span></div>
@@ -535,6 +647,57 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div id="xprev" class="sec" style="display:none">
     <table class="dt"><thead><tr><th>Προμηθευτής</th><th>IBAN</th><th>Τράπεζα</th><th>Περιγραφή</th><th>Σύνολο</th><th>Προκ/βολή</th><th>Υπόλοιπο</th><th>Λήξη</th><th>Τοποθεσία</th></tr></thead>
     <tbody id="xbody"></tbody></table>
+  </div>
+
+  <!-- Reports exports section -->
+  <div class="tlb" style="margin-top:24px"><span class="tlt">📊 Εξαγωγές Αναφορών</span></div>
+  <div style="color:var(--td);font-size:12px;margin-bottom:12px">Γρήγορη εξαγωγή των αναφορών σε Excel. Για περισσότερα φίλτρα, χρησιμοποίησε το tab Αναφορές.</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+    <div class="card" style="padding:16px">
+      <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">📈 Σύνοψη Εξόδων</div>
+      <div style="font-size:12px;color:var(--td);margin-bottom:14px">Έξοδα ανά κατηγορία/υποκατηγορία/κατάστημα. Βάσει ημερομηνίας δημιουργίας.</div>
+      <div class="fg2" style="margin-bottom:12px">
+        <div class="f s2"><label>Περίοδος</label>
+          <select id="xrep-sum-period" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px">
+            <option value="month">Τρέχων μήνας</option>
+            <option value="prevmonth">Προηγ. μήνας</option>
+            <option value="year">Φέτος</option>
+            <option value="all">Όλα</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn p" onclick="quickExportSummary()">📥 Εξαγωγή Excel</button>
+    </div>
+    <div class="card" style="padding:16px">
+      <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">💳 Αναλυτικές Πληρωμές</div>
+      <div style="font-size:12px;color:var(--td);margin-bottom:14px">Όλες οι πληρωμές με τράπεζα, τρόπο, κατηγορία. Βάσει ημερομηνίας πληρωμής.</div>
+      <div class="fg2" style="margin-bottom:12px">
+        <div class="f s2"><label>Περίοδος</label>
+          <select id="xrep-det-period" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px">
+            <option value="month">Τρέχων μήνας</option>
+            <option value="prevmonth">Προηγ. μήνας</option>
+            <option value="year">Φέτος</option>
+            <option value="all">Όλα</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn p" onclick="quickExportDetails()">📥 Εξαγωγή Excel</button>
+    </div>
+    <div class="card" style="padding:16px">
+      <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">🏦 Ανά Τράπεζα</div>
+      <div style="font-size:12px;color:var(--td);margin-bottom:14px">Πληρωμές ομαδοποιημένες ανά τράπεζα/τρόπο και μήνα. Για reconciliation.</div>
+      <div class="fg2" style="margin-bottom:12px">
+        <div class="f s2"><label>Περίοδος</label>
+          <select id="xrep-bnk-period" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px">
+            <option value="year" selected>Φέτος</option>
+            <option value="month">Τρέχων μήνας</option>
+            <option value="prevmonth">Προηγ. μήνας</option>
+            <option value="all">Όλα</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn p" onclick="quickExportBanks()">📥 Εξαγωγή Excel</button>
+    </div>
   </div>
 </div>
 </div><!-- /app -->
@@ -1107,6 +1270,7 @@ let cU=null,cP=null;
 let sups=[],locs=[],prods=[],ords=[],recs=[],prs=[],stk=[],cats=[],oths=[],ups=[],sps=[],ces=[],cps=[],oitems=[],credits=[],saces=[],sacps=[],ctransfers=[],pparts=[],subcats=[];
 let aOF='all',aSF='all',aPF='all',aCF='all',aPV='pending',oeditId=null;
 let aPaidTime='week',aPaidType='all';
+let aRepView='summary',aRepTime='month',aRepLoc='all',aRepType='all',aRepMethod='all',aRepBank='all';
 let pays=[];
 // Νέα: location filters ανεξάρτητα από τα status filters
 let aOL='all',aSL='all',aPL='all';
@@ -1194,7 +1358,7 @@ async function init(user){
     applyPermissions(p);
     // Πήγαινε στο πρώτο διαθέσιμο tab
     const tabs=p?.permissions?.tabs||[];
-    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',excel:'tab-excel'};
+    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',reports:'tab-reports',excel:'tab-excel'};
     const firstTab=tabs.find(t=>tabMap[t]);
     const tabEl=firstTab?document.getElementById(tabMap[firstTab]):document.getElementById('tab-cash');
     const pageName=firstTab||'cash';
@@ -1388,6 +1552,7 @@ function sw(n,el){
   if(n==='dash')rDash();
   if(n==='orders')rOrders();if(n==='stock')rStock();if(n==='prices')rPrices();if(n==='payments')rPay();if(n==='cash')rCash();
   if(n==='sacash')rSACash();
+  if(n==='reports')rReports();
 }
 function om(id){
   if(id==='mord'){oeditId=null;set('mord-title','Νέα παραγγελία');document.getElementById('odt').value=td();['otot','opp','obal','onet','ovat'].forEach(i=>document.getElementById(i).value='');['osup','oloc','ocat','onotes','odlv'].forEach(i=>document.getElementById(i).value='');document.getElementById('ibody').innerHTML='';addRow();}
@@ -2575,6 +2740,701 @@ function exportXL(){
 // ══════════════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// 📊 REPORTS — 3 views: Σύνοψη Εξόδων / Αναλυτικές Πληρωμές / Ανά Τράπεζα
+// ══════════════════════════════════════════════════════
+
+// Helper: επιστρέφει [from, to] dates βάσει του aRepTime
+function getRepDateRange(){
+  const now=new Date();
+  let from,to;
+  if(aRepTime==='week'){
+    from=new Date(now);const day=now.getDay()||7;
+    from.setDate(now.getDate()-day+1);from.setHours(0,0,0,0);
+    to=new Date();to.setHours(23,59,59,999);
+  }else if(aRepTime==='month'){
+    from=new Date(now.getFullYear(),now.getMonth(),1);
+    to=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59);
+  }else if(aRepTime==='prevmonth'){
+    from=new Date(now.getFullYear(),now.getMonth()-1,1);
+    to=new Date(now.getFullYear(),now.getMonth(),0,23,59,59);
+  }else if(aRepTime==='year'){
+    from=new Date(now.getFullYear(),0,1);
+    to=new Date(now.getFullYear(),11,31,23,59,59);
+  }else if(aRepTime==='custom'){
+    const fr=document.getElementById('rep-from')?.value;
+    const tr=document.getElementById('rep-to')?.value;
+    from=fr?new Date(fr):new Date(2000,0,1);
+    to=tr?new Date(tr+'T23:59:59'):new Date();
+  }
+  return [from,to];
+}
+
+// Helper: format date range για display
+function fmtRepRange(){
+  const [from,to]=getRepDateRange();
+  const f=fd(from),t=fd(to);
+  return f===t?f:`${f} — ${t}`;
+}
+
+// Filter handlers
+function fRepTime(t,el){
+  document.querySelectorAll('#rep-week,#rep-month,#rep-prevmonth,#rep-year,#rep-custom').forEach(b=>b?.classList.remove('active'));
+  el.classList.add('active');aRepTime=t;
+  const dr=document.getElementById('rep-daterange');
+  if(dr)dr.style.display=t==='custom'?'flex':'none';
+  rReports();
+}
+function fRepLoc(loc,el){
+  document.querySelectorAll('#rep-locs .seg').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');aRepLoc=loc;rReports();
+}
+function fRepType(t,el){
+  document.querySelectorAll('#rep-view-details .pill').forEach((p,i)=>{
+    if(i<7)p.classList.remove('active'); // first row = type pills
+  });
+  el.classList.add('active');aRepType=t;rReportsDetails();
+}
+function fRepMethod(m,el){
+  el.parentNode.querySelectorAll('.vb').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');aRepMethod=m;rReportsDetails();
+}
+function fRepBank(b,el){
+  el.parentNode.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');aRepBank=b;rReportsDetails();
+}
+function swRep(v,el){
+  document.querySelectorAll('#page-reports .vt .vb').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');aRepView=v;
+  ['summary','details','banks'].forEach(x=>{
+    const e=document.getElementById('rep-view-'+x);if(e)e.style.display=x===v?'block':'none';
+  });
+  rReports();
+}
+
+// Render location segments
+function renderRepLocSegs(){
+  const wrap=document.getElementById('rep-locs');
+  if(!wrap)return;
+  // Manager βλέπει μόνο τα δικά του locations
+  let allowedLocs=locs;
+  if(cP?.role==='manager'){
+    const permLocs=cP?.permissions?.locations||[];
+    allowedLocs=locs.filter(l=>permLocs.includes(l.id));
+  }
+  wrap.innerHTML=`<div class="seg ${aRepLoc==='all'?'active':''}" onclick="fRepLoc('all',this)">📍 Όλα</div>`+
+    allowedLocs.map(l=>`<div class="seg ${aRepLoc===l.id?'active':''}" onclick="fRepLoc('${l.id}',this)">${l.name}</div>`).join('');
+}
+
+// MAIN: Render Reports
+function rReports(){
+  if(document.querySelector('.page.active')?.id!=='page-reports')return;
+  renderRepLocSegs();
+  if(aRepView==='summary')rReportsSummary();
+  else if(aRepView==='details')rReportsDetails();
+  else if(aRepView==='banks')rReportsBanks();
+}
+
+// ─────────────────────────────────────────
+// VIEW 1: Σύνοψη Εξόδων (βάσει ημ. δημιουργίας)
+// ─────────────────────────────────────────
+function calcSummaryData(){
+  const[from,to]=getRepDateRange();
+  // Συγκέντρωση όλων των εξόδων με κατηγορία/υποκατηγορία/κατάστημα
+  // βάσει ΗΜΕΡΟΜΗΝΙΑΣ ΔΗΜΙΟΥΡΓΙΑΣ
+  const items=[]; // {category, subcategory, location_id, amount, count}
+  const proCat=cats.find(c=>c.name==='🛒 Προμήθειες'&&c.type==='expense');
+  // Παραγγελίες (κατηγορία = 🛒 Προμήθειες πάντα, υποκατηγορία από subcategory_id)
+  ords.filter(o=>o.status!=='cancelled').forEach(o=>{
+    const dt=new Date(o.order_date);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===o.subcategory_id);
+    items.push({category:'🛒 Προμήθειες',subcategory:sc?sc.name:'(χωρίς)',location_id:o.location_id,amount:Number(o.total_amount||0),source:'order'});
+  });
+  // Πάγια
+  recs.filter(r=>r.active!==false).forEach(r=>{
+    const dt=new Date(r.next_due_date);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===r.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||r.category):(r.category||'(χωρίς)');
+    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:r.location_id,amount:Number(r.amount||0),source:'rec'});
+  });
+  // Άλλες υποχρεώσεις
+  oths.forEach(o=>{
+    const dt=new Date(o.created_at||o.due_date);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===o.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||o.category):(o.category||'(χωρίς)');
+    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:o.location_id,amount:Number(o.amount||0),source:'other'});
+  });
+  // Cash payments καταστημάτων (έξοδα μετρητών — ως δαπάνες)
+  cps.forEach(p=>{
+    const dt=new Date(p.payment_date);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===p.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'(χωρίς)'):'(χωρίς)';
+    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:p.location_id,amount:Number(p.amount||0),source:'cash'});
+  });
+  // SA cash payments (έξοδα ΣΑ)
+  sacps.forEach(p=>{
+    const dt=new Date(p.payment_date);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===p.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'(χωρίς)'):'(χωρίς)';
+    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:null,amount:Number(p.amount||0),source:'sa'});
+  });
+  // Manager filter
+  if(cP?.role==='manager'){
+    const permLocs=cP?.permissions?.locations||[];
+    return items.filter(i=>i.location_id===null||permLocs.includes(i.location_id));
+  }
+  return items;
+}
+
+function rReportsSummary(){
+  const items=calcSummaryData();
+  // Φίλτρο τοποθεσίας
+  const filtered=aRepLoc==='all'?items:items.filter(i=>i.location_id===aRepLoc);
+  const total=filtered.reduce((s,i)=>s+i.amount,0);
+  const cats_active=new Set(filtered.map(i=>i.category)).size;
+  // Metrics
+  let prevTotal=0;
+  if(aRepLoc!=='all'||aRepLoc==='all'){
+    // Compute prev-month total για comparison
+    const oldTime=aRepTime;aRepTime='prevmonth';
+    const prevItems=calcSummaryData();
+    const prevFiltered=aRepLoc==='all'?prevItems:prevItems.filter(i=>i.location_id===aRepLoc);
+    prevTotal=prevFiltered.reduce((s,i)=>s+i.amount,0);
+    aRepTime=oldTime;
+  }
+  const change=prevTotal>0?((total-prevTotal)/prevTotal)*100:0;
+  const changeStr=prevTotal>0?(change>0?`<span style="color:var(--rd)">↑ +${change.toFixed(0)}%</span>`:change<0?`<span style="color:var(--gn)">↓ ${change.toFixed(0)}%</span>`:`<span style="color:var(--td)">—</span>`):'';
+  set('rep-summary-metrics',`
+    <div class="met" style="border-color:var(--rd)"><label>Συνολικά έξοδα</label><div class="mv rd">${fmt(total)} €</div>${prevTotal>0?`<div style="font-size:11px;color:var(--td);margin-top:4px">vs Προηγ.μήνα: ${fmt(prevTotal)} € ${changeStr}</div>`:''}</div>
+    <div class="met" style="border-color:var(--am)"><label>Κατηγορίες με κίνηση</label><div class="mv am">${cats_active}</div></div>
+    <div class="met" style="border-color:var(--bl)"><label>Κινήσεις</label><div class="mv" style="color:var(--bl)">${filtered.length}</div></div>
+    <div class="met"><label>Μέσος όρος/κίνηση</label><div class="mv">${filtered.length?fmt(total/filtered.length):'0'} €</div></div>
+  `);
+  // Pivot
+  if(aRepLoc==='all')renderPivotMultiLoc(filtered,total);
+  else renderPivotSingleLoc(filtered,total);
+  // Top 5
+  renderTop5(filtered,total);
+}
+
+function renderPivotMultiLoc(items,total){
+  // Group ανά (category, subcategory, location)
+  const byLoc={};
+  let allowedLocs=locs;
+  if(cP?.role==='manager'){
+    const permLocs=cP?.permissions?.locations||[];
+    allowedLocs=locs.filter(l=>permLocs.includes(l.id));
+  }
+  const colLocs=[...allowedLocs.map(l=>({id:l.id,name:l.name})),{id:'sa',name:'ΣΑ'}];
+  // Build category->subcategory->location tree
+  const tree={}; // {cat: {sub: {locId: amount}}}
+  items.forEach(i=>{
+    if(!tree[i.category])tree[i.category]={};
+    if(!tree[i.category][i.subcategory])tree[i.category][i.subcategory]={};
+    const lid=i.location_id||'sa';
+    tree[i.category][i.subcategory][lid]=(tree[i.category][i.subcategory][lid]||0)+i.amount;
+  });
+  const cats_sorted=Object.keys(tree).sort((a,b)=>{
+    const sa=Object.values(tree[a]).reduce((s,o)=>s+Object.values(o).reduce((x,v)=>x+v,0),0);
+    const sb=Object.values(tree[b]).reduce((s,o)=>s+Object.values(o).reduce((x,v)=>x+v,0),0);
+    return sb-sa;
+  });
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr>
+      <th style="text-align:left;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb);min-width:240px">Κατηγορία / Υποκατηγορία</th>
+      ${colLocs.map(l=>`<th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb);white-space:nowrap">${l.name}</th>`).join('')}
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--pk);font-size:11px;font-weight:700;text-transform:uppercase;border-bottom:2px solid var(--nb)">ΣΥΝΟΛΟ</th>
+    </tr></thead><tbody>`;
+  // Column totals
+  const colTotals={};colLocs.forEach(l=>colTotals[l.id]=0);
+  cats_sorted.forEach(catName=>{
+    const subs=tree[catName];
+    const catRow={};colLocs.forEach(l=>catRow[l.id]=0);
+    Object.values(subs).forEach(subData=>{
+      Object.entries(subData).forEach(([lid,amt])=>{catRow[lid]=(catRow[lid]||0)+amt;});
+    });
+    const catTotal=Object.values(catRow).reduce((s,v)=>s+v,0);
+    colLocs.forEach(l=>colTotals[l.id]+=catRow[l.id]||0);
+    html+=`<tr style="background:#f9fafb;font-weight:600">
+      <td style="padding:10px 14px;border-bottom:0.5px solid var(--nb);color:var(--t1)">${catName}</td>
+      ${colLocs.map(l=>{const v=catRow[l.id]||0;return`<td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);${v===0?'color:#d1d5db':'color:var(--t1)'}">${v===0?'—':fmt(v)+' €'}</td>`;}).join('')}
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t1);font-weight:700">${fmt(catTotal)} €</td>
+    </tr>`;
+    // Subcategories
+    Object.keys(subs).sort((a,b)=>{
+      const sa=Object.values(subs[a]).reduce((x,v)=>x+v,0);
+      const sb=Object.values(subs[b]).reduce((x,v)=>x+v,0);
+      return sb-sa;
+    }).forEach(subName=>{
+      const subData=subs[subName];
+      const subTotal=Object.values(subData).reduce((s,v)=>s+v,0);
+      html+=`<tr>
+        <td style="padding:8px 14px;padding-left:32px;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${subName}</td>
+        ${colLocs.map(l=>{const v=subData[l.id]||0;return`<td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);${v===0?'color:#d1d5db':'color:var(--t2)'};font-size:12px">${v===0?'—':fmt(v)+' €'}</td>`;}).join('')}
+        <td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t2);font-weight:600;font-size:12px">${fmt(subTotal)} €</td>
+      </tr>`;
+    });
+  });
+  // Total row
+  html+=`<tr style="background:#fce8f0;font-weight:700">
+    <td style="padding:12px 14px;border-top:2px solid var(--pk);color:var(--pk);font-size:14px">ΣΥΝΟΛΟ</td>
+    ${colLocs.map(l=>`<td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk);font-size:14px">${colTotals[l.id]>0?fmt(colTotals[l.id])+' €':'—'}</td>`).join('')}
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk);font-size:14px;font-weight:700">${fmt(total)} €</td>
+  </tr>`;
+  html+='</tbody></table>';
+  if(cats_sorted.length===0){html=`<div class="empty" style="padding:30px;text-align:center;color:var(--td)"><div class="ic">📊</div><p>Δεν υπάρχουν έξοδα στην επιλεγμένη περίοδο</p></div>`;}
+  set('rep-summary-pivot',html);
+}
+
+function renderPivotSingleLoc(items,total){
+  const tree={};
+  items.forEach(i=>{
+    if(!tree[i.category])tree[i.category]={};
+    if(!tree[i.category][i.subcategory])tree[i.category][i.subcategory]={amount:0,count:0};
+    tree[i.category][i.subcategory].amount+=i.amount;
+    tree[i.category][i.subcategory].count++;
+  });
+  const cats_sorted=Object.keys(tree).sort((a,b)=>{
+    const sa=Object.values(tree[a]).reduce((s,o)=>s+o.amount,0);
+    const sb=Object.values(tree[b]).reduce((s,o)=>s+o.amount,0);
+    return sb-sa;
+  });
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr>
+      <th style="text-align:left;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb);width:50%">Κατηγορία / Υποκατηγορία</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb)">Κινήσεις</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb)">Ποσό</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb);min-width:140px">%</th>
+    </tr></thead><tbody>`;
+  cats_sorted.forEach(catName=>{
+    const subs=tree[catName];
+    const catTotal=Object.values(subs).reduce((s,o)=>s+o.amount,0);
+    const catCount=Object.values(subs).reduce((s,o)=>s+o.count,0);
+    const pct=total>0?(catTotal/total)*100:0;
+    html+=`<tr style="background:#f9fafb;font-weight:600">
+      <td style="padding:10px 14px;border-bottom:0.5px solid var(--nb);color:var(--t1)">${catName}</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t1)">${catCount}</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t1)">${fmt(catTotal)} €</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t1)">${pct.toFixed(1)}% <span style="display:inline-block;width:60px;height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;vertical-align:middle;margin-left:6px"><span style="display:block;height:100%;background:var(--pk);width:${pct}%"></span></span></td>
+    </tr>`;
+    Object.keys(subs).sort((a,b)=>subs[b].amount-subs[a].amount).forEach(subName=>{
+      const sub=subs[subName];
+      const subPct=total>0?(sub.amount/total)*100:0;
+      html+=`<tr>
+        <td style="padding:8px 14px;padding-left:32px;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${subName}</td>
+        <td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${sub.count}</td>
+        <td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${fmt(sub.amount)} €</td>
+        <td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${subPct.toFixed(1)}%</td>
+      </tr>`;
+    });
+  });
+  html+=`<tr style="background:#fce8f0;font-weight:700">
+    <td style="padding:12px 14px;border-top:2px solid var(--pk);color:var(--pk);font-size:14px">ΣΥΝΟΛΟ</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk);font-size:14px">${items.length}</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk);font-size:14px;font-weight:700">${fmt(total)} €</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk);font-size:14px">100%</td>
+  </tr>`;
+  html+='</tbody></table>';
+  if(cats_sorted.length===0){html=`<div class="empty" style="padding:30px;text-align:center;color:var(--td)"><div class="ic">📊</div><p>Δεν υπάρχουν έξοδα στην επιλεγμένη περίοδο</p></div>`;}
+  set('rep-summary-pivot',html);
+}
+
+function renderTop5(items,total){
+  const byCat={};
+  items.forEach(i=>{byCat[i.category]=(byCat[i.category]||0)+i.amount;});
+  const top5=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(top5.length===0){set('rep-summary-top5','');return;}
+  const colors=['var(--pk)','var(--rd)','var(--am)','var(--gn)','var(--bl)'];
+  const maxVal=top5[0][1];
+  let html=`<h3 style="margin:0 0 14px;font-size:14px;color:var(--t1)">📊 Top ${top5.length} κατηγορίες</h3>`;
+  top5.forEach(([cat,amt],i)=>{
+    const pct=total>0?(amt/total)*100:0;
+    const widthPct=maxVal>0?(amt/maxVal)*100:0;
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="flex:0 0 200px;font-size:12px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cat}</span>
+      <span style="flex:1;background:#f3f4f6;border-radius:6px;height:24px;overflow:hidden;position:relative">
+        <span style="display:flex;align-items:center;padding-left:10px;height:100%;width:${widthPct}%;background:${colors[i]};color:#fff;font-size:11px;font-weight:600">${pct.toFixed(1)}%</span>
+      </span>
+      <span style="flex:0 0 100px;text-align:right;font-size:13px;font-weight:600;color:var(--t1)">${fmt(amt)} €</span>
+    </div>`;
+  });
+  set('rep-summary-top5',html);
+}
+
+// ─────────────────────────────────────────
+// VIEW 2: Αναλυτικές Πληρωμές (βάσει ημ. πληρωμής)
+// ─────────────────────────────────────────
+function calcDetailsData(){
+  const[from,to]=getRepDateRange();
+  const items=[]; // {date, type, name, location_id, category, subcategory, amount, method, bank, notes}
+  const methodMap={cash:'💵 Μετρητά',transfer:'🏦 Κατάθεση',card:'💳 Κάρτα',other:'Άλλο'};
+  // Παραγγελίες (πληρωμές)
+  pays.filter(p=>p.order_id&&p.confirmed).forEach(p=>{
+    const dt=new Date(p.payment_date);
+    if(dt<from||dt>to)return;
+    const o=ords.find(x=>x.id===p.order_id);if(!o)return;
+    const sc=subcats.find(s=>s.id===o.subcategory_id);
+    items.push({type:'order',date:p.payment_date,name:sN(o.supplier_id),location_id:o.location_id,category:'🛒 Προμήθειες',subcategory:sc?sc.name:'',amount:Number(p.amount),method:p.payment_method,bank:p.bank_name,notes:p.payment_notes});
+  });
+  // Πάγια (πληρωμές)
+  pays.filter(p=>p.recurring_id&&p.confirmed).forEach(p=>{
+    const dt=new Date(p.payment_date);
+    if(dt<from||dt>to)return;
+    const r=recs.find(x=>x.id===p.recurring_id);if(!r)return;
+    const sc=subcats.find(s=>s.id===r.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||r.category):(r.category||'');
+    items.push({type:'rec',date:p.payment_date,name:r.name,location_id:r.location_id,category:cat,subcategory:sc?sc.name:'',amount:Number(p.amount),method:p.payment_method,bank:p.bank_name,notes:p.payment_notes});
+  });
+  // Άλλες υποχρεώσεις (πληρωμένες)
+  oths.filter(o=>o.paid).forEach(o=>{
+    const dt=new Date(o.paid_at||o.created_at);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===o.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||o.category):(o.category||'');
+    items.push({type:'other',date:o.paid_at,name:o.name,location_id:o.location_id,category:cat,subcategory:sc?sc.name:'',amount:Number(o.amount),method:o.payment_method,bank:o.payment_bank,notes:o.payment_notes});
+  });
+  // Cash payments
+  cps.forEach(p=>{
+    const dt=new Date(p.payment_date);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===p.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||''):'';
+    items.push({type:'cash',date:p.payment_date,name:p.description,location_id:p.location_id,category:cat,subcategory:sc?sc.name:'',amount:Number(p.amount),method:'cash',bank:null,notes:p.notes});
+  });
+  // SA cash payments
+  sacps.forEach(p=>{
+    const dt=new Date(p.payment_date);
+    if(dt<from||dt>to)return;
+    const sc=subcats.find(s=>s.id===p.subcategory_id);
+    const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||''):'';
+    items.push({type:'sa',date:p.payment_date,name:p.description,location_id:null,category:cat,subcategory:sc?sc.name:'',amount:Number(p.amount),method:'cash',bank:null,notes:p.notes});
+  });
+  // Partial payments (έναντι)
+  pparts.forEach(p=>{
+    const dt=new Date(p.paid_at);
+    if(dt<from||dt>to)return;
+    let parentName='', parentCat='', parentSub='', parentLoc=null;
+    if(p.entity_type==='order'){
+      const o=ords.find(x=>x.id===p.entity_id);
+      if(o){parentName=sN(o.supplier_id)+' (έναντι)';parentLoc=o.location_id;parentCat='🛒 Προμήθειες';
+        const sc=subcats.find(s=>s.id===o.subcategory_id);if(sc)parentSub=sc.name;}
+    }else if(p.entity_type==='recurring'){
+      const r=recs.find(x=>x.id===p.entity_id);
+      if(r){parentName=r.name+' (έναντι)';parentLoc=r.location_id;
+        const sc=subcats.find(s=>s.id===r.subcategory_id);
+        parentCat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||r.category):(r.category||'');
+        if(sc)parentSub=sc.name;}
+    }else if(p.entity_type==='other'){
+      const o=oths.find(x=>x.id===p.entity_id);
+      if(o){parentName=o.name+' (έναντι)';parentLoc=o.location_id;
+        const sc=subcats.find(s=>s.id===o.subcategory_id);
+        parentCat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||o.category):(o.category||'');
+        if(sc)parentSub=sc.name;}
+    }
+    items.push({type:'partial',date:p.paid_at,name:parentName,location_id:parentLoc,category:parentCat,subcategory:parentSub,amount:Number(p.amount),method:p.payment_method,bank:p.bank_name,notes:p.notes});
+  });
+  // Manager filter
+  if(cP?.role==='manager'){
+    const permLocs=cP?.permissions?.locations||[];
+    return items.filter(i=>i.location_id===null||permLocs.includes(i.location_id));
+  }
+  return items;
+}
+
+function rReportsDetails(){
+  // Populate category dropdown (μόνο πρώτη φορά)
+  const catSel=document.getElementById('rep-cat-filter');
+  if(catSel&&catSel.options.length<=1){
+    const expCats=cats.filter(c=>c.type==='expense').sort((a,b)=>a.name.localeCompare(b.name,'el'));
+    catSel.innerHTML='<option value="">— Όλες —</option>'+expCats.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  }
+  let items=calcDetailsData();
+  // Φίλτρο τοποθεσίας
+  if(aRepLoc!=='all')items=items.filter(i=>i.location_id===aRepLoc||(aRepLoc==='sa'&&i.type==='sa'));
+  // Φίλτρο τύπου
+  if(aRepType!=='all')items=items.filter(i=>i.type===aRepType);
+  // Φίλτρο τρόπου πληρωμής
+  if(aRepMethod!=='all')items=items.filter(i=>i.method===aRepMethod);
+  // Φίλτρο τράπεζας
+  if(aRepBank!=='all')items=items.filter(i=>i.bank===aRepBank);
+  // Φίλτρο κατηγορίας
+  const catFilter=catSel?.value||'';
+  if(catFilter)items=items.filter(i=>i.category===catFilter);
+  // Search
+  const q=(document.getElementById('rep-search')?.value||'').toLowerCase().trim();
+  if(q)items=items.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
+  // Sort by date desc
+  items.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  // Metrics
+  const total=items.reduce((s,i)=>s+i.amount,0);
+  const max=items.reduce((m,i)=>Math.max(m,i.amount),0);
+  set('rep-details-metrics',`
+    <div class="met" style="border-color:var(--rd)"><label>Σύνολο πληρωμών</label><div class="mv rd">${fmt(total)} €</div></div>
+    <div class="met" style="border-color:var(--bl)"><label>Κινήσεις</label><div class="mv" style="color:var(--bl)">${items.length}</div></div>
+    <div class="met" style="border-color:var(--am)"><label>Μέσος όρος</label><div class="mv am">${items.length?fmt(total/items.length):'0'} €</div></div>
+    <div class="met"><label>Μεγαλύτερη</label><div class="mv">${fmt(max)} €</div></div>
+  `);
+  set('rep-details-count',`${items.length} αποτελέσματα`);
+  // Table
+  const methodMap={cash:'💵 Μετρητά',transfer:'🏦 Κατάθεση',card:'💳 Κάρτα',other:'Άλλο'};
+  const typeBadge={
+    order:'<span style="background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap">📦 Παραγγ.</span>',
+    rec:'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap">🔄 Πάγια</span>',
+    other:'<span style="background:#fce7f3;color:#9d174d;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap">📌 Έκτακτο</span>',
+    cash:'<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap">💵 Μετρητά</span>',
+    sa:'<span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap">💼 ΣΑ</span>',
+    partial:'<span style="background:#fef3c7;color:#854d0e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap">⬤ Έναντι</span>'
+  };
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb);white-space:nowrap">Ημ/νία</th>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Τύπος</th>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Όνομα</th>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Κατάστημα</th>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Κατηγορία/Υποκ.</th>
+      <th style="text-align:right;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Ποσό</th>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Τρόπος</th>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Τράπεζα</th>
+      <th style="text-align:left;padding:10px 12px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--nb)">Σημείωση</th>
+    </tr></thead><tbody>`;
+  if(items.length===0){
+    html+=`<tr><td colspan="9" style="padding:30px;text-align:center;color:var(--td)">Δεν υπάρχουν πληρωμές με αυτά τα φίλτρα</td></tr>`;
+  }else{
+    items.forEach(i=>{
+      html+=`<tr>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--t2);white-space:nowrap">${fd(i.date)}</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb)">${typeBadge[i.type]||''}</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--t1);font-weight:500">${i.name||'—'}</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--t2)">${i.location_id?lN(i.location_id):'—'}</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--t2);font-size:11px">${i.category||'—'}${i.subcategory?' · <span style="color:var(--td)">'+i.subcategory+'</span>':''}</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--rd);font-weight:600;text-align:right;white-space:nowrap">${fmt(i.amount)} €</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--t2);font-size:11px;white-space:nowrap">${methodMap[i.method]||i.method||'—'}</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--t2);font-size:11px">${i.bank||'—'}</td>
+        <td style="padding:9px 12px;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${i.notes||''}">${i.notes||'—'}</td>
+      </tr>`;
+    });
+  }
+  html+='</tbody></table>';
+  set('rep-details-table',html);
+  // Banks footer
+  const banks={Εθνική:0,Πειραιώς:0,μετρητά:0,κάρτα:0,άλλο:0};
+  items.forEach(i=>{
+    if(i.method==='cash')banks['μετρητά']+=i.amount;
+    else if(i.method==='card'){if(i.bank)banks[i.bank]=(banks[i.bank]||0)+i.amount;else banks['κάρτα']+=i.amount;}
+    else if(i.method==='transfer'&&i.bank)banks[i.bank]=(banks[i.bank]||0)+i.amount;
+    else banks['άλλο']+=i.amount;
+  });
+  set('rep-details-banks',`
+    <div style="display:flex;flex-direction:column;gap:2px"><label style="font-size:11px;color:var(--td);font-weight:600">🏛 ΕΘΝΙΚΗ</label><div style="font-weight:700;font-size:15px;color:var(--rd)">${fmt(banks['Εθνική']||0)} €</div></div>
+    <div style="display:flex;flex-direction:column;gap:2px"><label style="font-size:11px;color:var(--td);font-weight:600">⚓ ΠΕΙΡΑΙΩΣ</label><div style="font-weight:700;font-size:15px;color:var(--bl)">${fmt(banks['Πειραιώς']||0)} €</div></div>
+    <div style="display:flex;flex-direction:column;gap:2px"><label style="font-size:11px;color:var(--td);font-weight:600">💵 ΜΕΤΡΗΤΑ</label><div style="font-weight:700;font-size:15px;color:var(--gn)">${fmt(banks['μετρητά']||0)} €</div></div>
+    <div style="display:flex;flex-direction:column;gap:2px"><label style="font-size:11px;color:var(--td);font-weight:600">💳 ΚΑΡΤΑ</label><div style="font-weight:700;font-size:15px;color:var(--am)">${fmt(banks['κάρτα']||0)} €</div></div>
+    ${banks['άλλο']>0?`<div style="display:flex;flex-direction:column;gap:2px"><label style="font-size:11px;color:var(--td);font-weight:600">ΑΛΛΟ</label><div style="font-weight:700;font-size:15px;color:var(--td)">${fmt(banks['άλλο'])} €</div></div>`:''}
+    <div style="border-left:1px solid var(--nb);padding-left:24px;display:flex;flex-direction:column;gap:2px"><label style="font-size:11px;color:var(--td);font-weight:600">ΣΥΝΟΛΟ</label><div style="font-weight:700;font-size:18px;color:var(--pk)">${fmt(total)} €</div></div>
+  `);
+}
+
+// ─────────────────────────────────────────
+// VIEW 3: Ανά Τράπεζα — μηνιαίο pivot
+// ─────────────────────────────────────────
+function rReportsBanks(){
+  // Παίρνουμε τα τελευταία 6 μήνες (ή τη period filter)
+  const items=calcDetailsData();
+  // Group by month + bank/method
+  const byMonth={}; // {YYYY-MM: {Εθνική, Πειραιώς, μετρητά, κάρτα}}
+  items.forEach(i=>{
+    if(!i.date)return;
+    const d=new Date(i.date);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!byMonth[key])byMonth[key]={'Εθνική':0,'Πειραιώς':0,'μετρητά':0,'κάρτα':0};
+    if(i.method==='cash')byMonth[key]['μετρητά']+=i.amount;
+    else if(i.method==='card'){if(i.bank)byMonth[key][i.bank]=(byMonth[key][i.bank]||0)+i.amount;else byMonth[key]['κάρτα']+=i.amount;}
+    else if(i.method==='transfer'&&i.bank)byMonth[key][i.bank]=(byMonth[key][i.bank]||0)+i.amount;
+  });
+  const months=Object.keys(byMonth).sort().reverse();
+  const monthNames=['Ιαν','Φεβ','Μάρ','Απρ','Μάι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'];
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr>
+      <th style="text-align:left;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb)">Μήνας</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb)">🏛 Εθνική</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb)">⚓ Πειραιώς</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb)">💵 Μετρητά</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb)">💳 Κάρτα</th>
+      <th style="text-align:right;padding:11px 14px;background:var(--ni);color:var(--pk);font-size:11px;font-weight:700;text-transform:uppercase;border-bottom:2px solid var(--nb)">ΣΥΝΟΛΟ</th>
+    </tr></thead><tbody>`;
+  const totals={'Εθνική':0,'Πειραιώς':0,'μετρητά':0,'κάρτα':0};
+  let grandTotal=0;
+  months.forEach(m=>{
+    const data=byMonth[m];
+    const monTotal=data['Εθνική']+data['Πειραιώς']+data['μετρητά']+data['κάρτα'];
+    totals['Εθνική']+=data['Εθνική'];
+    totals['Πειραιώς']+=data['Πειραιώς'];
+    totals['μετρητά']+=data['μετρητά'];
+    totals['κάρτα']+=data['κάρτα'];
+    grandTotal+=monTotal;
+    const [yr,mo]=m.split('-');
+    html+=`<tr>
+      <td style="padding:10px 14px;border-bottom:0.5px solid var(--nb);color:var(--t1);font-weight:500">${monthNames[parseInt(mo)-1]} ${yr}</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:${data['Εθνική']>0?'var(--t2)':'#d1d5db'}">${data['Εθνική']>0?fmt(data['Εθνική'])+' €':'—'}</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:${data['Πειραιώς']>0?'var(--t2)':'#d1d5db'}">${data['Πειραιώς']>0?fmt(data['Πειραιώς'])+' €':'—'}</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:${data['μετρητά']>0?'var(--t2)':'#d1d5db'}">${data['μετρητά']>0?fmt(data['μετρητά'])+' €':'—'}</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:${data['κάρτα']>0?'var(--t2)':'#d1d5db'}">${data['κάρτα']>0?fmt(data['κάρτα'])+' €':'—'}</td>
+      <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t1);font-weight:600">${fmt(monTotal)} €</td>
+    </tr>`;
+  });
+  html+=`<tr style="background:#fce8f0;font-weight:700">
+    <td style="padding:12px 14px;border-top:2px solid var(--pk);color:var(--pk);font-size:14px">ΣΥΝΟΛΟ</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk)">${fmt(totals['Εθνική'])} €</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk)">${fmt(totals['Πειραιώς'])} €</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk)">${fmt(totals['μετρητά'])} €</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk)">${fmt(totals['κάρτα'])} €</td>
+    <td style="padding:12px 14px;text-align:right;border-top:2px solid var(--pk);color:var(--pk);font-size:14px;font-weight:700">${fmt(grandTotal)} €</td>
+  </tr>`;
+  html+='</tbody></table>';
+  if(months.length===0){html=`<div class="empty" style="padding:30px;text-align:center;color:var(--td)"><div class="ic">🏦</div><p>Δεν υπάρχουν πληρωμές στην επιλεγμένη περίοδο</p></div>`;}
+  set('rep-banks-table',html);
+  // Bars
+  let barsHtml=`<h3 style="margin:0 0 14px;font-size:14px">📊 Κατανομή ανά τράπεζα/τρόπο</h3>`;
+  if(grandTotal>0){
+    const colors={'Εθνική':'var(--rd)','Πειραιώς':'var(--bl)','μετρητά':'var(--gn)','κάρτα':'var(--am)'};
+    const labels={'Εθνική':'🏛 Εθνική','Πειραιώς':'⚓ Πειραιώς','μετρητά':'💵 Μετρητά','κάρτα':'💳 Κάρτα'};
+    Object.keys(totals).forEach(k=>{
+      const pct=(totals[k]/grandTotal)*100;
+      barsHtml+=`<div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px"><span>${labels[k]}</span><b>${fmt(totals[k])} € (${pct.toFixed(0)}%)</b></div>
+        <div style="background:#f3f4f6;border-radius:8px;height:14px;overflow:hidden"><div style="background:${colors[k]};height:100%;width:${pct}%"></div></div>
+      </div>`;
+    });
+  }else{barsHtml+='<div style="color:var(--td);padding:10px">Δεν υπάρχουν δεδομένα</div>';}
+  set('rep-banks-bars',barsHtml);
+}
+
+// ─────────────────────────────────────────
+// EXPORTS to Excel
+// ─────────────────────────────────────────
+function exportSummary(){
+  const items=calcSummaryData();
+  const filtered=aRepLoc==='all'?items:items.filter(i=>i.location_id===aRepLoc);
+  const data=filtered.map(i=>({
+    'Κατηγορία':i.category,
+    'Υποκατηγορία':i.subcategory,
+    'Κατάστημα':i.location_id?lN(i.location_id):'ΣΑ',
+    'Πηγή':({order:'Παραγγελία',rec:'Πάγια',other:'Έκτακτο',cash:'Μετρητά κατ.',sa:'Μετρητά ΣΑ'})[i.source]||i.source,
+    'Ποσό':i.amount
+  }));
+  if(data.length===0){toast('Δεν υπάρχουν δεδομένα','err');return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.json_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb,ws,'Σύνοψη Εξόδων');
+  XLSX.writeFile(wb,`OrderFlow_Synopsi_Eksodon_${td()}.xlsx`);
+  toast('Εξαγωγή επιτυχής!');
+}
+
+function exportDetails(){
+  let items=calcDetailsData();
+  if(aRepLoc!=='all')items=items.filter(i=>i.location_id===aRepLoc);
+  if(aRepType!=='all')items=items.filter(i=>i.type===aRepType);
+  if(aRepMethod!=='all')items=items.filter(i=>i.method===aRepMethod);
+  if(aRepBank!=='all')items=items.filter(i=>i.bank===aRepBank);
+  const catFilter=document.getElementById('rep-cat-filter')?.value||'';
+  if(catFilter)items=items.filter(i=>i.category===catFilter);
+  const q=(document.getElementById('rep-search')?.value||'').toLowerCase().trim();
+  if(q)items=items.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));
+  items.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  const typeMap={order:'Παραγγελία',rec:'Πάγια',other:'Έκτακτο',cash:'Μετρητά κατ.',sa:'Μετρητά ΣΑ',partial:'Έναντι'};
+  const methodMap={cash:'Μετρητά',transfer:'Κατάθεση',card:'Κάρτα',other:'Άλλο'};
+  const data=items.map(i=>({
+    'Ημερομηνία':fd(i.date),
+    'Τύπος':typeMap[i.type]||i.type,
+    'Όνομα':i.name||'',
+    'Κατάστημα':i.location_id?lN(i.location_id):'—',
+    'Κατηγορία':i.category||'',
+    'Υποκατηγορία':i.subcategory||'',
+    'Ποσό':i.amount,
+    'Τρόπος':methodMap[i.method]||i.method||'',
+    'Τράπεζα':i.bank||'',
+    'Σημείωση':i.notes||''
+  }));
+  if(data.length===0){toast('Δεν υπάρχουν δεδομένα','err');return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.json_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb,ws,'Πληρωμές');
+  XLSX.writeFile(wb,`OrderFlow_Plirwmes_${td()}.xlsx`);
+  toast('Εξαγωγή επιτυχής!');
+}
+
+function exportBanks(){
+  const items=calcDetailsData();
+  const byMonth={};
+  items.forEach(i=>{
+    if(!i.date)return;
+    const d=new Date(i.date);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!byMonth[key])byMonth[key]={'Εθνική':0,'Πειραιώς':0,'μετρητά':0,'κάρτα':0};
+    if(i.method==='cash')byMonth[key]['μετρητά']+=i.amount;
+    else if(i.method==='card'){if(i.bank)byMonth[key][i.bank]=(byMonth[key][i.bank]||0)+i.amount;else byMonth[key]['κάρτα']+=i.amount;}
+    else if(i.method==='transfer'&&i.bank)byMonth[key][i.bank]=(byMonth[key][i.bank]||0)+i.amount;
+  });
+  const months=Object.keys(byMonth).sort().reverse();
+  const data=months.map(m=>({
+    'Μήνας':m,
+    'Εθνική':byMonth[m]['Εθνική'],
+    'Πειραιώς':byMonth[m]['Πειραιώς'],
+    'Μετρητά':byMonth[m]['μετρητά'],
+    'Κάρτα':byMonth[m]['κάρτα'],
+    'Σύνολο':byMonth[m]['Εθνική']+byMonth[m]['Πειραιώς']+byMonth[m]['μετρητά']+byMonth[m]['κάρτα']
+  }));
+  if(data.length===0){toast('Δεν υπάρχουν δεδομένα','err');return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.json_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb,ws,'Ανά Τράπεζα');
+  XLSX.writeFile(wb,`OrderFlow_AnaTrapeza_${td()}.xlsx`);
+  toast('Εξαγωγή επιτυχής!');
+}
+
+function quickExportSummary(){
+  const p=document.getElementById('xrep-sum-period').value;
+  const oldTime=aRepTime,oldLoc=aRepLoc;
+  aRepTime=p==='all'?'custom':p;aRepLoc='all';
+  if(p==='all'){
+    // Set custom dates to wide range
+    const fr=document.getElementById('rep-from'),to=document.getElementById('rep-to');
+    if(fr)fr.value='2020-01-01';if(to)to.value=td();
+  }
+  exportSummary();
+  aRepTime=oldTime;aRepLoc=oldLoc;
+}
+function quickExportDetails(){
+  const p=document.getElementById('xrep-det-period').value;
+  const oldTime=aRepTime,oldLoc=aRepLoc,oldType=aRepType,oldMethod=aRepMethod,oldBank=aRepBank;
+  aRepTime=p==='all'?'custom':p;aRepLoc='all';aRepType='all';aRepMethod='all';aRepBank='all';
+  if(p==='all'){
+    const fr=document.getElementById('rep-from'),to=document.getElementById('rep-to');
+    if(fr)fr.value='2020-01-01';if(to)to.value=td();
+  }
+  // Clear filters that exportDetails reads from DOM
+  const cs=document.getElementById('rep-cat-filter');if(cs)cs.value='';
+  const ss=document.getElementById('rep-search');if(ss)ss.value='';
+  exportDetails();
+  aRepTime=oldTime;aRepLoc=oldLoc;aRepType=oldType;aRepMethod=oldMethod;aRepBank=oldBank;
+}
+function quickExportBanks(){
+  const p=document.getElementById('xrep-bnk-period').value;
+  const oldTime=aRepTime;
+  aRepTime=p==='all'?'custom':p;
+  if(p==='all'){
+    const fr=document.getElementById('rep-from'),to=document.getElementById('rep-to');
+    if(fr)fr.value='2020-01-01';if(to)to.value=td();
+  }
+  exportBanks();
+  aRepTime=oldTime;
+}
+
 function rDash(){
   const now=new Date();
   // Metrics — ίδια λογική με Πληρωμές για consistency
@@ -3176,7 +4036,7 @@ function applyPermissions(profile){
   const perms=profile.permissions||{tabs:ALL_TABS.map(t=>t.id),locations:[]};
   const allowedTabs=perms.tabs||ALL_TABS.map(t=>t.id);
   // Κρύψε tabs που δεν επιτρέπονται
-  const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',excel:'tab-excel'};
+  const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',reports:'tab-reports',excel:'tab-excel'};
   Object.entries(tabMap).forEach(([key,tabId])=>{
     const el=document.getElementById(tabId);
     if(el)el.style.display=allowedTabs.includes(key)?'':'none';
@@ -3197,6 +4057,7 @@ const ALL_TABS=[
   {id:'payments',label:'💳 Πληρωμές'},
   {id:'cash',label:'💵 Μετρητά Καταστημάτων'},
   {id:'sa_cash',label:'💼 Μετρητά ΣΑ'},
+  {id:'reports',label:'📊 Αναφορές'},
   {id:'excel',label:'📊 Excel'},
   {id:'mgmt',label:'⚙ Διαχείριση'}
 ];
