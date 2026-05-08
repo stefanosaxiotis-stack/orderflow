@@ -547,7 +547,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
       <span class="loclbl" style="margin:0">📍 Κατάστημα:</span>
-      <div id="rep-locs" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      <div class="locseg" id="rep-locs" style="margin-bottom:0"></div>
     </div>
   </div>
 
@@ -2812,18 +2812,9 @@ function swRep(v,el){
   rReports();
 }
 
-// Render location segments
+// Render location segments (χρησιμοποιεί το standard helper)
 function renderRepLocSegs(){
-  const wrap=document.getElementById('rep-locs');
-  if(!wrap)return;
-  // Manager βλέπει μόνο τα δικά του locations
-  let allowedLocs=locs;
-  if(cP?.role==='manager'){
-    const permLocs=cP?.permissions?.locations||[];
-    allowedLocs=locs.filter(l=>permLocs.includes(l.id));
-  }
-  wrap.innerHTML=`<div class="seg ${aRepLoc==='all'?'active':''}" onclick="fRepLoc('all',this)">📍 Όλα</div>`+
-    allowedLocs.map(l=>`<div class="seg ${aRepLoc===l.id?'active':''}" onclick="fRepLoc('${l.id}',this)">${l.name}</div>`).join('');
+  renderLocSeg('rep-locs',aRepLoc,'fRepLoc');
 }
 
 // MAIN: Render Reports
