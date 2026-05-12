@@ -1576,7 +1576,7 @@ function sw(n,el){
   if(n==='reports')rReports();
 }
 function om(id){
-  if(id==='mord'){oeditId=null;set('mord-title','Νέα παραγγελία');document.getElementById('odt').value=td();['otot','opp','obal','onet','ovat'].forEach(i=>document.getElementById(i).value='');['osup','oloc','ocat','onotes','odlv'].forEach(i=>document.getElementById(i).value='');document.getElementById('ibody').innerHTML='';addRow();}
+  if(id==='mord'){oeditId=null;set('mord-title','Νέα παραγγελία');document.getElementById('odt').value=td();['otot','opp','obal','onet','ovat'].forEach(i=>document.getElementById(i).value='');['osup','oloc','osub','onotes','odlv'].forEach(i=>document.getElementById(i).value='');document.getElementById('ibody').innerHTML='';addRow();}
   if(id==='mpr')document.getElementById('pdt').value=td();
   if(id==='minv'){document.getElementById('idt').value=td();['iboxes','iqty'].forEach(i=>document.getElementById(i).value='');document.getElementById('iper').value=1;}
   if(id==='mr')document.getElementById('rdue').value=td();
