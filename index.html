@@ -2068,7 +2068,7 @@ async function savePrice(){
   const pqty=parseFloat(document.getElementById('ppqty').value)||1;
   const ppr=parseFloat(document.getElementById('ppprice').value)||0;
   if(!sid||!pid){toast('Συμπλήρωσε τα υποχρεωτικά πεδία','err');return;}
-  try{const{data:r}=await getDb().from('prices').insert({product_id:pid,supplier_id:sid,supplier_product_id:spId,supplier_code:document.getElementById('pcode').value,supplier_description:document.getElementById('pdesc').value,package_unit:document.getElementById('ppkg').value,package_qty:pqty,package_price:ppr,unit_price:pqty>0?ppr/pqty:0,recorded_at:document.getElementById('pdt').value,notes:document.getElementById('pnotes').value}).select();prs.unshift(r[0]);cm('mpr');rPrices();toast('Τιμή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
+  try{const{data:r}=await getDb().from('prices').insert({product_id:pid,supplier_id:sid,supplier_product_id:spId,supplier_code:document.getElementById('pcode').value,supplier_description:document.getElementById('pdesc').value,package_unit:document.getElementById('ppkg').value,package_qty:pqty,package_price:ppr,recorded_at:document.getElementById('pdt').value,notes:document.getElementById('pnotes').value}).select();prs.unshift(r[0]);cm('mpr');rPrices();toast('Τιμή αποθηκεύτηκε!');}catch(e){toast('Σφάλμα: '+e.message,'err');}
 }
 
 // ══════════════════════════════════════════════════════
