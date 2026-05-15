@@ -2415,7 +2415,7 @@ function rPay(){
     const hasIban=s?.iban;
     const eyeBtn=`<button class="ib" onclick="showDetail('${i.type}','${i.id}')" title="Λεπτομέρειες">👁</button>`;
     const ibBtn=hasIban?`<button class="ib" onclick="showIban('${i.id}','${i.type}',${i.amount})" title="Στοιχεία πληρωμής" style="color:var(--gn);border-color:var(--gn)">🏦</button>`:'';
-    const cb=(mode==='pending')?`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="💳 Πληρώθηκε">💳</button>`:'';
+    const cb=(mode==='pending'||mode==='forecast')?`<button class="ib cf" onclick="confPI('${i.type}','${i.id}')" title="💳 Πληρώθηκε">💳</button>`:'';
     const canToggle=(isAdm||isMgr);
     const readyBtn=canToggle?(
       mode==='pipeline'?`<button class="ib" onclick="toggleReady('${i.type}','${i.id}',true)" title="Σημείωση ως έτοιμο για πληρωμή" style="color:var(--gn);border-color:var(--gn)">✓</button>`
