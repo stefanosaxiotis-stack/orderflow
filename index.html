@@ -2249,7 +2249,7 @@ function rPay(){
         if(!o)return;
         if(aPF!=='all'&&o.location_id!==aPF)return;
         const parts=pparts.filter(x=>x.entity_type==='order'&&x.entity_id===p.order_id);
-        paidItems.push({type:'order',name:sN(o.supplier_id),sub:'Παραγγελία · '+lN(o.location_id),amount:Number(p.amount),method:p.payment_method,bank:p.bank_name,notes:p.payment_notes,date:p.payment_date,parts});
+        paidItems.push({type:'order',id:o.id,name:sN(o.supplier_id),sub:'Παραγγελία · '+lN(o.location_id),amount:Number(p.amount),method:p.payment_method,bank:p.bank_name,notes:p.payment_notes,date:p.payment_date,parts});
       });
     }
     // Πάγια πληρωμένα
@@ -2259,7 +2259,7 @@ function rPay(){
         if(!r)return;
         if(aPF!=='all'&&r.location_id!==aPF)return;
         const parts=pparts.filter(x=>x.entity_type==='recurring'&&x.entity_id===p.recurring_id);
-        paidItems.push({type:'rec',name:r.name,sub:'Πάγια · '+lN(r.location_id),amount:Number(p.amount),method:p.payment_method,bank:p.bank_name,notes:p.payment_notes,date:p.payment_date,parts});
+        paidItems.push({type:'rec',id:r.id,name:r.name,sub:'Πάγια · '+lN(r.location_id),amount:Number(p.amount),method:p.payment_method,bank:p.bank_name,notes:p.payment_notes,date:p.payment_date,parts});
       });
     }
     // Άλλες υποχρεώσεις πληρωμένες
@@ -2267,7 +2267,7 @@ function rPay(){
       oths.filter(o=>o.paid).forEach(o=>{
         if(aPF!=='all'&&o.location_id!==aPF)return;
         const parts=pparts.filter(x=>x.entity_type==='other'&&x.entity_id===o.id);
-        paidItems.push({type:'other',name:o.name,sub:'Έκτακτο · '+lN(o.location_id),amount:Number(o.amount),method:o.payment_method,bank:o.payment_bank,notes:o.payment_notes,date:o.paid_at,parts});
+        paidItems.push({type:'other',id:o.id,name:o.name,sub:'Έκτακτο · '+lN(o.location_id),amount:Number(o.amount),method:o.payment_method,bank:o.payment_bank,notes:o.payment_notes,date:o.paid_at,parts});
       });
     }
     // Χρονικό φίλτρο
@@ -2312,6 +2312,7 @@ function rPay(){
           ${partsHtml}
         </div>
         <div class="pam" style="color:var(--gn)">${fmt(i.amount)} €</div>
+        <div class="pact"><button class="ib" onclick="showDetail('${i.type}','${i.id}')" title="Λεπτομέρειες">👁</button></div>
       </div>`;
     }).join(''));
     return;
