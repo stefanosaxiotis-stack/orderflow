@@ -2938,7 +2938,7 @@ function calcSummaryData(){
     const dt=new Date(o.order_date);
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===o.subcategory_id);
-    items.push({category:'🛒 Προμήθειες',subcategory:sc?sc.name:'(χωρίς)',location_id:o.location_id,amount:Number(o.total_amount||0),source:'order'});
+    items.push({category:'🛒 Προμήθειες',subcategory:sc?sc.name:'(χωρίς)',location_id:o.location_id,amount:Number(o.total_amount||0),source:'order',name:sN(o.supplier_id),notes:o.notes||'',date:o.order_date});
   });
   // Πάγια
   recs.filter(r=>r.active!==false).forEach(r=>{
@@ -2946,7 +2946,7 @@ function calcSummaryData(){
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===r.subcategory_id);
     const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||r.category):(r.category||'(χωρίς)');
-    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:r.location_id,amount:Number(r.amount||0),source:'rec'});
+    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:r.location_id,amount:Number(r.amount||0),source:'rec',name:r.name,notes:r.notes||'',date:r.next_due_date});
   });
   // Άλλες υποχρεώσεις
   oths.forEach(o=>{
@@ -2954,7 +2954,7 @@ function calcSummaryData(){
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===o.subcategory_id);
     const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||o.category):(o.category||'(χωρίς)');
-    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:o.location_id,amount:Number(o.amount||0),source:'other'});
+    items.push({category:cat,subcategory:sc?sc.name:'(χωρίς)',location_id:o.location_id,amount:Number(o.amount||0),source:'other',name:o.name,notes:o.notes||'',date:o.due_date});
   });
   // Cash payments καταστημάτων (έξοδα μετρητών — ως δαπάνες)
   // Εξαίρεση μεταφορών προς ΣΑ (linked στο cash_transfers)
@@ -2964,7 +2964,7 @@ function calcSummaryData(){
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===p.subcategory_id);
     const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'❓ Χωρίς κατηγοριοποίηση'):'❓ Χωρίς κατηγοριοποίηση';
-    items.push({category:cat,subcategory:sc?sc.name:'—',location_id:p.location_id,amount:Number(p.amount||0),source:'cash'});
+    items.push({category:cat,subcategory:sc?sc.name:'—',location_id:p.location_id,amount:Number(p.amount||0),source:'cash',name:p.description||'Πληρωμή',notes:p.notes||'',date:p.payment_date});
   });
   // SA cash payments (έξοδα ΣΑ)
   // Εξαίρεση μεταφορών προς κατάστημα
@@ -2974,7 +2974,7 @@ function calcSummaryData(){
     if(dt<from||dt>to)return;
     const sc=subcats.find(s=>s.id===p.subcategory_id);
     const cat=sc?(cats.find(c=>c.id===sc.parent_category_id)?.name||'❓ Χωρίς κατηγοριοποίηση'):'❓ Χωρίς κατηγοριοποίηση';
-    items.push({category:cat,subcategory:sc?sc.name:'—',location_id:null,amount:Number(p.amount||0),source:'sa'});
+    items.push({category:cat,subcategory:sc?sc.name:'—',location_id:null,amount:Number(p.amount||0),source:'sa',name:p.description||'Πληρωμή ΣΑ',notes:p.notes||'',date:p.payment_date});
   });
   // Manager filter
   if(cP?.role==='manager'){
@@ -3088,15 +3088,17 @@ function renderPivotSingleLoc(items,total){
   const tree={};
   items.forEach(i=>{
     if(!tree[i.category])tree[i.category]={};
-    if(!tree[i.category][i.subcategory])tree[i.category][i.subcategory]={amount:0,count:0};
+    if(!tree[i.category][i.subcategory])tree[i.category][i.subcategory]={amount:0,count:0,rows:[]};
     tree[i.category][i.subcategory].amount+=i.amount;
     tree[i.category][i.subcategory].count++;
+    tree[i.category][i.subcategory].rows.push(i);
   });
   const cats_sorted=Object.keys(tree).sort((a,b)=>{
     const sa=Object.values(tree[a]).reduce((s,o)=>s+o.amount,0);
     const sb=Object.values(tree[b]).reduce((s,o)=>s+o.amount,0);
     return sb-sa;
   });
+  let uid=0;
   let html=`<table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr>
       <th style="text-align:left;padding:11px 14px;background:var(--ni);color:var(--td);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:2px solid var(--nb);width:50%">Κατηγορία / Υποκατηγορία</th>
@@ -3109,7 +3111,7 @@ function renderPivotSingleLoc(items,total){
     const catTotal=Object.values(subs).reduce((s,o)=>s+o.amount,0);
     const catCount=Object.values(subs).reduce((s,o)=>s+o.count,0);
     const pct=total>0?(catTotal/total)*100:0;
-    html+=`<tr style="background:#f9fafb;font-weight:600">
+    html+=`<tr style="background:var(--ni);font-weight:600">
       <td style="padding:10px 14px;border-bottom:0.5px solid var(--nb);color:var(--t1)">${catName}</td>
       <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t1)">${catCount}</td>
       <td style="padding:10px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--t1)">${fmt(catTotal)} €</td>
@@ -3118,12 +3120,37 @@ function renderPivotSingleLoc(items,total){
     Object.keys(subs).sort((a,b)=>subs[b].amount-subs[a].amount).forEach(subName=>{
       const sub=subs[subName];
       const subPct=total>0?(sub.amount/total)*100:0;
+      const hasDetail=sub.count>0;
+      const detailId=`sub-detail-${uid++}`;
       html+=`<tr>
-        <td style="padding:8px 14px;padding-left:32px;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${subName}</td>
+        <td style="padding:8px 14px;padding-left:32px;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">
+          ${hasDetail?`<button onclick="toggleSubDetail('${detailId}',this)" style="background:none;border:1px solid var(--nb);border-radius:4px;cursor:pointer;color:var(--pk);font-size:11px;font-weight:700;padding:1px 6px;margin-right:6px;line-height:1.4">+</button>`:''}${subName}
+        </td>
         <td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${sub.count}</td>
         <td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${fmt(sub.amount)} €</td>
         <td style="padding:8px 14px;text-align:right;border-bottom:0.5px solid var(--nb);color:var(--td);font-size:12px">${subPct.toFixed(1)}%</td>
       </tr>`;
+      if(hasDetail){
+        html+=`<tr id="${detailId}" style="display:none"><td colspan="4" style="padding:0;border-bottom:1px solid var(--pk)">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--bg)">
+            <thead><tr style="background:var(--ni)">
+              <th style="text-align:left;padding:7px 14px 7px 48px;color:var(--td);font-weight:600;font-size:11px">Περιγραφή</th>
+              <th style="text-align:left;padding:7px 14px;color:var(--td);font-weight:600;font-size:11px">Ημ/νία</th>
+              <th style="text-align:left;padding:7px 14px;color:var(--td);font-weight:600;font-size:11px">Κατάστημα</th>
+              <th style="text-align:left;padding:7px 14px;color:var(--td);font-weight:600;font-size:11px">Σχόλια</th>
+              <th style="text-align:right;padding:7px 14px;color:var(--td);font-weight:600;font-size:11px">Ποσό</th>
+            </tr></thead><tbody>
+            ${sub.rows.map(r=>`<tr style="border-top:0.5px solid var(--nb)">
+              <td style="padding:7px 14px 7px 48px;color:var(--t2)">${r.name||'—'}</td>
+              <td style="padding:7px 14px;color:var(--td);white-space:nowrap">${r.date?fd(r.date):'—'}</td>
+              <td style="padding:7px 14px;color:var(--td)">${r.location_id?lN(r.location_id):'ΣΑ'}</td>
+              <td style="padding:7px 14px;color:var(--td);font-style:italic">${r.notes||'—'}</td>
+              <td style="padding:7px 14px;text-align:right;color:var(--rd);font-weight:600">${fmt(r.amount)} €</td>
+            </tr>`).join('')}
+            </tbody>
+          </table>
+        </td></tr>`;
+      }
     });
   });
   html+=`<tr style="background:#fce8f0;font-weight:700">
@@ -3135,6 +3162,16 @@ function renderPivotSingleLoc(items,total){
   html+='</tbody></table>';
   if(cats_sorted.length===0){html=`<div class="empty" style="padding:30px;text-align:center;color:var(--td)"><div class="ic">📊</div><p>Δεν υπάρχουν έξοδα στην επιλεγμένη περίοδο</p></div>`;}
   set('rep-summary-pivot',html);
+}
+
+function toggleSubDetail(id,btn){
+  const row=document.getElementById(id);
+  if(!row)return;
+  const isOpen=row.style.display!=='none';
+  row.style.display=isOpen?'none':'table-row';
+  btn.textContent=isOpen?'+':'−';
+  btn.style.background=isOpen?'none':'var(--pk)';
+  btn.style.color=isOpen?'var(--pk)':'#fff';
 }
 
 function renderTop5(items,total){
@@ -4308,14 +4345,19 @@ function rSACash(){
   // Λίστα εισπράξεων
   if(en.length===0){set('saelist','<div class="empty"><div class="ic">💼</div><p>Καμία είσπραξη</p></div>');}
   else{
-    set('saelist',en.map(e=>`<div class="cei">
+    set('saelist',en.map(e=>{
+      // Αν είναι μεταφορά από κατάστημα, βρες το όνομα καταστήματος
+      const tr=ctransfers.find(t=>t.sa_entry_id===e.id);
+      const locLabel=tr?lN(tr.location_id):'';
+      const label=tr?`Μεταφορά από κατάστημα · <span style="color:var(--bl);font-weight:700">${locLabel}</span>`:e.description||'Είσπραξη';
+      return`<div class="cei">
       <div style="flex:1">
-        <div style="font-size:13px;font-weight:600">${e.description||'Είσπραξη'}</div>
+        <div style="font-size:13px;font-weight:600">${label}</div>
         <div style="font-size:11px;color:var(--td);margin-top:2px">${fd(e.entry_date)}${e.notes?' · '+e.notes:''}</div>
       </div>
       <div style="font-size:15px;font-weight:700;color:var(--gn)">+${fmt(e.amount)} €</div>
       <button class="ib" onclick="delSAE('${e.id}')" style="color:var(--rd);margin-left:6px">✕</button>
-    </div>`).join(''));
+    </div>`;}).join(''));
   }
 
   // Λίστα πληρωμών
