@@ -534,15 +534,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
       <input type="date" id="cc-to" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px" onchange="rCashCheck()">
     </span>
   </div>
-  <div id="cc-missing-card" style="background:var(--ni);border:0.5px solid var(--nb);border-radius:12px;padding:11px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px">
-    <span style="font-size:16px;color:#c8507a;margin-top:1px">⚠️</span>
-    <div>
-      <div style="font-size:11px;color:var(--td);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Ημέρες που λείπουν</div>
-      <div id="cc-missing-list" style="font-size:12px;color:#c8507a;font-weight:500;line-height:1.8">—</div>
-    </div>
-  </div>
-  <div style="overflow-x:auto">
-    <table id="cc-table" style="width:100%;border-collapse:collapse;font-size:13px;border:0.5px solid var(--nb);border-radius:12px;overflow:hidden">
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table id="cc-table" style="width:100%;border-collapse:collapse;font-size:13px;border:0.5px solid var(--nb);border-radius:12px;overflow:hidden;table-layout:fixed">
       <thead id="cc-thead"></thead>
       <tbody id="cc-tbody"></tbody>
     </table>
@@ -4487,34 +4480,18 @@ function rCashCheck(){
     if(entryIndex[e.location_id])entryIndex[e.location_id].add(d);
   });
 
-  // Ημέρες που λείπουν (τουλάχιστον 1 κατάστημα χωρίς καταχώρηση, εκτός σήμερα)
-  const dayNames=['Κυρ','Δευ','Τρί','Τετ','Πέμ','Παρ','Σάβ'];
-  const dayNamesFull=['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
-  const missingDays=[];
-  days.forEach(d=>{
-    if(d===today)return;
-    const hasMiss=allowedLocs.some(l=>!entryIndex[l.id].has(d));
-    if(hasMiss){
-      const dt=new Date(d+'T12:00:00');
-      const dd=String(dt.getDate()).padStart(2,'0');
-      const mm=String(dt.getMonth()+1).padStart(2,'0');
-      const yy=String(dt.getFullYear()).slice(2);
-      missingDays.push(`${dd}/${mm}/${yy} ${dayNamesFull[dt.getDay()]}`);
-    }
-  });
-  const missList=document.getElementById('cc-missing-list');
-  if(missList)missList.textContent=missingDays.length?missingDays.join(' · '):'—';
-
   // Header
   const thead=document.getElementById('cc-thead');
   const tbody=document.getElementById('cc-tbody');
   if(!thead||!tbody)return;
 
   thead.innerHTML=`<tr style="background:var(--ni)">
-    <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:500;color:var(--td);border-bottom:0.5px solid var(--nb);white-space:nowrap">Ημερομηνία</th>
-    <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:500;color:var(--td);border-bottom:0.5px solid var(--nb);white-space:nowrap">Ημέρα</th>
-    ${allowedLocs.map(l=>`<th style="text-align:center;padding:9px 14px;font-size:11px;font-weight:500;color:#185FA5;border-bottom:0.5px solid var(--nb);white-space:nowrap">${l.name}</th>`).join('')}
+    <th style="text-align:left;padding:8px 8px;font-size:11px;font-weight:500;color:var(--td);border-bottom:0.5px solid var(--nb);white-space:nowrap;width:72px">Ημερ/νία</th>
+    <th style="text-align:left;padding:8px 6px;font-size:11px;font-weight:500;color:var(--td);border-bottom:0.5px solid var(--nb);white-space:nowrap;width:54px">Ημέρα</th>
+    ${allowedLocs.map(l=>`<th style="text-align:center;padding:8px 4px;font-size:11px;font-weight:500;color:#185FA5;border-bottom:0.5px solid var(--nb);white-space:nowrap">${l.name}</th>`).join('')}
   </tr>`;
+
+  const dayNamesFull=['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
 
   const rows=days.map(d=>{
     const dt=new Date(d+'T12:00:00');
@@ -4527,13 +4504,13 @@ function rCashCheck(){
     const isSun=dow===0;
     const isToday=d===today;
     const dayCells=allowedLocs.map(l=>{
-      if(isToday)return`<td style="text-align:center;padding:9px 14px;border-bottom:0.5px solid var(--nb)"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#FAEEDA;color:#633806;font-size:13px">⏳</span></td>`;
+      if(isToday)return`<td style="text-align:center;padding:7px 4px;border-bottom:0.5px solid var(--nb)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#FAEEDA;color:#633806;font-size:12px">⏳</span></td>`;
       const has=entryIndex[l.id].has(d);
-      return`<td style="text-align:center;padding:9px 14px;border-bottom:0.5px solid var(--nb)"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:${has?'#EAF3DE':'#FCEBEB'};color:${has?'#27500A':'#791F1F'};font-size:14px">${has?'✓':'✗'}</span></td>`;
+      return`<td style="text-align:center;padding:7px 4px;border-bottom:0.5px solid var(--nb)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:${has?'#EAF3DE':'#FCEBEB'};color:${has?'#27500A':'#791F1F'};font-size:14px">${has?'✓':'✗'}</span></td>`;
     }).join('');
     return`<tr style="${isToday?'opacity:0.7':''}">
-      <td style="padding:9px 14px;border-bottom:0.5px solid var(--nb);font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap">${dateStr}</td>
-      <td style="padding:9px 14px;border-bottom:0.5px solid var(--nb);font-size:12px;color:${isSun?'#c8507a':'var(--td)'};white-space:nowrap">${dayStr}</td>
+      <td style="padding:7px 8px;border-bottom:0.5px solid var(--nb);font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap">${dateStr}</td>
+      <td style="padding:7px 6px;border-bottom:0.5px solid var(--nb);font-size:11px;color:${isSun?'#c8507a':'var(--td)'};white-space:nowrap">${dayStr}</td>
       ${dayCells}
     </tr>`;
   }).join('');
