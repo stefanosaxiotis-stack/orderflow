@@ -4431,8 +4431,13 @@ function rCashCheck(){
     const permLocs=cP?.permissions?.locations||[];
     allowedLocs=locs.filter(l=>STORE_ORDER.includes(l.name)&&permLocs.includes(l.id));
   }else if(isStore){
-    const permLocs=cP?.permissions?.locations||[];
-    allowedLocs=locs.filter(l=>STORE_ORDER.includes(l.name)&&permLocs.includes(l.id));
+    // Store χρήστης: location_id απευθείας στο profile
+    if(cP.location_id){
+      allowedLocs=locs.filter(l=>l.id===cP.location_id&&STORE_ORDER.includes(l.name));
+    } else {
+      const permLocs=cP?.permissions?.locations||[];
+      allowedLocs=locs.filter(l=>STORE_ORDER.includes(l.name)&&permLocs.includes(l.id));
+    }
   }
   // Ταξινόμηση βάσει STORE_ORDER
   allowedLocs.sort((a,b)=>STORE_ORDER.indexOf(a.name)-STORE_ORDER.indexOf(b.name));
