@@ -306,6 +306,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
   <div class="tab" id="tab-payments" onclick="sw('payments',this)">Πληρωμές</div>
   <div class="tab" id="tab-cash" onclick="sw('cash',this)">Μετρητά Καταστημάτων</div>
   <div class="tab" id="tab-sacash" onclick="sw('sacash',this)">Μετρητά ΣΑ</div>
+  <div class="tab" id="tab-cashcheck" onclick="sw('cashcheck',this)">✅ Check Ταμείων</div>
   <div class="tab ao" id="tab-reports" onclick="sw('reports',this)">📊 Αναφορές</div>
   <div class="tab ao" id="tab-excel" onclick="sw('excel',this)">Excel</div>
   <div class="ts"></div>
@@ -519,6 +520,28 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 </div>
 
 <!-- REPORTS -->
+<div id="page-cashcheck" class="page">
+  <div class="tlb"><span class="tlt">✅ Check Ταμείων</span></div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    <button class="vb active" id="cc-pill-week" onclick="setCCTime('week',this)">Τρέχουσα εβδομάδα</button>
+    <button class="vb" id="cc-pill-month" onclick="setCCTime('month',this)">Τρέχων μήνας</button>
+    <button class="vb" id="cc-pill-prevmonth" onclick="setCCTime('prevmonth',this)">Προηγ. μήνας</button>
+    <button class="vb" id="cc-pill-all" onclick="setCCTime('all',this)">Όλο το ιστορικό</button>
+    <button class="vb" id="cc-pill-custom" onclick="setCCTime('custom',this)">Από/Έως</button>
+    <span id="cc-custom-range" style="display:none;gap:6px;align-items:center">
+      <input type="date" id="cc-from" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px" onchange="rCashCheck()">
+      <span style="color:var(--td);font-size:12px">έως</span>
+      <input type="date" id="cc-to" style="background:var(--ni);border:1px solid var(--nb);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px" onchange="rCashCheck()">
+    </span>
+  </div>
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table id="cc-table" style="width:100%;border-collapse:collapse;font-size:13px;border:0.5px solid var(--nb);border-radius:12px;overflow:hidden;table-layout:fixed">
+      <thead id="cc-thead"></thead>
+      <tbody id="cc-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
 <div id="page-reports" class="page ao">
   <div class="tlb"><span class="tlt">📊 Αναφορές</span></div>
   <div style="color:var(--td);font-size:12px;margin-bottom:16px">Ολοκληρωμένη εικόνα εξόδων, πληρωμών και τραπεζικών κινήσεων</div>
@@ -1368,7 +1391,7 @@ async function init(user){
     applyPermissions(p);
     // Πήγαινε στο πρώτο διαθέσιμο tab (default: cash)
     const tabs=p?.permissions?.tabs||['cash'];
-    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash'};
+    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',cash_check:'tab-cashcheck'};
     const firstTab=tabs.find(t=>tabMap[t])||'cash';
     const tabEl=document.getElementById(tabMap[firstTab]);
     sw(firstTab==='dashboard'?'dash':firstTab,tabEl);
@@ -1377,7 +1400,7 @@ async function init(user){
     applyPermissions(p);
     // Πήγαινε στο πρώτο διαθέσιμο tab
     const tabs=p?.permissions?.tabs||[];
-    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',reports:'tab-reports',excel:'tab-excel'};
+    const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',reports:'tab-reports',excel:'tab-excel',cash_check:'tab-cashcheck'};
     const firstTab=tabs.find(t=>tabMap[t]);
     const tabEl=firstTab?document.getElementById(tabMap[firstTab]):document.getElementById('tab-cash');
     const pageName=firstTab||'cash';
@@ -1482,6 +1505,7 @@ async function load(){
     else if(ap?.id==='page-payments')rPay();
     else if(ap?.id==='page-cash')rCash();
     else if(ap?.id==='page-sacash')rSACash();
+    else if(ap?.id==='page-cashcheck')rCashCheck();
     refreshUrgentBadge();
   }catch(e){toast('Σφάλμα φόρτωσης: '+e.message,'err');}
 }
@@ -1575,6 +1599,7 @@ function sw(n,el){
   if(n==='dash')rDash();
   if(n==='orders')rOrders();if(n==='stock')rStock();if(n==='prices')rPrices();if(n==='payments')rPay();if(n==='cash')rCash();
   if(n==='sacash')rSACash();
+  if(n==='cashcheck')rCashCheck();
   if(n==='reports')rReports();
 }
 function om(id){
@@ -4211,7 +4236,7 @@ function applyPermissions(profile){
   const perms=profile.permissions||{tabs:ALL_TABS.map(t=>t.id),locations:[]};
   const allowedTabs=perms.tabs||ALL_TABS.map(t=>t.id);
   // Κρύψε tabs που δεν επιτρέπονται
-  const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',reports:'tab-reports',excel:'tab-excel'};
+  const tabMap={dashboard:'tab-dash',orders:'tab-orders',stock:'tab-stock',prices:'tab-prices',payments:'tab-payments',cash:'tab-cash',sa_cash:'tab-sacash',reports:'tab-reports',excel:'tab-excel',cash_check:'tab-cashcheck'};
   Object.entries(tabMap).forEach(([key,tabId])=>{
     const el=document.getElementById(tabId);
     if(el)el.style.display=allowedTabs.includes(key)?'':'none';
@@ -4219,6 +4244,8 @@ function applyPermissions(profile){
   // Κρύψε το πληροφοριακό SA card στο cash tab αν δεν έχει sa_cash
   const saInfoCard=document.getElementById('sacash-info-card');
   if(saInfoCard)saInfoCard.style.display=allowedTabs.includes('sa_cash')?'':'none';
+  const ccTab=document.getElementById('tab-cashcheck');
+  if(ccTab)ccTab.style.display=(allowedTabs.includes('cash')||allowedTabs.includes('cash_check'))?'':'none';
   // Κρύψε διαχείριση αν δεν έχει δικαίωμα
   const mgmtBtn=document.querySelector('.mbtn');
   if(mgmtBtn)mgmtBtn.style.display=allowedTabs.includes('mgmt')?'':'none';
@@ -4232,6 +4259,7 @@ const ALL_TABS=[
   {id:'payments',label:'💳 Πληρωμές'},
   {id:'cash',label:'💵 Μετρητά Καταστημάτων'},
   {id:'sa_cash',label:'💼 Μετρητά ΣΑ'},
+  {id:'cash_check',label:'✅ Check Ταμείων'},
   {id:'reports',label:'📊 Αναφορές'},
   {id:'excel',label:'📊 Excel'},
   {id:'mgmt',label:'⚙ Διαχείριση'}
@@ -4415,6 +4443,51 @@ function rSACash(){
       <button class="ib" onclick="delSAP('${p.id}')" style="color:var(--rd);margin-left:6px">✕</button>
     </div>`).join(''));
   }
+}
+
+// ══════════════════════════════════════════════════════
+// CHECK ΤΑΜΕΙΩΝ
+// ══════════════════════════════════════════════════════
+let aCCTime="week";
+
+function setCCTime(t,el){
+  aCCTime=t;
+  document.querySelectorAll("#page-cashcheck .vb").forEach(b=>b.classList.remove("active"));
+  if(el)el.classList.add("active");
+  const cr=document.getElementById("cc-custom-range");
+  if(cr)cr.style.display=t==="custom"?"flex":"none";
+  rCashCheck();
+}
+
+function rCashCheck(){
+  const STORE_ORDER=["Γέρακας","Παγκράτι","Μαρούσι"];
+  const isAdmin=cP?.role==="admin";
+  const isManager=cP?.role==="manager";
+  const isStore=cP?.role==="store";
+  let allowedLocs=[];
+  if(isAdmin){allowedLocs=locs.filter(l=>STORE_ORDER.includes(l.name));}
+  else if(isManager){const pl=cP?.permissions?.locations||[];allowedLocs=locs.filter(l=>STORE_ORDER.includes(l.name)&&pl.includes(l.id));}
+  else if(isStore){if(cP.location_id){allowedLocs=locs.filter(l=>l.id===cP.location_id&&STORE_ORDER.includes(l.name));}else{const pl=cP?.permissions?.locations||[];allowedLocs=locs.filter(l=>STORE_ORDER.includes(l.name)&&pl.includes(l.id));}}
+  allowedLocs.sort((a,b)=>STORE_ORDER.indexOf(a.name)-STORE_ORDER.indexOf(b.name));
+  const now=new Date();const today=now.toISOString().split("T")[0];
+  let fromDate,toDate;
+  if(aCCTime==="week"){const d=new Date(now);const day=d.getDay()||7;d.setDate(d.getDate()-day+1);d.setHours(0,0,0,0);fromDate=d.toISOString().split("T")[0];toDate=today;}
+  else if(aCCTime==="month"){fromDate=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";toDate=today;}
+  else if(aCCTime==="prevmonth"){const pm=new Date(now.getFullYear(),now.getMonth()-1,1);const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);fromDate=pm.toISOString().split("T")[0];toDate=pmEnd.toISOString().split("T")[0];}
+  else if(aCCTime==="all"){const allDates=ces.map(e=>e.entry_date).filter(Boolean).sort();fromDate=allDates[0]?allDates[0].substring(0,10):today;toDate=today;}
+  else if(aCCTime==="custom"){fromDate=document.getElementById("cc-from")?.value||today;toDate=document.getElementById("cc-to")?.value||today;}
+  if(!fromDate||!toDate)return;
+  const days=[];let cur=new Date(fromDate+"T12:00:00");const end=new Date(toDate+"T12:00:00");
+  while(cur<=end){days.push(cur.toISOString().split("T")[0]);cur.setDate(cur.getDate()+1);}
+  days.reverse();
+  const entryIndex={};allowedLocs.forEach(l=>{entryIndex[l.id]=new Set();});
+  ces.forEach(e=>{if(!e.entry_date||!e.location_id)return;const d=e.entry_date.substring(0,10);if(entryIndex[e.location_id])entryIndex[e.location_id].add(d);});
+  const dayNamesFull=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
+  const thead=document.getElementById("cc-thead");const tbody=document.getElementById("cc-tbody");
+  if(!thead||!tbody)return;
+  thead.innerHTML=`<tr style="background:var(--ni)"><th style="text-align:left;padding:8px 8px;font-size:11px;font-weight:500;color:var(--td);border-bottom:0.5px solid var(--nb);width:72px">Ημερ/νία</th><th style="text-align:left;padding:8px 6px;font-size:11px;font-weight:500;color:var(--td);border-bottom:0.5px solid var(--nb);width:60px">Ημέρα</th>${allowedLocs.map(l=>`<th style="text-align:center;padding:8px 4px;font-size:11px;font-weight:500;color:#185FA5;border-bottom:0.5px solid var(--nb)">${l.name}</th>`).join("")}</tr>`;
+  const rows=days.map(d=>{const dt=new Date(d+"T12:00:00");const dow=dt.getDay();const dd=String(dt.getDate()).padStart(2,"0");const mm=String(dt.getMonth()+1).padStart(2,"0");const yy=String(dt.getFullYear()).slice(2);const dateStr=`${dd}/${mm}/${yy}`;const dayStr=dayNamesFull[dow];const isSun=dow===0;const isToday=d===today;const dayCells=allowedLocs.map(l=>{if(isToday)return`<td style="text-align:center;padding:7px 4px;border-bottom:0.5px solid var(--nb)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#FAEEDA;color:#633806;font-size:12px">⏳</span></td>`;const has=entryIndex[l.id].has(d);return`<td style="text-align:center;padding:7px 4px;border-bottom:0.5px solid var(--nb)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:${has?"#EAF3DE":"#FCEBEB"};color:${has?"#27500A":"#791F1F"};font-size:14px">${has?"✓":"✗"}</span></td>`;}).join("");return`<tr style="${isToday?"opacity:0.7":""}"><td style="padding:7px 8px;border-bottom:0.5px solid var(--nb);font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap">${dateStr}</td><td style="padding:7px 6px;border-bottom:0.5px solid var(--nb);font-size:11px;color:${isSun?"#c8507a":"var(--td)"};white-space:nowrap">${dayStr}</td>${dayCells}</tr>`;}).join("");
+  tbody.innerHTML=rows||`<tr><td colspan="${2+allowedLocs.length}" style="padding:30px;text-align:center;color:var(--td)">Δεν υπάρχουν δεδομένα</td></tr>`;
 }
 
 async function saveSAE(){
