@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrderFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -36,26 +39,26 @@
   --rdd:#fef2f2   /* red tint background */
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
 
 /* LOGIN */
-#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#fce7f0 0%,#f5f5f7 70%)}
+#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#e8eaf6 0%,#f5f5f7 70%)}
 .lb{background:var(--nc);border:0.5px solid var(--nb);border-radius:20px;padding:44px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(30,39,97,.12)}
-.ll{font-size:26px;font-weight:700;color:var(--pk);text-align:center;letter-spacing:2px;margin-bottom:6px}
+.ll{font-size:28px;font-weight:700;color:#1e2761;text-align:center;letter-spacing:1px;margin-bottom:6px;font-family:'Comfortaa',cursive}
 .ls2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:32px}
 .lf{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
-.lf label{font-size:12px;color:var(--td)}
-.lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;color:var(--t1);padding:11px 14px;font-size:14px;outline:none;font-family:inherit;width:100%;transition:border-color .15s}
-.lf input:focus{border-color:var(--pk)}
-.lbtn{width:100%;padding:12px;background:var(--pb);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:background .15s}
-.lbtn:hover{background:#8a2c4d}
-.lerr{font-size:12px;color:var(--rd);text-align:center;margin-top:10px;min-height:18px}
+.lf{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.lf label{font-size:12px;color:var(--td);font-weight:500}
+.lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;color:var(--t1);padding:11px 14px;font-size:14px;outline:none;font-family:'Inter',system-ui,sans-serif;width:100%;transition:border-color .15s}
+.lf input:focus{border-color:#1e2761;box-shadow:0 0 0 3px rgba(30,39,97,.08)}
+.lbtn{width:100%;padding:13px;background:#1e2761;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.3px;transition:background .15s;font-family:'Inter',system-ui,sans-serif}
+.lbtn:hover{background:#16205a}
 
 /* APP */
 #app{display:none}
 .topbar{background:#1e2761;border-bottom:none;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
 .topbar::-webkit-scrollbar{display:none}
-.logo{font-size:14px;font-weight:700;color:#e8a0c0;padding:0 16px 0 4px;margin-right:8px;white-space:nowrap;letter-spacing:1.5px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12)}
+.logo{font-size:14px;font-weight:700;color:#e8a0c0;padding:0 16px 0 4px;margin-right:8px;white-space:nowrap;letter-spacing:1.5px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12);font-family:'Comfortaa',cursive}
 .tab{padding:0 12px;height:48px;font-size:12.5px;color:rgba(255,255,255,0.5);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-weight:400}
 .tab:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.06)}
 .tab.active{color:#fff;border-bottom-color:#e8a0c0;font-weight:500}
@@ -85,8 +88,9 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 
 /* TOOLBAR */
 .tlb{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
-.tlt{font-size:15px;font-weight:500}
+.tlt{font-size:15px;font-weight:600;letter-spacing:-0.2px;font-family:'Comfortaa',cursive}
 .tbr2{display:flex;gap:8px;flex-wrap:wrap}
+.csup{font-size:14px;font-weight:600;letter-spacing:-0.1px}
 
 /* BUTTONS */
 .btn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--t2);cursor:pointer;transition:background .15s;white-space:nowrap}
@@ -145,7 +149,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .fg2 .f{display:flex;flex-direction:column;gap:5px}
 .fg2 .f.s2{grid-column:span 2}
 .fg2 .f label{font-size:12px;color:var(--td)}
-.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
+.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:'Inter',system-ui,sans-serif;transition:border-color .15s}
 .fg2 .f input:focus,.fg2 .f select:focus{border-color:var(--pk)}
 .fg2 .f select option{background:var(--nc);color:var(--t1)}
 .mf{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:0.5px solid var(--nb)}
@@ -300,7 +304,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <!-- LOGIN -->
 <div id="ls">
   <div class="lb">
-    <div class="ll">✦ OrderFlow</div>
+    <div class="ll"><span style="color:#c8507a">✦</span> OrderFlow</div>
     <div class="ls2">Σύνδεση στο σύστημα διαχείρισης</div>
     <div class="lf"><label>Email</label><input type="email" id="lemail" placeholder="email@example.com" autocomplete="email"></div>
     <div class="lf"><label>Κωδικός</label><input type="password" id="lpass" placeholder="••••••••" autocomplete="current-password"></div>
@@ -1342,6 +1346,7 @@ const fd=d=>d?new Date(d).toLocaleDateString('el-GR'):'—';
 const lN=id=>locs.find(x=>x.id===id)?.name||'—';
 const sN=id=>{const s=sups.find(x=>x.id===id);return s?(s.friendly_name||s.name):'—';};
 const pN=id=>{const p=prods.find(x=>x.id===id);return p?(p.friendly_name||p.name):'—';};
+const uN=id=>{const u=ups.find(x=>x.id===id);return u?(u.full_name||u.email||'—'):'—';};
 const lC=lid=>{const n=locs.find(x=>x.id===lid)?.name||'';if(n.includes('Κεντρική'))return'lm';if(n.includes('Γέρακα'))return'lg';if(n.includes('Παγκράτι'))return'lp';if(n.includes('Μαρούσι'))return'lma';return'lm';};
 const i2b=i=>{if(!i)return'—';const c=i.replace(/\s/g,'').substring(4,7);const b={'011':'Εθνική','014':'Alpha','026':'Πειραιώς','019':'Eurobank','037':'Attica','060':'Παγκρήτια','072':'Optima'};return b[c]||('GR'+c);};
 const toast=(m,t='ok')=>{const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+t;setTimeout(()=>e.className='toast',3000);};
@@ -2809,13 +2814,14 @@ function rCash(){
   const av=ti-to2;
   set('cin',fmt(ti)+' €');set('cout',fmt(to2)+' €');
   const ae=document.getElementById('cavail');if(ae){ae.textContent=fmt(av)+' €';ae.style.color=av>=0?'var(--gn)':'var(--rd)';}
-  set('celist',en.length?en.map(e=>`<div class="crow"><div class="cri"><div class="crd">${fd(e.entry_date)} · ${lN(e.location_id)}</div><div class="crds">${e.notes||'Ημερήσιο σύνολο'}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span><button class="ib" onclick="delCE('${e.id}')" style="color:var(--rd)">✕</button></div></div>`).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν εισπράξεις</p></div>');
+  set('celist',en.length?en.map(e=>{const uLbl=e.created_by?` · <strong>${uN(e.created_by)}</strong>`:'';return`<div class="crow"><div class="cri"><div class="crd">${fd(e.entry_date)} · ${lN(e.location_id)}${uLbl}</div><div class="crds">${e.notes||'Ημερήσιο σύνολο'}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span><button class="ib" onclick="delCE('${e.id}')" style="color:var(--rd)">✕</button></div></div>`;}).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν εισπράξεις</p></div>');
   set('cplist',py.length?py.map(p=>{
     const isAdm=cP?.role==='admin';
     const editBtn=isAdm?`<button class="ib" onclick="editCP('${p.id}')" title="Επεξεργασία">✎</button>`:'';
     const sc=subcats.find(s=>s.id===p.subcategory_id);
     const subLbl=sc?` · <span style="color:var(--td);font-size:11px">${sc.name}</span>`:'';
-    return`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}${subLbl}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span>${editBtn}<button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">✕</button></div></div>`;
+    const userLbl=p.created_by?` · <strong>${uN(p.created_by)}</strong>`:'';
+    return`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}${subLbl}${userLbl}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span>${editBtn}<button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">✕</button></div></div>`;
   }).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν πληρωμές</p></div>');
 }
 async function saveCE(){
