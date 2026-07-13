@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrderFlow</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -52,13 +53,15 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 
 /* APP */
 #app{display:none}
-.topbar{background:var(--nc);border-bottom:1px solid var(--nb);display:flex;align-items:center;padding:0 18px;position:sticky;top:0;z-index:100;overflow-x:auto}
-.logo{font-size:15px;font-weight:700;color:var(--pk);padding:14px 0;margin-right:20px;white-space:nowrap;letter-spacing:1px;flex-shrink:0}
-.tab{padding:14px 12px;font-size:13px;color:var(--tm);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s;flex-shrink:0}
-.tab:hover{color:var(--t2)}.tab.active{color:var(--pk);border-bottom-color:var(--pk)}
+.topbar{background:#1e2761;border-bottom:none;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.logo{font-size:14px;font-weight:700;color:#e8a0c0;padding:0 16px 0 4px;margin-right:8px;white-space:nowrap;letter-spacing:1.5px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12)}
+.tab{padding:0 12px;height:48px;font-size:12.5px;color:rgba(255,255,255,0.5);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-weight:400}
+.tab:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.06)}
+.tab.active{color:#fff;border-bottom-color:#e8a0c0;font-weight:500}
 .ts{flex:1}
 .tbr{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px}
-.ub{font-size:12px;color:var(--tm);white-space:nowrap}
+.ub{font-size:12px;color:rgba(255,255,255,0.65);white-space:nowrap}
 .urgent-badge{display:inline-flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;color:var(--rd);padding:4px 10px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
 .urgent-badge:hover{background:#fee2e2;transform:scale(1.03)}
 .urgent-badge .ub-num{background:var(--rd);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
@@ -67,8 +70,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .urgent-banner .ub-meta{font-size:11px;color:var(--td)}
 .mbtn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--pk);background:var(--pd);color:var(--pk);cursor:pointer;white-space:nowrap;font-weight:500;transition:background .15s}
 .mbtn:hover{background:var(--pd);border-color:var(--pk)}
-.lout{padding:7px 12px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
-.lout:hover{color:var(--rd);border-color:var(--rd)}
+.lout{padding:5px 10px;font-size:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;transition:all .15s}
+.lout:hover{color:#fff;border-color:rgba(255,255,255,0.5)}
 
 /* PAGES */
 .page{display:none;padding:20px;max-width:1200px;margin:0 auto}.page.active{display:block}
@@ -195,6 +198,17 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .cri{flex:1}.crd{font-size:11px;color:var(--td)}.crds{font-size:13px;color:var(--t2);margin-top:2px}
 .cra{font-size:15px;font-weight:600;white-space:nowrap}
 
+/* SA / CASH MOVEMENT CARDS */
+.mv-card{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s}
+.mv-card:hover{border-color:var(--pk)}
+.mv-card-left{flex:1;min-width:0}
+.mv-card-title{font-size:13px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mv-card-sub{font-size:11px;color:var(--td);margin-top:2px}
+.mv-card-amount{font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.mv-card-amount.inc{color:var(--gn)}
+.mv-card-amount.exp{color:var(--rd)}
+.mv-transfer-tag{display:inline-block;font-size:10px;font-weight:600;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:8px;margin-right:4px}
+
 /* SIDE PANEL */
 .spbg{display:none;position:fixed;inset:0;background:rgba(30,39,97,.3);z-index:300}
 .spbg.open{display:block}
@@ -299,16 +313,16 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 <div id="app">
 <div class="topbar">
   <div class="logo">✦ OrderFlow</div>
-  <div class="tab active" id="tab-dash" onclick="sw('dash',this)">Dashboard</div>
-  <div class="tab" id="tab-orders" onclick="sw('orders',this)">Παραγγελίες</div>
-  <div class="tab" id="tab-stock" onclick="sw('stock',this)">Αποθήκη</div>
-  <div class="tab" id="tab-prices" onclick="sw('prices',this)">Παρατηρητήριο Τιμών</div>
-  <div class="tab" id="tab-payments" onclick="sw('payments',this)">Πληρωμές</div>
-  <div class="tab" id="tab-cash" onclick="sw('cash',this)">Μετρητά Καταστημάτων</div>
-  <div class="tab" id="tab-sacash" onclick="sw('sacash',this)">Μετρητά ΣΑ</div>
-  <div class="tab" id="tab-cashcheck" onclick="sw('cashcheck',this)">✅ Check Ταμείων</div>
-  <div class="tab ao" id="tab-reports" onclick="sw('reports',this)">📊 Αναφορές</div>
-  <div class="tab ao" id="tab-excel" onclick="sw('excel',this)">Excel</div>
+  <div class="tab active" id="tab-dash" onclick="sw('dash',this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard</div>
+  <div class="tab" id="tab-orders" onclick="sw('orders',this)"><i class="ti ti-shopping-cart" aria-hidden="true"></i>Παραγγελίες</div>
+  <div class="tab" id="tab-stock" onclick="sw('stock',this)"><i class="ti ti-building-warehouse" aria-hidden="true"></i>Αποθήκη</div>
+  <div class="tab" id="tab-prices" onclick="sw('prices',this)"><i class="ti ti-chart-line" aria-hidden="true"></i>Παρατηρητήριο</div>
+  <div class="tab" id="tab-payments" onclick="sw('payments',this)"><i class="ti ti-credit-card" aria-hidden="true"></i>Πληρωμές</div>
+  <div class="tab" id="tab-cash" onclick="sw('cash',this)"><i class="ti ti-cash" aria-hidden="true"></i>Μετρητά</div>
+  <div class="tab" id="tab-sacash" onclick="sw('sacash',this)"><i class="ti ti-wallet" aria-hidden="true"></i>Μετρητά ΣΑ</div>
+  <div class="tab" id="tab-cashcheck" onclick="sw('cashcheck',this)"><i class="ti ti-calendar-check" aria-hidden="true"></i>Check Ταμείων</div>
+  <div class="tab ao" id="tab-reports" onclick="sw('reports',this)"><i class="ti ti-report-analytics" aria-hidden="true"></i>Αναφορές</div>
+  <div class="tab ao" id="tab-excel" onclick="sw('excel',this)"><i class="ti ti-table" aria-hidden="true"></i>Excel</div>
   <div class="ts"></div>
   <div class="tbr">
     <span class="urgent-badge" id="urgent-badge" onclick="goToUrgent()" style="display:none"></span>
@@ -465,9 +479,9 @@ body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <span class="loclbl" style="margin-bottom:0">🗓️ Περίοδος:</span>
       <div class="vb" id="cf-week" onclick="fCashTime('week',this)">Τρέχουσα εβδομάδα</div>
-      <div class="vb" id="cf-month" onclick="fCashTime('month',this)">Τρέχων μήνας</div>
+      <div class="vb active" id="cf-month" onclick="fCashTime('month',this)">Τρέχων μήνας</div>
       <div class="vb" id="cf-prevmonth" onclick="fCashTime('prevmonth',this)">Προηγ. μήνας</div>
-      <div class="vb active" id="cf-all" onclick="fCashTime('all',this)">Όλο το ιστορικό</div>
+      <div class="vb" id="cf-all" onclick="fCashTime('all',this)">Όλο το ιστορικό</div>
       <div class="vb" id="cf-custom" onclick="fCashTime('custom',this)">📅 Από/Έως</div>
     </div>
     <div id="cf-daterange" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
@@ -3789,7 +3803,7 @@ function copyIban(){
 }
 
 // ══ CASH TIME FILTERS ══
-let aCashTime='all';
+let aCashTime='month';
 let aSACashTime='all';
 function fCashTime(f,el){
   document.querySelectorAll('#cf-week,#cf-month,#cf-prevmonth,#cf-all,#cf-custom').forEach(b=>b?.classList.remove('active'));
@@ -4417,31 +4431,34 @@ function rSACash(){
   if(en.length===0){set('saelist','<div class="empty"><div class="ic">💼</div><p>Καμία είσπραξη</p></div>');}
   else{
     set('saelist',en.map(e=>{
-      // Αν είναι μεταφορά από κατάστημα, βρες το όνομα καταστήματος
       const tr=ctransfers.find(t=>t.sa_entry_id===e.id);
       const locLabel=tr?lN(tr.location_id):'';
-      const label=tr?`Μεταφορά από κατάστημα · <span style="color:var(--bl);font-weight:700">${locLabel}</span>`:e.description||'Είσπραξη';
-      return`<div class="cei">
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600">${label}</div>
-        <div style="font-size:11px;color:var(--td);margin-top:2px">${fd(e.entry_date)}${e.notes?' · '+e.notes:''}</div>
-      </div>
-      <div style="font-size:15px;font-weight:700;color:var(--gn)">+${fmt(e.amount)} €</div>
-      <button class="ib" onclick="delSAE('${e.id}')" style="color:var(--rd);margin-left:6px">✕</button>
-    </div>`;}).join(''));
+      const titleHtml=tr?`<span class="mv-transfer-tag">Μεταφορά</span>${locLabel}`:e.description||'Είσπραξη';
+      return`<div class="mv-card">
+        <div class="mv-card-left">
+          <div class="mv-card-title">${titleHtml}</div>
+          <div class="mv-card-sub">${fd(e.entry_date)}${e.notes?' · '+e.notes:''}</div>
+        </div>
+        <div class="mv-card-amount inc">+${fmt(e.amount)} €</div>
+        <button class="ib" onclick="delSAE('${e.id}')" style="color:var(--rd);flex-shrink:0">✕</button>
+      </div>`;}).join(''));
   }
 
   // Λίστα πληρωμών
   if(py.length===0){set('saplist','<div class="empty"><div class="ic">💼</div><p>Καμία πληρωμή</p></div>');}
   else{
-    set('saplist',py.map(p=>`<div class="cei">
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600">${p.description||'Πληρωμή'}</div>
-        <div style="font-size:11px;color:var(--td);margin-top:2px">${fd(p.payment_date)}${p.notes?' · '+p.notes:''}</div>
-      </div>
-      <div style="font-size:15px;font-weight:700;color:var(--rd)">-${fmt(p.amount)} €</div>
-      <button class="ib" onclick="delSAP('${p.id}')" style="color:var(--rd);margin-left:6px">✕</button>
-    </div>`).join(''));
+    set('saplist',py.map(p=>{
+      const tr=ctransfers.find(t=>t.sa_payment_id===p.id);
+      const locLabel=tr?lN(tr.location_id):'';
+      const titleHtml=tr?`<span class="mv-transfer-tag" style="background:#fef2f2;color:#dc2626">Μεταφορά</span>${locLabel}`:p.description||'Πληρωμή';
+      return`<div class="mv-card">
+        <div class="mv-card-left">
+          <div class="mv-card-title">${titleHtml}</div>
+          <div class="mv-card-sub">${fd(p.payment_date)}${p.notes?' · '+p.notes:''}</div>
+        </div>
+        <div class="mv-card-amount exp">−${fmt(p.amount)} €</div>
+        <button class="ib" onclick="delSAP('${p.id}')" style="color:var(--rd);flex-shrink:0">✕</button>
+      </div>`;}).join(''));
   }
 }
 
