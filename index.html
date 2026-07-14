@@ -203,6 +203,9 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
 .cra{font-size:15px;font-weight:600;white-space:nowrap}
 
 /* SA / CASH MOVEMENT CARDS */
+.sa-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.sa-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.mv-card{padding:8px 10px}.mv-card-title{font-size:12px}.mv-card-amount{font-size:13px}}
 .mv-card{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s}
 .mv-card:hover{border-color:var(--pk)}
 .mv-card-left{flex:1;min-width:0}
@@ -531,7 +534,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
       <button class="btn p" onclick="om('msae')">+ Είσπραξη ΣΑ</button>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="sa-grid">
     <div><div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις ΣΑ</div><div class="clist" id="saelist"><div class="ld">Φόρτωση...</div></div></div>
     <div><div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές ΣΑ</div><div class="clist" id="saplist"><div class="ld">Φόρτωση...</div></div></div>
   </div>
@@ -4496,7 +4499,7 @@ function rCashCheck(){
   let fromDate,toDate;
   if(aCCTime==="week"){const d=new Date(now);const day=d.getDay()||7;d.setDate(d.getDate()-day+1);d.setHours(0,0,0,0);fromDate=d.toISOString().split("T")[0];toDate=today;}
   else if(aCCTime==="month"){fromDate=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";toDate=today;}
-  else if(aCCTime==="prevmonth"){const pm=new Date(now.getFullYear(),now.getMonth()-1,1);const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);fromDate=pm.toISOString().split("T")[0];toDate=pmEnd.toISOString().split("T")[0];}
+  else if(aCCTime==="prevmonth"){const pm=new Date(now.getFullYear(),now.getMonth()-1,1);const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);fromDate=`${pm.getFullYear()}-${String(pm.getMonth()+1).padStart(2,"0")}-01`;toDate=`${pmEnd.getFullYear()}-${String(pmEnd.getMonth()+1).padStart(2,"0")}-${String(pmEnd.getDate()).padStart(2,"0")}`;}
   else if(aCCTime==="all"){const allDates=ces.map(e=>e.entry_date).filter(Boolean).sort();fromDate=allDates[0]?allDates[0].substring(0,10):today;toDate=today;}
   else if(aCCTime==="custom"){fromDate=document.getElementById("cc-from")?.value||today;toDate=document.getElementById("cc-to")?.value||today;}
   if(!fromDate||!toDate)return;
