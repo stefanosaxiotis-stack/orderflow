@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrderFlow</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -39,26 +36,26 @@
   --rdd:#fef2f2   /* red tint background */
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+body{background:var(--nm);color:var(--t1);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
 
 /* LOGIN */
-#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#e8eaf6 0%,#f5f5f7 70%)}
+#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#fce7f0 0%,#f5f5f7 70%)}
 .lb{background:var(--nc);border:0.5px solid var(--nb);border-radius:20px;padding:44px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(30,39,97,.12)}
-.ll{font-size:28px;font-weight:700;color:#1e2761;text-align:center;letter-spacing:1px;margin-bottom:6px;font-family:'Comfortaa',cursive}
+.ll{font-size:26px;font-weight:700;color:var(--pk);text-align:center;letter-spacing:2px;margin-bottom:6px}
 .ls2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:32px}
 .lf{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
-.lf{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
-.lf label{font-size:12px;color:var(--td);font-weight:500}
-.lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;color:var(--t1);padding:11px 14px;font-size:14px;outline:none;font-family:'Inter',system-ui,sans-serif;width:100%;transition:border-color .15s}
-.lf input:focus{border-color:#1e2761;box-shadow:0 0 0 3px rgba(30,39,97,.08)}
-.lbtn{width:100%;padding:13px;background:#1e2761;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.3px;transition:background .15s;font-family:'Inter',system-ui,sans-serif}
-.lbtn:hover{background:#16205a}
+.lf label{font-size:12px;color:var(--td)}
+.lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;color:var(--t1);padding:11px 14px;font-size:14px;outline:none;font-family:inherit;width:100%;transition:border-color .15s}
+.lf input:focus{border-color:var(--pk)}
+.lbtn{width:100%;padding:12px;background:var(--pb);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:background .15s}
+.lbtn:hover{background:#8a2c4d}
+.lerr{font-size:12px;color:var(--rd);text-align:center;margin-top:10px;min-height:18px}
 
 /* APP */
 #app{display:none}
 .topbar{background:#1e2761;border-bottom:none;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
 .topbar::-webkit-scrollbar{display:none}
-.logo{font-size:14px;font-weight:700;color:#e8a0c0;padding:0 16px 0 4px;margin-right:8px;white-space:nowrap;letter-spacing:1.5px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12);font-family:'Comfortaa',cursive}
+.logo{font-size:14px;font-weight:700;color:#e8a0c0;padding:0 16px 0 4px;margin-right:8px;white-space:nowrap;letter-spacing:1.5px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12)}
 .tab{padding:0 12px;height:48px;font-size:12.5px;color:rgba(255,255,255,0.5);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-weight:400}
 .tab:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.06)}
 .tab.active{color:#fff;border-bottom-color:#e8a0c0;font-weight:500}
@@ -88,9 +85,8 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
 
 /* TOOLBAR */
 .tlb{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
-.tlt{font-size:15px;font-weight:600;letter-spacing:-0.2px;font-family:'Comfortaa',cursive}
+.tlt{font-size:15px;font-weight:500}
 .tbr2{display:flex;gap:8px;flex-wrap:wrap}
-.csup{font-size:14px;font-weight:600;letter-spacing:-0.1px}
 
 /* BUTTONS */
 .btn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--t2);cursor:pointer;transition:background .15s;white-space:nowrap}
@@ -149,7 +145,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
 .fg2 .f{display:flex;flex-direction:column;gap:5px}
 .fg2 .f.s2{grid-column:span 2}
 .fg2 .f label{font-size:12px;color:var(--td)}
-.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:'Inter',system-ui,sans-serif;transition:border-color .15s}
+.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
 .fg2 .f input:focus,.fg2 .f select:focus{border-color:var(--pk)}
 .fg2 .f select option{background:var(--nc);color:var(--t1)}
 .mf{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:0.5px solid var(--nb)}
@@ -203,9 +199,6 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
 .cra{font-size:15px;font-weight:600;white-space:nowrap}
 
 /* SA / CASH MOVEMENT CARDS */
-.sa-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:640px){.sa-grid{grid-template-columns:1fr}}
-@media(max-width:640px){.mv-card{padding:8px 10px}.mv-card-title{font-size:12px}.mv-card-amount{font-size:13px}}
 .mv-card{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s}
 .mv-card:hover{border-color:var(--pk)}
 .mv-card-left{flex:1;min-width:0}
@@ -307,7 +300,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
 <!-- LOGIN -->
 <div id="ls">
   <div class="lb">
-    <div class="ll"><span style="color:#c8507a">✦</span> OrderFlow</div>
+    <div class="ll">✦ OrderFlow</div>
     <div class="ls2">Σύνδεση στο σύστημα διαχείρισης</div>
     <div class="lf"><label>Email</label><input type="email" id="lemail" placeholder="email@example.com" autocomplete="email"></div>
     <div class="lf"><label>Κωδικός</label><input type="password" id="lpass" placeholder="••••••••" autocomplete="current-password"></div>
@@ -320,21 +313,21 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
 <div id="app">
 <div class="topbar">
   <div class="logo">✦ OrderFlow</div>
-  <div class="tab active" id="tab-dash" onclick="sw('dash',this)">Dashboard</div>
-  <div class="tab" id="tab-orders" onclick="sw('orders',this)">Παραγγελίες</div>
-  <div class="tab" id="tab-stock" onclick="sw('stock',this)">Αποθήκη</div>
-  <div class="tab" id="tab-prices" onclick="sw('prices',this)">Παρατηρητήριο</div>
-  <div class="tab" id="tab-payments" onclick="sw('payments',this)">Πληρωμές</div>
-  <div class="tab" id="tab-cash" onclick="sw('cash',this)">Μετρητά</div>
-  <div class="tab" id="tab-sacash" onclick="sw('sacash',this)">Μετρητά ΣΑ</div>
-  <div class="tab" id="tab-cashcheck" onclick="sw('cashcheck',this)">✅ Check Ταμείων</div>
-  <div class="tab ao" id="tab-reports" onclick="sw('reports',this)">📊 Αναφορές</div>
-  <div class="tab ao" id="tab-excel" onclick="sw('excel',this)">Excel</div>
+  <div class="tab active" id="tab-dash" onclick="sw('dash',this)"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard</div>
+  <div class="tab" id="tab-orders" onclick="sw('orders',this)"><i class="ti ti-shopping-cart" aria-hidden="true"></i>Παραγγελίες</div>
+  <div class="tab" id="tab-stock" onclick="sw('stock',this)"><i class="ti ti-building-warehouse" aria-hidden="true"></i>Αποθήκη</div>
+  <div class="tab" id="tab-prices" onclick="sw('prices',this)"><i class="ti ti-chart-line" aria-hidden="true"></i>Παρατηρητήριο</div>
+  <div class="tab" id="tab-payments" onclick="sw('payments',this)"><i class="ti ti-credit-card" aria-hidden="true"></i>Πληρωμές</div>
+  <div class="tab" id="tab-cash" onclick="sw('cash',this)"><i class="ti ti-cash" aria-hidden="true"></i>Μετρητά</div>
+  <div class="tab" id="tab-sacash" onclick="sw('sacash',this)"><i class="ti ti-wallet" aria-hidden="true"></i>Μετρητά ΣΑ</div>
+  <div class="tab" id="tab-cashcheck" onclick="sw('cashcheck',this)"><i class="ti ti-calendar-check" aria-hidden="true"></i>Check Ταμείων</div>
+  <div class="tab ao" id="tab-reports" onclick="sw('reports',this)"><i class="ti ti-report-analytics" aria-hidden="true"></i>Αναφορές</div>
+  <div class="tab ao" id="tab-excel" onclick="sw('excel',this)"><i class="ti ti-table" aria-hidden="true"></i>Excel</div>
   <div class="ts"></div>
   <div class="tbr">
     <span class="urgent-badge" id="urgent-badge" onclick="goToUrgent()" style="display:none"></span>
     <span class="ub" id="ubadge"></span>
-    <button class="lout ao" onclick="openMgmt()" style="border-color:rgba(232,160,192,0.5);color:#e8a0c0">⚙ Διαχείριση</button>
+    <button class="mbtn ao" onclick="openMgmt()">⚙ Διαχείριση</button>
     <button class="lout" onclick="load().then(()=>toast('Ανανεώθηκε!'))" title="Ανανέωση δεδομένων">🔄</button>
     <button class="lout" onclick="doLogout()">→ Έξοδος</button>
   </div>
@@ -534,7 +527,7 @@ body{background:var(--nm);color:var(--t1);font-family:'Inter',system-ui,sans-ser
       <button class="btn p" onclick="om('msae')">+ Είσπραξη ΣΑ</button>
     </div>
   </div>
-  <div class="sa-grid">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
     <div><div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις ΣΑ</div><div class="clist" id="saelist"><div class="ld">Φόρτωση...</div></div></div>
     <div><div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές ΣΑ</div><div class="clist" id="saplist"><div class="ld">Φόρτωση...</div></div></div>
   </div>
@@ -1343,13 +1336,13 @@ let chartMonthly=null,chartSupplier=null;
 // HELPERS
 // ══════════════════════════════════════════════════════
 const td=()=>new Date().toISOString().split('T')[0];
+const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const fmt=n=>Number(n||0).toLocaleString('el-GR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtU=n=>{const v=Number(n||0);if(v===0)return'0,00';if(v<0.01)return v.toLocaleString('el-GR',{minimumFractionDigits:4,maximumFractionDigits:5});if(v<0.1)return v.toLocaleString('el-GR',{minimumFractionDigits:3,maximumFractionDigits:4});return v.toLocaleString('el-GR',{minimumFractionDigits:2,maximumFractionDigits:3});};
 const fd=d=>d?new Date(d).toLocaleDateString('el-GR'):'—';
 const lN=id=>locs.find(x=>x.id===id)?.name||'—';
 const sN=id=>{const s=sups.find(x=>x.id===id);return s?(s.friendly_name||s.name):'—';};
 const pN=id=>{const p=prods.find(x=>x.id===id);return p?(p.friendly_name||p.name):'—';};
-const uN=id=>{const u=ups.find(x=>x.id===id);return u?(u.full_name||u.email||'—'):'—';};
 const lC=lid=>{const n=locs.find(x=>x.id===lid)?.name||'';if(n.includes('Κεντρική'))return'lm';if(n.includes('Γέρακα'))return'lg';if(n.includes('Παγκράτι'))return'lp';if(n.includes('Μαρούσι'))return'lma';return'lm';};
 const i2b=i=>{if(!i)return'—';const c=i.replace(/\s/g,'').substring(4,7);const b={'011':'Εθνική','014':'Alpha','026':'Πειραιώς','019':'Eurobank','037':'Attica','060':'Παγκρήτια','072':'Optima'};return b[c]||('GR'+c);};
 const toast=(m,t='ok')=>{const e=document.getElementById('toast');e.textContent=m;e.className='toast show '+t;setTimeout(()=>e.className='toast',3000);};
@@ -2365,7 +2358,7 @@ function rPay(){
       if(aPaidTime==='week'){
         const start=new Date(now);const day=now.getDay()||7;
         start.setDate(now.getDate()-day+1);start.setHours(0,0,0,0);
-        const s=start.toISOString().split('T')[0];
+        const s=fmtDate(start);
         return items.filter(i=>(i.date||'').substring(0,10)>=s);
       }else if(aPaidTime==='month'){
         const s=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
@@ -2373,7 +2366,7 @@ function rPay(){
       }else if(aPaidTime==='prevmonth'){
         const pm=new Date(now.getFullYear(),now.getMonth()-1,1);
         const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);
-        const s=pm.toISOString().split('T')[0],e2=pmEnd.toISOString().split('T')[0];
+        const s=fmtDate(pm),e2=fmtDate(pmEnd);
         return items.filter(i=>(i.date||'').substring(0,10)>=s&&(i.date||'').substring(0,10)<=e2);
       }else if(aPaidTime==='custom'){
         const fr=document.getElementById('pf-from')?.value;
@@ -2801,7 +2794,7 @@ function rCash(){
   }else if(aCashTime==='prevmonth'){
     const pm=new Date(now.getFullYear(),now.getMonth()-1,1);
     const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);
-    const s=pm.toISOString().split('T')[0],e2=pmEnd.toISOString().split('T')[0];
+    const s=fmtDate(pm),e2=fmtDate(pmEnd);
     en=en.filter(e=>(e.entry_date||'').substring(0,10)>=s&&(e.entry_date||'').substring(0,10)<=e2);
     py=py.filter(p=>(p.payment_date||'').substring(0,10)>=s&&(p.payment_date||'').substring(0,10)<=e2);
   }else if(aCashTime==='custom'){
@@ -2817,14 +2810,13 @@ function rCash(){
   const av=ti-to2;
   set('cin',fmt(ti)+' €');set('cout',fmt(to2)+' €');
   const ae=document.getElementById('cavail');if(ae){ae.textContent=fmt(av)+' €';ae.style.color=av>=0?'var(--gn)':'var(--rd)';}
-  set('celist',en.length?en.map(e=>{const uLbl=e.created_by?` · <strong>${uN(e.created_by)}</strong>`:'';return`<div class="crow"><div class="cri"><div class="crd">${fd(e.entry_date)} · ${lN(e.location_id)}${uLbl}</div><div class="crds">${e.notes||'Ημερήσιο σύνολο'}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span><button class="ib" onclick="delCE('${e.id}')" style="color:var(--rd)">✕</button></div></div>`;}).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν εισπράξεις</p></div>');
+  set('celist',en.length?en.map(e=>`<div class="crow"><div class="cri"><div class="crd">${fd(e.entry_date)} · ${lN(e.location_id)}</div><div class="crds">${e.notes||'Ημερήσιο σύνολο'}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span><button class="ib" onclick="delCE('${e.id}')" style="color:var(--rd)">✕</button></div></div>`).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν εισπράξεις</p></div>');
   set('cplist',py.length?py.map(p=>{
     const isAdm=cP?.role==='admin';
     const editBtn=isAdm?`<button class="ib" onclick="editCP('${p.id}')" title="Επεξεργασία">✎</button>`:'';
     const sc=subcats.find(s=>s.id===p.subcategory_id);
     const subLbl=sc?` · <span style="color:var(--td);font-size:11px">${sc.name}</span>`:'';
-    const userLbl=p.created_by?` · <strong>${uN(p.created_by)}</strong>`:'';
-    return`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}${subLbl}${userLbl}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span>${editBtn}<button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">✕</button></div></div>`;
+    return`<div class="crow"><div class="cri"><div class="crd">${fd(p.payment_date)} · ${lN(p.location_id)}${subLbl}</div><div class="crds">${p.description}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="cra" style="color:var(--rd)">-${fmt(p.amount)} €</span>${editBtn}<button class="ib" onclick="delCP('${p.id}')" style="color:var(--rd)">✕</button></div></div>`;
   }).join(''):'<div class="empty"><div class="ic">💵</div><p>Δεν υπάρχουν πληρωμές</p></div>');
 }
 async function saveCE(){
@@ -4417,7 +4409,7 @@ function rSACash(){
   }else if(aSACashTime==='prevmonth'){
     const pm=new Date(now.getFullYear(),now.getMonth()-1,1);
     const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);
-    const s=pm.toISOString().split('T')[0],e2=pmEnd.toISOString().split('T')[0];
+    const s=fmtDate(pm),e2=fmtDate(pmEnd);
     en=en.filter(e=>(e.entry_date||'').substring(0,10)>=s&&(e.entry_date||'').substring(0,10)<=e2);
     py=py.filter(p=>(p.payment_date||'').substring(0,10)>=s&&(p.payment_date||'').substring(0,10)<=e2);
   }else if(aSACashTime==='custom'){
@@ -4499,7 +4491,7 @@ function rCashCheck(){
   let fromDate,toDate;
   if(aCCTime==="week"){const d=new Date(now);const day=d.getDay()||7;d.setDate(d.getDate()-day+1);d.setHours(0,0,0,0);fromDate=d.toISOString().split("T")[0];toDate=today;}
   else if(aCCTime==="month"){fromDate=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-01";toDate=today;}
-  else if(aCCTime==="prevmonth"){const pm=new Date(now.getFullYear(),now.getMonth()-1,1);const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);fromDate=`${pm.getFullYear()}-${String(pm.getMonth()+1).padStart(2,"0")}-01`;toDate=`${pmEnd.getFullYear()}-${String(pmEnd.getMonth()+1).padStart(2,"0")}-${String(pmEnd.getDate()).padStart(2,"0")}`;}
+  else if(aCCTime==="prevmonth"){const pm=new Date(now.getFullYear(),now.getMonth()-1,1);const pmEnd=new Date(now.getFullYear(),now.getMonth(),0);fromDate=fmtDate(pm);toDate=fmtDate(pmEnd);}
   else if(aCCTime==="all"){const allDates=ces.map(e=>e.entry_date).filter(Boolean).sort();fromDate=allDates[0]?allDates[0].substring(0,10):today;toDate=today;}
   else if(aCCTime==="custom"){fromDate=document.getElementById("cc-from")?.value||today;toDate=document.getElementById("cc-to")?.value||today;}
   if(!fromDate||!toDate)return;
