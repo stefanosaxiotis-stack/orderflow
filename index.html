@@ -13,36 +13,54 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  /* LIGHT THEME — "Fresh Mail Close" */
-  /* Backgrounds: από σκούρο μπλε σε ανοιχτό γκρι/λευκό */
-  --nd:#1e2761;     /* navy headings (αντί για deep dark) */
-  --nm:#FBF7F6;     /* main app background — warm off-white */
-  --nc:#ffffff;     /* card background */
-  --ni:#f9f5f4;     /* input/inset background — warm tint */
-  --nb:#EDE5E3;     /* borders — warm grey */
-  --nh:#f3edeb;     /* hover state */
-  /* Pink accents (κρατάει το brand) */
-  --pk:#c8507a;     /* primary pink (πιο σκούρο για contrast σε light bg) */
-  --pb:#a8395e;    /* darker pink για buttons */
-  --pd:#fff0f3;    /* pink δι-light tint background */
-  /* Text colors */
-  --t1:#1e2761;    /* primary text (navy) */
-  --t2:#374151;    /* secondary text (dark grey) */
-  --tm:#6b7280;    /* muted text */
-  --td:#9ca3af;    /* very muted / labels */
-  /* Status colors */
-  --gn:#059669;    /* green (πιο σκούρο για readability) */
-  --gd:#ecfdf5;    /* green tint background */
-  --am:#d97706;    /* amber/orange */
-  --ad:#fffbeb;    /* amber tint background */
-  --rd:#dc2626;    /* red */
-  --rdd:#fef2f2   /* red tint background */
+  /* Fresh Mail Design Tokens — exact match */
+  --nm:#F5F3F7;     /* bg — warm grey-purple tint */
+  --nc:#FFFFFF;     /* surface — pure white cards */
+  --ni:#F8F5F9;     /* surface2 — input background */
+  --nb:#EAE5F0;     /* border */
+  --nh:#F0ECF4;     /* hover */
+
+  /* Navy / primary */
+  --nd:#1C1F4A;     /* navy */
+  --nd1:#2A2F6B;    /* navy-1 lighter */
+  --t1:#1C1F4A;     /* primary text */
+  --t2:#7A7A9A;     /* sub text */
+  --tm:#7A7A9A;
+  --td:#9ca3af;
+
+  /* Pink accents */
+  --pk:#D4899A;     /* pink */
+  --pk1:#EFCCD4;    /* pink-1 light */
+  --pb:#b56a7a;     /* darker pink for buttons */
+  --pd:#FDF4F6;     /* pink bg tint */
+
+  /* Teal */
+  --tl:#0D9488;     /* teal */
+
+  /* Gold */
+  --gd2:#C9973A;    /* gold */
+
+  /* Status */
+  --gn:#0D9488;     /* green = teal */
+  --gd:#E6F7F5;     /* green tint */
+  --am:#C9973A;     /* amber */
+  --ad:#FDF8EC;     /* amber tint */
+  --rd:#D6455D;     /* red */
+  --rdd:#FCF0F2;    /* red tint */
+
+  /* Shadows */
+  --sh:0 1px 3px rgba(28,31,74,.07),0 1px 2px rgba(28,31,74,.05);
+  --sh-md:0 8px 24px rgba(28,31,74,.12);
+
+  /* Radius */
+  --r:16px;
+  --r-sm:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100vw}
 
 /* LOGIN */
-#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 60% 40%,#f0e8e6 0%,#FBF7F6 70%)}
+#ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:#F5F3F7}
 .lb{background:var(--nc);border:0.5px solid var(--nb);border-radius:20px;padding:44px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(30,39,97,.12)}
 .ll{font-size:26px;font-weight:700;color:var(--pk);text-align:center;letter-spacing:.5px;margin-bottom:6px;font-family:'Comfortaa',cursive}
 .ls2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:32px}
@@ -50,17 +68,17 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
 .lf label{font-size:12px;color:var(--td)}
 .lf input{background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;color:var(--t1);padding:11px 14px;font-size:14px;outline:none;font-family:inherit;width:100%;transition:border-color .15s}
 .lf input:focus{border-color:var(--pk)}
-.lbtn{width:100%;padding:12px;background:var(--pb);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:background .15s}
+.lbtn{width:100%;padding:12px;background:#1C1F4A;border:none;border-radius:var(--r);color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;letter-spacing:.5px;transition:background .15s}
 .lbtn:hover{background:#8a2c4d}
 .lerr{font-size:12px;color:var(--rd);text-align:center;margin-top:10px;min-height:18px}
 
 /* APP */
 #app{display:none}
-.topbar{background:#1e2761;border-bottom:none;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
+.topbar{background:#1C1F4A;border-bottom:none;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
 .topbar::-webkit-scrollbar{display:none}
-.logo{font-size:14px;font-weight:700;color:#e8a0c0;padding:0 16px 0 4px;margin-right:8px;white-space:nowrap;letter-spacing:1px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12)}
+.logo{font-size:14px;font-weight:700;color:#D4899A;padding:0 16px 0 4px;margin-right:8px;white-space:nowrap;letter-spacing:1px;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.12)}
 .tab{padding:0 12px;height:48px;font-size:12.5px;color:rgba(255,255,255,0.5);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-weight:400}
-.tab:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.06)}
+.tab:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.06)}.tab.active{color:#fff;border-bottom-color:#0D9488;font-weight:600}
 .tab.active{color:#fff;border-bottom-color:#e8a0c0;font-weight:500}
 .ts{flex:1}
 .tbr{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px}
@@ -92,9 +110,9 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
 .tbr2{display:flex;gap:8px;flex-wrap:wrap}
 
 /* BUTTONS */
-.btn{padding:7px 14px;font-size:12px;border-radius:8px;border:0.5px solid var(--nb);background:var(--ni);color:var(--t2);cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn{padding:7px 14px;font-size:12px;border-radius:var(--r-sm);border:1px solid var(--nb);background:var(--nc);color:var(--t1);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit;font-weight:500}
 .btn:hover{background:var(--nh)}
-.btn.p{background:var(--pb);border-color:var(--pb);color:#ffe8f0;font-weight:500}.btn.p:hover{background:#b8406a}
+.btn.p{background:#1C1F4A;border-color:#1C1F4A;color:#fff;font-weight:600}.btn.p:hover{background:#2A2F6B}
 .btn.s{background:var(--gd);border-color:var(--gn);color:var(--gn)}
 
 /* FILTERS */
@@ -142,14 +160,14 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
 /* MODAL */
 .mbg{display:none;position:fixed;inset:0;background:rgba(30,39,97,.35);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .mbg.open{display:flex}
-.modal{background:var(--nc);border:0.5px solid var(--nb);border-radius:18px;padding:26px;width:100%;max-width:680px;margin:auto;box-shadow:0 2px 4px rgba(28,31,74,.05),0 12px 32px rgba(28,31,74,.10)}
+.modal{background:var(--nc);border:0.5px solid var(--nb);border-radius:var(--r);padding:26px;width:100%;max-width:680px;margin:auto;box-shadow:var(--sh-md)}
 .modal h2{font-size:16px;font-weight:600;color:var(--pk);margin-bottom:20px}
 .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg2 .f{display:flex;flex-direction:column;gap:5px}
 .fg2 .f.s2{grid-column:span 2}
 .fg2 .f label{font-size:12px;color:var(--td)}
-.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:8px;color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
-.fg2 .f input:focus,.fg2 .f select:focus{border-color:var(--pk)}
+.fg2 .f input,.fg2 .f select,.fg2 .f textarea{background:var(--ni);border:0.5px solid var(--nb);border-radius:var(--r-sm);color:var(--t1);padding:8px 10px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
+.fg2 .f input:focus,.fg2 .f select:focus{border-color:#1C1F4A}
 .fg2 .f select option{background:var(--nc);color:var(--t1)}
 .mf{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:0.5px solid var(--nb)}
 
@@ -181,7 +199,7 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
 
 /* PAYMENTS */
 .pl{display:flex;flex-direction:column;gap:8px}
-.pi{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 1px 2px rgba(28,31,74,.04),0 4px 16px rgba(28,31,74,.06)}
+.pi{background:var(--nc);border:0.5px solid var(--nb);border-radius:var(--r);padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:var(--sh)}
 .pd2{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;text-align:center;line-height:1.2}
 .dov{background:var(--rdd);color:var(--rd)}.dsn{background:var(--ad);color:var(--am)}.dok{background:var(--gd);color:var(--gn)}
 .pinf{flex:1;min-width:0}
@@ -192,17 +210,17 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
 
 /* CASH */
 .cs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px}
-.cc{background:var(--nc);border:0.5px solid var(--nb);border-radius:12px;padding:18px;text-align:center;box-shadow:0 1px 2px rgba(28,31,74,.04),0 4px 16px rgba(28,31,74,.06)}
+.cc{background:var(--nc);border:0.5px solid var(--nb);border-radius:var(--r);padding:18px;text-align:center;box-shadow:var(--sh)}
 .cc.av{border-color:var(--gn)}
 .cl2{font-size:12px;color:var(--tm);margin-bottom:8px}
 .ca{font-size:26px;font-weight:700}
 .clist{display:flex;flex-direction:column;gap:8px}
-.crow{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;box-shadow:0 1px 2px rgba(28,31,74,.03),0 3px 10px rgba(28,31,74,.05)}
+.crow{background:var(--nc);border:0.5px solid var(--nb);border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;box-shadow:var(--sh)}
 .cri{flex:1}.crd{font-size:11px;color:var(--td)}.crds{font-size:13px;color:var(--t2);margin-top:2px}
 .cra{font-size:15px;font-weight:600;white-space:nowrap}
 
 /* SA / CASH MOVEMENT CARDS */
-.mv-card{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;transition:border-color .15s;box-shadow:0 1px 2px rgba(28,31,74,.03),0 3px 10px rgba(28,31,74,.05);min-width:0;overflow:hidden}
+.mv-card{background:var(--nc);border:0.5px solid var(--nb);border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:8px;transition:border-color .15s;box-shadow:var(--sh);min-width:0;overflow:hidden}
 .mv-card:hover{border-color:var(--pk)}
 .mv-card-left{flex:1;min-width:0;overflow:hidden}
 .mv-card-title{font-size:13px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
@@ -263,8 +281,8 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{border-color:var(--gn);color:var(--gn)}.toast.err{border-color:var(--rd);color:var(--rd)}
 .vt{display:flex;gap:6px;margin-bottom:16px}
-.vb{padding:6px 16px;font-size:12px;border-radius:20px;border:0.5px solid var(--nb);background:var(--ni);color:var(--tm);cursor:pointer;transition:all .15s}
-.vb.active{background:var(--pd);border-color:var(--pk);color:var(--pk)}
+.vb{padding:6px 16px;font-size:12px;border-radius:20px;border:1px solid var(--nb);background:var(--nc);color:var(--t2);cursor:pointer;transition:all .15s;font-weight:500}
+.vb.active{background:#1C1F4A;border-color:#1C1F4A;color:#fff;font-weight:600}
 
 /* SEGMENTED CONTROL για καταστήματα (μπλε χρώμα για διαχωρισμό από φίλτρα) */
 .locseg{display:inline-flex;background:var(--ni);border:0.5px solid var(--nb);border-radius:10px;padding:3px;flex-wrap:wrap;gap:2px;margin-bottom:14px;max-width:100%}
@@ -532,9 +550,17 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
       <button class="btn p" onclick="om('msae')">+ Είσπραξη ΣΑ</button>
     </div>
   </div>
-  <div class="sa-grid">
-    <div><div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις ΣΑ</div><div class="clist" id="saelist"><div class="ld">Φόρτωση...</div></div></div>
-    <div><div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές ΣΑ</div><div class="clist" id="saplist"><div class="ld">Φόρτωση...</div></div></div>
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button id="sa-toggle-inc" onclick="setSAView('inc')" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--gn);background:var(--gn);color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">+ Εισπράξεις</button>
+    <button id="sa-toggle-exp" onclick="setSAView('exp')" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--nb);background:var(--nc);color:var(--td);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">− Πληρωμές</button>
+  </div>
+  <div id="sa-inc-section">
+    <div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις ΣΑ</div>
+    <div class="clist" id="saelist"><div class="ld">Φόρτωση...</div></div>
+  </div>
+  <div id="sa-exp-section" style="display:none">
+    <div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές ΣΑ</div>
+    <div class="clist" id="saplist"><div class="ld">Φόρτωση...</div></div>
   </div>
 </div>
 
@@ -4389,6 +4415,24 @@ function fSACashTime(t,el){
   const dr=document.getElementById('saf-daterange');
   if(dr)dr.style.display=t==='custom'?'flex':'none';
   rSACash();
+}
+
+let aSAView='inc';
+function setSAView(v){
+  aSAView=v;
+  const inc=document.getElementById('sa-inc-section');
+  const exp=document.getElementById('sa-exp-section');
+  const btnInc=document.getElementById('sa-toggle-inc');
+  const btnExp=document.getElementById('sa-toggle-exp');
+  if(v==='inc'){
+    inc.style.display='';exp.style.display='none';
+    btnInc.style.cssText='flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--gn);background:var(--gn);color:#fff;font-size:13px;font-weight:600;cursor:pointer';
+    btnExp.style.cssText='flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--nb);background:var(--nc);color:var(--td);font-size:13px;font-weight:600;cursor:pointer';
+  }else{
+    inc.style.display='none';exp.style.display='';
+    btnExp.style.cssText='flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--rd);background:var(--rd);color:#fff;font-size:13px;font-weight:600;cursor:pointer';
+    btnInc.style.cssText='flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--nb);background:var(--nc);color:var(--td);font-size:13px;font-weight:600;cursor:pointer';
+  }
 }
 
 function rSACash(){
