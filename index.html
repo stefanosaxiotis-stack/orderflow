@@ -202,14 +202,16 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
 .cra{font-size:15px;font-weight:600;white-space:nowrap}
 
 /* SA / CASH MOVEMENT CARDS */
-.mv-card{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s;box-shadow:0 1px 2px rgba(28,31,74,.03),0 3px 10px rgba(28,31,74,.05)}
+.mv-card{background:var(--nc);border:0.5px solid var(--nb);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;transition:border-color .15s;box-shadow:0 1px 2px rgba(28,31,74,.03),0 3px 10px rgba(28,31,74,.05);min-width:0;overflow:hidden}
 .mv-card:hover{border-color:var(--pk)}
-.mv-card-left{flex:1;min-width:0}
-.mv-card-title{font-size:13px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mv-card-left{flex:1;min-width:0;overflow:hidden}
+.mv-card-title{font-size:13px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .mv-card-sub{font-size:11px;color:var(--td);margin-top:2px}
-.mv-card-amount{font-size:14px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.mv-card-amount{font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .mv-card-amount.inc{color:var(--gn)}
 .mv-card-amount.exp{color:var(--rd)}
+.sa-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.sa-grid{grid-template-columns:1fr;gap:24px}}
 .mv-transfer-tag{display:inline-block;font-size:10px;font-weight:600;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:8px;margin-right:4px}
 
 /* SIDE PANEL */
@@ -530,7 +532,7 @@ body{background:var(--nm);color:var(--t1);font-family:'DM Sans',system-ui,sans-s
       <button class="btn p" onclick="om('msae')">+ Είσπραξη ΣΑ</button>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="sa-grid">
     <div><div style="font-size:13px;font-weight:600;color:var(--gn);margin-bottom:10px">Εισπράξεις ΣΑ</div><div class="clist" id="saelist"><div class="ld">Φόρτωση...</div></div></div>
     <div><div style="font-size:13px;font-weight:600;color:var(--rd);margin-bottom:10px">Πληρωμές ΣΑ</div><div class="clist" id="saplist"><div class="ld">Φόρτωση...</div></div></div>
   </div>
