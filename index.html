@@ -4439,14 +4439,16 @@ function rSACash(){
     set('saelist',en.map(e=>{
       const tr=ctransfers.find(t=>t.sa_entry_id===e.id);
       const locLabel=tr?lN(tr.location_id):'';
-      const titleHtml=tr?`<span class="mv-transfer-tag">Μεταφορά</span>${locLabel}`:e.description||'Είσπραξη';
-      return`<div class="mv-card">
-        <div class="mv-card-left">
-          <div class="mv-card-title">${titleHtml}</div>
-          <div class="mv-card-sub">${fd(e.entry_date)}${e.notes?' · '+e.notes:''}</div>
+      const sub=tr?`Μεταφορά · ${locLabel}`:e.description||'Είσπραξη';
+      return`<div class="crow">
+        <div class="cri">
+          <div class="crd">${fd(e.entry_date)}${e.notes?' · '+e.notes:''}</div>
+          <div class="crds">${sub}</div>
         </div>
-        <div class="mv-card-amount inc">+${fmt(e.amount)} €</div>
-        <button class="ib" onclick="delSAE('${e.id}')" style="color:var(--rd);flex-shrink:0">✕</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="cra" style="color:var(--gn)">+${fmt(e.amount)} €</span>
+          <button class="ib" onclick="delSAE('${e.id}')" style="color:var(--rd)">✕</button>
+        </div>
       </div>`;}).join(''));
   }
 
@@ -4456,14 +4458,16 @@ function rSACash(){
     set('saplist',py.map(p=>{
       const tr=ctransfers.find(t=>t.sa_payment_id===p.id);
       const locLabel=tr?lN(tr.location_id):'';
-      const titleHtml=tr?`<span class="mv-transfer-tag" style="background:#fef2f2;color:#dc2626">Μεταφορά</span>${locLabel}`:p.description||'Πληρωμή';
-      return`<div class="mv-card">
-        <div class="mv-card-left">
-          <div class="mv-card-title">${titleHtml}</div>
-          <div class="mv-card-sub">${fd(p.payment_date)}${p.notes?' · '+p.notes:''}</div>
+      const sub=tr?`Μεταφορά · ${locLabel}`:p.description||'Πληρωμή';
+      return`<div class="crow">
+        <div class="cri">
+          <div class="crd">${fd(p.payment_date)}${p.notes?' · '+p.notes:''}</div>
+          <div class="crds">${sub}</div>
         </div>
-        <div class="mv-card-amount exp">−${fmt(p.amount)} €</div>
-        <button class="ib" onclick="delSAP('${p.id}')" style="color:var(--rd);flex-shrink:0">✕</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="cra" style="color:var(--rd)">−${fmt(p.amount)} €</span>
+          <button class="ib" onclick="delSAP('${p.id}')" style="color:var(--rd)">✕</button>
+        </div>
       </div>`;}).join(''));
   }
 }
